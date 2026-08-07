@@ -1,0 +1,339 @@
+<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 20px;">
+
+    <h3><b>Documentos Por Atender</b></h3>
+<hr>
+</div>
+
+
+
+<div class="mt-2 table-responsive">
+
+
+  <div *ngIf="dg" class="form-group col-md-3">
+    <label for="inputPassword4">Área</label>
+    <select [(ngModel)]="areas2" id="inputState" class="form-control" name="AreaTurnada"  (change)=" traerDatosPorContestarCombo()" required #AreaTurnada="ngModel">
+      <ng-container *ngFor="let area of areasLocales2" >
+        <option [value]="area.clave">{{area.nombre_completo}}</option>
+      </ng-container>
+    </select>
+  </div>
+
+
+    <table id="empleados" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
+        <thead>
+            <tr style="color:#000">
+                <th style="text-align:center;width:50px">Número oficio</th>
+                <th style="text-align:center;width:130px">Documento</th>
+                <th style="text-align:center;width:130px">Folio</th>
+                <th style="text-align:center;width:80px">Prioridad</th>
+                <th style="text-align:center;width: 350px;">Asunto</th>
+                <th style="text-align:center;width: 350px;">Emitido por</th>
+                <th style="text-align:center;width: 150px;">Fecha Documento</th>
+                <th style="text-align:center;width: 200px;">Fecha Límite de respuesta</th>
+                <th style="text-align:center;">Estatus</th>
+                <th style="text-align:center;width: 120px;">Doc. Recibido</th>
+                <th style="text-align:center;width: 120px;">Doc. Respuesta</th>
+                <th style="text-align:center;width: 120px;">Atendido por</th>
+                <th style="text-align:center;width: 120px;">Reasignar</th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 15px;">
+            <tr *ngFor="let contestar of porContestar">
+                <td style="text-align:center;width:200px;">{{ contestar.referencia}}</td>
+                <td style="text-align:center;">{{ contestar.tipo_documento }}</td>
+                <td style="text-align:center;">{{ contestar.folio_unico }}</td>
+                <td style="text-align:center;">{{ contestar.prioridad}}</td>
+                <td style="text-align:center;width: 200px;">{{ contestar.asunto}}</td>
+                <td style="text-align:center;">{{ contestar.nombre_completo}}</td>
+                <td style="text-align:center;">{{ contestar.fecha_documento | date:"dd/MM/yy"}}</td>
+                <td style="text-align:center;">{{ contestar.fecha_limite_respuesta | date:"dd/MM/yy"}}</td>
+
+                <td 
+                style="text-align:center;"><i *ngIf="contestar.guia_proceso" class=" mdi mdi-checkbox-blank-circle" title="En proceso" style="color: #f07e32;"></i>
+                                           <i *ngIf="contestar.guia_atendido" class=" mdi mdi-checkbox-blank-circle" title="Atendido" style="color: rgb(82, 167, 4);"></i>
+                                           <i *ngIf="contestar.guia_conocimiento" class=" mdi mdi-checkbox-blank-circle" title="De conocimiento" style="color: rgb(24, 127, 245);"></i>
+                                           <i *ngIf="contestar.guia_no_atendido" class=" mdi mdi-checkbox-blank-circle" title="No atendido" style="color: rgb(202, 17, 7);"></i>
+                                          </td>
+                <td style="text-align:center;">
+                    <button type="button" class="btn btn-light" title="Abrir" (click)="VerDocPeticion(contestar.id,contestar.url)" > <i class="mdi mdi-file-pdf" aria-hidden="true" style="color:#bb0606;"></i></button>  
+                </td>
+
+                <td style="text-align:center;">
+                    <button *ngIf="contestar.guia_proceso" type="button" data-toggle="modal" data-target="#exampleModal" (click)="ObtenerIdyAreaEmite(contestar.id,contestar.area_que_emite,contestar.folio_unico)" class="btn btn-light" title="Subir Respuesta"> <i class="mdi mdi-upload" style="color: rgb(187, 6, 6);"></i></button>
+                    <button *ngIf="contestar.guia_atendido" type="button" (click)="VerDocumentoRespuesta(contestar.url_respuesta)" class="btn btn-light" title="Ver Respuesta"> <i class="mdi mdi-file-pdf" style="color: rgb(187, 6, 6);"></i> </button>
+                    <button *ngIf="contestar.guia_conocimiento" type="button" data-toggle="modal" data-target="#exampleModal2" (click)="ObtenerIdyAreaEmite(contestar.id,contestar.area_que_emite,contestar.folio_unico)" class="btn btn-light" title="Contestar"> <i class="mdi mdi-message-draw" style="color: rgb(114, 113, 113);"></i> </button>
+                    
+                    <button *ngIf="contestar.auxiliarConocimiento" type="button" data-toggle="modal" data-target="#exampleModal2" (click)="ObtenerIdyAreaEmite(contestar.id,contestar.area_que_emite,contestar.folio_unico)" class="btn btn-light" title="Contestar"> <i class="mdi mdi-message-draw" style="color: rgb(114, 113, 113);"></i> </button>               
+                    <button *ngIf="contestar.auxiliarAtencion" type="button" data-toggle="modal" data-target="#exampleModal" (click)="ObtenerIdyAreaEmite(contestar.id,contestar.area_que_emite,contestar.folio_unico)" class="btn btn-light" title="Subir Respuesta"> <i class="mdi mdi-upload" style="color: rgb(187, 6, 6);"></i></button>
+                               
+                  </td>
+
+                <td style="text-align:center;">{{ contestar.atendido_por}}</td>
+                
+
+                <td style="text-align:center;">           
+                  <button *ngIf="contestar.guia_proceso && (NumeroPermiso==4 || NumeroPermiso==2)" type="button" data-toggle="modal" data-target="#exampleModal3" (click)="ObtenerFolioyId(contestar.id,contestar.folio_unico)"  class="btn btn-light" title="Reenviar"> <i class="mdi mdi-redo" style="color: rgb(187, 6, 6);"></i> </button>                 
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- Modal Responder -->
+<div  id="exampleModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-xl" >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Subir Documento de Respuesta</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+      
+
+            <form (ngSubmit)="GenerarDocumentoRespuesta(f)" #f="ngForm">
+
+                <div class="form-row mt-5">
+                  <div class="form-group col-md-4">
+                    <label for="inputEmail4">Origen del documento</label>
+                    <select [(ngModel)]="documento.tipo" id="inputState" class="form-control" name="Tipo" [(ngModel)]="opcionSeleccionada" (change)="Capturar()" required #Origen="ngModel">
+                        <option>Interno</option>
+                        <option>Externo</option>
+                      </select>
+                      <small *ngIf="Origen.invalid && Origen.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+
+                  </div>
+
+                  <div class="form-group col-md-4">
+                    <label for="inputAddress"><b>Área que emite</b></label>
+                    <input [(ngModel)]="documento.nombreAreaEmite" type="text" class="form-control" name="areaEmite" id="inputAddress" placeholder="" readonly>
+                  </div>
+
+                  <div class="form-group col-md-4">
+                    <label for="inputAddress"><b>Tipo de atención</b></label>
+                    <input [(ngModel)]="documento.tipoAtencion" type="text" class="form-control" name="tipoAtencion" id="inputAddress" placeholder="" readonly>
+                  </div>
+            
+                 
+            </div>
+            
+                <div class="form-row">
+
+                    <div class="form-group col-md-4">
+                        <label for="inputAddress">Persona que lo emite</label>
+                        <input [(ngModel)]="documento.personaQueEmite" type="text" class="form-control" name="personaQueEmite" id="inputAddress" placeholder="" readonly>
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="inputAddress2">Tipo de documento</label>
+                        <select [(ngModel)]="documento.tipoDocumento" id="inputState" class="form-control" name="TipoDocumento" required #TipoDoc="ngModel">
+                          <option selected>Seleccione...</option>
+                          <option>Oficio</option>
+                          <option>Tarjeta</option>
+                          <option>Circular</option>
+                          <option>Memorandum</option>
+                          <option>Correo electrónico</option>
+                          <option>Otro</option>
+                        </select>
+                        <small *ngIf="TipoDoc.invalid && TipoDoc.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="inputAddress"><b>Área turnada</b></label>
+                        <input [(ngModel)]="documento.nombreAreaTurnada" type="text" class="form-control" name="areaTurnada" id="inputAddress" placeholder="" readonly>
+                      </div>
+           
+                </div>
+            
+               
+                <div class="form-row">
+                  
+            
+                      <div class="form-group col-md-4">
+                        <label for="inputAddress">Número de oficio</label>
+                        <input [(ngModel)]="documento.referenciaDocumento" type="text" class="form-control" name="Referencia" id="inputAddress" placeholder="" required #NumOficio="ngModel">
+                        <small *ngIf="NumOficio.invalid && NumOficio.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                      </div>
+        
+                      <div class="form-group col-md-4">
+                        <label for="inputAddress">Fecha de respuesta</label>
+                        <input [(ngModel)]="documento.fechaRespuesta" type="date" class="form-control" name="FechaRespuesta" id="inputAddress" placeholder="" required #FechaRes="ngModel">
+                        <small *ngIf="FechaRes.invalid && FechaRes.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                      </div>
+                    
+
+                      <div class="form-group col-md-4">
+                        <label for="inputAddress">Comentario(s)</label>
+                        <input [(ngModel)]="documento.resumen" type="text" class="form-control" name="Resumen" id="inputAddress" placeholder="" required #Comentario="ngModel">
+                        <small *ngIf="Comentario.invalid && Comentario.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                      </div>
+            
+                </div>
+            
+            
+                <div class="form-row">                   
+            
+                </div>
+            
+                <div class="form-row">
+
+                  <div class="form-group col-md-4">
+                    <label for="inputAddress">Atendido por</label>
+                    <input [(ngModel)]="documento.atendidoPor" type="text" class="form-control" name="AtendidoPor" id="inputAddress" placeholder="" required #AtendidoPor="ngModel">
+                    <small *ngIf="AtendidoPor.invalid && AtendidoPor.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                  </div>
+            
+                  <div class="form-group col-md-4">
+                    <label for="inputPassword4">Cargar Documento (solo .pdf)</label>
+                    <input id="file" type="file" (change)="upload($event)" class="form-control" multiple="multiple" accept=".pdf" required>
+                  </div>  
+            
+                </div>
+              
+                <div *ngIf="mostrarBoton" class="boton mt-5" style="margin: 0 auto;text-align: center;">
+                    <button style="padding:10px;margin-right: 10px;"type="submit" class="btn btn-success">Enviar Respuesta</button>
+                </div>
+              
+            </form>  
+            
+            
+
+
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMINA MODAL  SUBIR PDF -->
+
+<!-- ********************************************************************************************************************************************************************** -->
+
+  <!--********* INICIA MODAL  RESPUESTA SIN PDF **********-->
+
+<div  id="exampleModal2" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-xl" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Respuesta sin archivo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">  
+
+          <form (ngSubmit)="GenerarDocumentoRespuestaSinPDF(formu)" #formu="ngForm">
+
+              <div class="form-row mt-5">
+
+               <div class="form-group col-md-4">
+                  <label for="inputAddress"><b>Área que emite</b></label>
+                  <input [(ngModel)]="documentosinPDF.nombreAreaEmite" type="text" class="form-control" name="areaEmite" id="inputAddress" placeholder="" readonly>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="inputAddress"><b>Tipo de atención</b></label>
+                  <input [(ngModel)]="documentosinPDF.tipoAtencion" type="text" class="form-control" name="tipoAtencion" id="inputAddress" placeholder="" readonly>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="inputAddress">Persona que lo emite</label>
+                  <input [(ngModel)]="documentosinPDF.personaQueEmite" type="text" class="form-control" name="personaQueEmite" id="inputAddress" placeholder="" readonly>
+              </div>
+          
+               
+              </div>
+          
+              <div class="form-row">
+
+                 
+                    <div class="form-group col-md-4">
+                      <label for="inputAddress"><b>Área turnada</b></label>
+                      <input [(ngModel)]="documentosinPDF.nombreAreaTurnada" type="text" class="form-control" name="areaTurnada" id="inputAddress" placeholder="" readonly>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                      <label for="inputAddress">Fecha de respuesta</label>
+                      <input [(ngModel)]="documentosinPDF.fechaRespuesta" type="date" class="form-control" name="FechaRespuesta" id="inputAddress" placeholder="" required #FechaRes="ngModel">
+                      <small *ngIf="FechaRes.invalid && FechaRes.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                      <label for="inputAddress">Acción de respuesta</label>
+                      <input [(ngModel)]="documentosinPDF.atendidoPor" type="text" class="form-control" name="AtendidoPor" id="inputAddress" placeholder="" required #AtendidoPor="ngModel">
+                      <small *ngIf="AtendidoPor.invalid && AtendidoPor.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                    </div>
+                  
+         
+              </div>
+          
+            
+              <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
+                  <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-success">Enviar Respuesta</button>
+              </div>
+            
+          </form>  
+
+  </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- INICIA MODAL PARA PODER REENVIAR A DEPARTAMENTOS DE UNA MISMA DIRECCION -->
+
+
+<div  id="exampleModal3" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-sm" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Reasignar a...</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">  
+
+          <form (ngSubmit)="reenviar()">
+
+              <div class="form-row mt-2">
+
+                    <!-- CHECKBOX -->
+
+    <div class="form-row mt-3">
+
+      <ng-container *ngFor="let multiple of deptosPorDireccion2; let i=index">
+
+        <input class="form-check-input form-group col-md-2" type="checkbox" value="" id="flexCheckDefault{{i}}" (change)="CapturaCheck(multiple.id_centrotrabajo)">
+        <label class="form-check-label" for="flexCheckDefault{{i}}" style="padding-right: 10px;">
+          <p style="font-size: 14px;">{{multiple.nombre_completo}}</p>
+        </label>
+
+      </ng-container>
+
+    </div>
+
+    <!-- END CHECKBOX -->
+
+                        
+              </div>
+          
+            
+              <div class="boton mt-5" style="margin: 0 auto;text-align: center;" *ngIf="botonReenviar">
+                  <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-success">Enviar</button>
+              </div>
+            
+          </form>  
+
+  </div>
+
+    </div>
+  </div>
+</div>

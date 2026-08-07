@@ -1,0 +1,38 @@
+<div class="formulario">
+
+  <div class="Titulo" style="text-align: center;"> <h3>Artículos con bajo stock</h3></div>
+
+  <hr>
+  
+</div>
+
+
+<!-- lista de productos a surtir -->
+
+<div class="mt-5" style="width: 85%;margin: 0 auto;" >
+
+    <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
+        <thead>
+            <tr style="color:#000">
+                <th>Partida</th>
+                <th>Artículo</th>
+                <th style="text-align: center;">Existencia</th> 
+                <th>Proveedor</th> 
+                <!-- <th>Telefono Proveedor</th>  -->
+      
+            </tr>
+        </thead>
+        <tbody style="font-size: 15px;">
+            <tr *ngFor="let existencia of existenciasBajas">          
+                <td>{{existencia.partida}}</td>
+                <td style="width: 500px;text-transform:lowercase;">{{existencia.descripcion}}</td>
+                <td style="text-align: center;width: 50px;">{{existencia.existencias}}</td>  
+                <td>{{existencia.proveedor}}</td> 
+                <!-- <td>{{existencia.telefono}}</td>   -->
+                           
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
