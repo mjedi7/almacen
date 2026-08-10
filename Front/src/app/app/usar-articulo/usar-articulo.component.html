@@ -65,7 +65,7 @@
 
          <div class="form-group col-md-2">
             <label for="inputAddress">Cantidad solicitada</label>
-            <input [(ngModel)]="usarArticulo.cantidadSolicitar" type="number" class="form-control" name="cantidadSolicitar" id="inputAddress" placeholder="" style="text-align: center;" required #cantidadSolicitar="ngModel">
+            <input [(ngModel)]="usarArticulo.cantidadSolicitar" type="number" class="form-control" name="cantidadSolicitar" id="inputAddress" placeholder="" style="text-align: center;" required #cantidadSolicitar="ngModel" min="1">
             <small *ngIf="cantidadSolicitar.invalid && cantidadSolicitar.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
         </div>
 
