@@ -73,7 +73,7 @@ export class UsarArticuloComponent implements OnInit {
     .subscribe((res:any)=>{
       this.disponible=res;
       this.stockPlantel=this.disponible[0].existencias;
-      console.log(this.stockPlantel);
+      console.log(`Stock del plantel: ${this.stockPlantel}`);
       
     });
 
@@ -118,7 +118,7 @@ export class UsarArticuloComponent implements OnInit {
 
    seleccionarProducto(producto: any,idProducto:number){
 
-    console.log(idProducto);
+    console.log(`Id del producto: ${idProducto}`);
 
     this.usarArticulo.idcosto = producto.id_costos;
     this.productoBuscado = producto.nombre_producto;
