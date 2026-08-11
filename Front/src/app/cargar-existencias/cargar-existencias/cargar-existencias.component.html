@@ -1,1 +1,125 @@
-<p>cargar-existencias works!</p>
+<div class="formulario animated fadeIn">
+
+    <div class="Titulo" style="text-align: center;">
+      <h3>Cargar existencias de inventario a Dirección General</h3>
+    </div>
+    <hr>
+  
+    <!-- 🔥 FORMULARIO DESHABILITADO SI YA HAY ARTÍCULO -->
+    <form #f="ngForm" (ngSubmit)="agregarALista(f)" [ngClass]="{'opacity-50': articuloAgregado}">
+      <div class="form-row mt-5">
+  
+        <!-- Partida -->
+        <div class="form-group col-md-5">
+          <label><strong>Partida</strong></label>
+          <select class="form-control"
+                  name="id_partida"
+                  [(ngModel)]="partidaSeleccionadaId"
+                  #Partida="ngModel"
+                  (change)="onPartidaChange()"
+                  [disabled]="articuloAgregado"
+                  required>
+            <option value="" disabled selected>-- Seleccione una partida --</option>
+            <option *ngFor="let p of partidas" [value]="p.id">
+              {{ p.clave || p.id_partida }} — {{ p.descripcion || p.partida }}
+            </option>
+          </select>
+          <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">
+            Seleccione una partida
+          </small>
+        </div>
+  
+        <!-- Artículo -->
+        <div class="form-group col-md-6">
+          <label><strong>Artículo</strong></label>
+          <input type="text"
+                 class="form-control"
+                 name="id_articulo"
+                 [(ngModel)]="articuloBuscado"
+                 [disabled]="!partidaSeleccionadaId || articuloAgregado"
+                 (input)="onArticuloInput()"
+                 placeholder="Escriba clave o descripción..."
+                 list="listaArticulos"
+                 autocomplete="off"
+                 #Articulo="ngModel"
+                 required>
+          <datalist id="listaArticulos">
+            <option *ngFor="let art of articulos" [value]="art.clave + ' — ' + art.descripcion">
+            </option>
+          </datalist>
+          <small *ngIf="Articulo.invalid && Articulo.touched" class="form-text text-danger animated fadeIn">
+            Seleccione un artículo
+          </small>
+        </div>
+  
+        <!-- Cantidad -->
+        <div class="form-group col-md-1 text-center">
+          <label for="cantidad"><strong>Cantidad</strong></label>
+          <input type="number" class="form-control text-center" name="cantidad"
+                 [(ngModel)]="cantidadInput" 
+                 required 
+                 min="1" 
+                 #Cant="ngModel"
+                 [disabled]="!articuloSeleccionadoId || articuloAgregado">
+          <small *ngIf="Cant.invalid && Cant.touched" class="form-text text-danger animated fadeIn">
+            Mínimo 1
+          </small>
+        </div>
+
+        <!-- Botón añadir -->
+        <div class="form-group col-md-auto d-flex align-items-end">
+          <button type="button" class="btn btn-info btn-block" 
+                  (click)="agregarALista(f)"
+                  [disabled]="articuloAgregado">
+            <span class="mdi mdi-plus"></span> Agregar a lista
+          </button>
+        </div>
+  
+      </div>
+    </form>
+
+    <!-- 🔥 MENSAJE DE RESTRICCIÓN -->
+    <div class="alert alert-info mt-3" *ngIf="articuloAgregado" role="alert">
+      <strong>ℹ️ Restricción activa:</strong> Solo se permite un artículo por carga. Debes guardar o eliminar el artículo actual para agregar otro.
+    </div>
+  
+    <hr>
+  
+    <!-- Tabla temporal -->
+    <div class="row mt-4" style="padding: 0 60px;" *ngIf="listaTemporal.length > 0">
+      <div class="col-12">
+        <table class="table table-hover">
+          <thead>
+            <tr style="background-color: brown; color: white;">
+              <th>Partida</th>
+              <th>Artículo</th>
+              <th style="text-align: center;">Cantidad</th>
+              <th style="text-align: center;">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of listaTemporal; let i = index">
+              <td>{{ item.partida }}</td>
+              <td>{{ item.descripcion }}</td>
+              <td style="text-align: center;">{{ item.cantidad }}</td>
+              <td style="text-align: center;">
+                <button class="btn btn-outline-danger btn-sm" (click)="eliminarDeLista(i)">
+                  <i class="mdi mdi-delete"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+  
+        <div class="text-right">
+          <button class="btn btn-success btn-lg" 
+                  (click)="enviarAlServidor()" 
+                  [disabled]="isSaving || listaTemporal.length === 0" >
+            <span class="mdi mdi-content-save"></span>   
+                  {{ isSaving ? 'Guardando...' : 'Actualizar existencias' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  
+  </div>

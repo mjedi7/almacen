@@ -22,6 +22,7 @@ import { ReporteComprasComponent } from '../app/reporte-compras/reporte-compras.
 import { AltaArticuloComponent } from '../app/alta-articulo/alta-articulo.component';
 import { ListaMovimientosComponent } from '../app/lista-movimientos/lista-movimientos.component';
 import { UsarArticuloComponent } from '../app/usar-articulo/usar-articulo.component';
+import { CargarExistenciasComponent } from '../cargar-existencias/cargar-existencias/cargar-existencias.component';
 
 
 
@@ -49,7 +50,8 @@ const routes: Routes = [
             {path:'reporte_compras',component:ReporteComprasComponent,canActivate:[AuthGuard]},
             {path:'agregar-articulo',component:AltaArticuloComponent,canActivate:[AuthGuard]},
             {path:'lista-movimientos',component:ListaMovimientosComponent,canActivate:[AuthGuard]},
-            {path:'usar-articulo',component:UsarArticuloComponent,canActivate:[AuthGuard]}
+            {path:'usar-articulo',component:UsarArticuloComponent,canActivate:[AuthGuard]},
+            {path: 'cargar-existencias', component: CargarExistenciasComponent, canActivate: [AuthGuard]}
 
 
 

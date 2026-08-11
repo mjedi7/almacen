@@ -9,20 +9,21 @@ import { RegistroService } from 'src/app/services/registro.service';
 })
 export class SidebarComponent implements OnInit {
 
-
   menuItems: any[];
   menuItems2: any[];
   menuItems3: any[];
   menuItems4: any[];
 
   menuItems44: any[];
-  menuItems4B: any[];
+
+  menuItems4B: any[];  
 
   menuItems55: any[];
-
+  
+  menuItems6: any[];
 
   menuItems5: any[];
-
+  
   menuItems10: any[];
 
   // Almacen
@@ -30,23 +31,23 @@ export class SidebarComponent implements OnInit {
   resgistraCompra:boolean=true;
   recargaStock:boolean=true;
   existencias:boolean=true;
+  cargarexistencias:boolean=true;
+  
+  // Movimientos
+  movimientos:boolean=true;
 
   // Requisiciones
-
   generarRequisicion:boolean=false;
   pendientes:boolean=false;
   atendidas:boolean=false;
 
-
-// Transferencias
+  // Transferencias
   vertransferencias:boolean=false;
   verReportes:boolean=false;
 
   verArticulos:boolean=false;
 
-
-muestraUsuarios:boolean=false;
-
+  muestraUsuarios:boolean=false;
 
 /////////////////////////////////////////////////////
   constructor( private sidebarService: SidebarService,private permodulos:RegistroService ) {
@@ -58,12 +59,13 @@ muestraUsuarios:boolean=false;
     this.menuItems4B=sidebarService.menu4B;
 
     this.menuItems44=sidebarService.menu44;
-     this.menuItems55=sidebarService.menu55;
+    this.menuItems55=sidebarService.menu55;
 
-     this.menuItems5=sidebarService.menu5;    
+    this.menuItems5=sidebarService.menu5;    
+    
+    this.menuItems6=sidebarService.menu6;
 
     this.menuItems10=sidebarService.menu10;  
-  
 
   }
 
@@ -79,11 +81,16 @@ muestraUsuarios:boolean=false;
 
     if(permiso==1){
 
-      //Almacen
+    //Almacen
       this.menuItems[0].submenu[0].mostrar = true;
       this.menuItems[0].submenu[1].mostrar = true;
       this.menuItems[0].submenu[2].mostrar = true;
-
+	  
+	  // Este item es "Recargar existencias", pero solo esta diseñado para Planteles
+	  this.menuItems[0].submenu[3].mostrar = false;
+	  
+	  this.menuItems[0].submenu[4].mostrar = false;	  
+	  
       // Transferencias
        this.vertransferencias=true;
 
@@ -97,11 +104,13 @@ muestraUsuarios:boolean=false;
       this.verArticulos=true;
       this.menuItems55[0].submenu[0].mostrar=true;
 
-      //Reportes
+      this.movimientos=false;
+      this.menuItems6[0].submenu[0].mostrar=false;
+      this.menuItems6[0].submenu[1].mostrar=false;
 
+      //Reportes
       this.verReportes=true;
  
-
 
     }else if(permiso==3){
 
@@ -110,6 +119,12 @@ muestraUsuarios:boolean=false;
       this.menuItems[0].submenu[2].mostrar = true;
       this.menuItems[0].submenu[0].mostrar = false;
       this.menuItems[0].submenu[1].mostrar = false;
+ 
+      this.cargarexistencias=false;
+      // "Recargar existencias", agregado por Oscar (27/03/26)
+      this.menuItems[0].submenu[3].mostrar = true;
+      
+      this.menuItems[0].submenu[4].mostrar = true;
 
     //Transferencias
       this.vertransferencias=false;
@@ -118,8 +133,13 @@ muestraUsuarios:boolean=false;
       this.menuItems4[0].submenu[0].mostrar=true;
       this.menuItems4[0].submenu[1].mostrar=true;
 
-      //Reportes
+      // MOVIMIENTOS 
+      this.movimientos=true;
+      // Salidas
+      this.menuItems6[0].submenu[0].mostrar=true;
 
+
+      //Reportes
       this.verReportes=false;
 
       // Articulos
@@ -130,6 +150,5 @@ muestraUsuarios:boolean=false;
     } 
 
   }
-
 
 }

@@ -13,9 +13,13 @@ export class SidebarService {
             { titulo: 'Registrar Compra', url: 'generar-documento',mostrar:false},
             { titulo: 'Recargar Stock', url: 'mis-seguimientos',mostrar:false},
             { titulo: 'Existencias', url: 'existencias',mostrar:false},
-             { titulo: 'Usar artículo', url: 'usar-articulo',mostrar:true},
 
+            // Agregado por Oscar (27/03/26)
+            { titulo: 'Cargar existencias a DG', url: 'cargar-existencias', mostrar: false },
             
+            // Creado por Juan  
+            { titulo: 'Usar artículo', url: 'usar-articulo',mostrar:false}
+ 
           ]
         },
   ];
@@ -101,7 +105,15 @@ export class SidebarService {
   ];
 
 
-
+       menu6: any[] = [
+    {
+          titulo: 'Movimientos',
+          icono: 'mdi mdi-gauge',
+          submenu: [
+             { titulo: 'Salidas', url: 'lista-movimientos',mostrar:true },
+          ]
+        },
+  ];
 
   menu10: any[] = [
     {
