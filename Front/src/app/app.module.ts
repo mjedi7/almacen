@@ -29,6 +29,7 @@ import { ReporteComprasComponent } from './app/reporte-compras/reporte-compras.c
 import { AltaArticuloComponent } from './app/alta-articulo/alta-articulo.component';
 import { ListaMovimientosComponent } from './app/lista-movimientos/lista-movimientos.component';
 import { UsarArticuloComponent } from './app/usar-articulo/usar-articulo.component';
+import { CargarExistenciasComponent } from './cargar-existencias/cargar-existencias/cargar-existencias.component';
 
 
 
@@ -50,7 +51,8 @@ import { UsarArticuloComponent } from './app/usar-articulo/usar-articulo.compone
     ReporteComprasComponent,
     AltaArticuloComponent,
     ListaMovimientosComponent,
-    UsarArticuloComponent
+    UsarArticuloComponent,
+    CargarExistenciasComponent
   ],
   imports: [
     BrowserModule,
