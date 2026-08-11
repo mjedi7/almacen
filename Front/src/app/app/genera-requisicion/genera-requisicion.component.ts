@@ -28,6 +28,7 @@ export class GeneraRequisicionComponent implements OnInit {
       
       };
 
+      //variables para el buscador de los productos
       productosfiltrados: any [] = [];
       productoBuscado: string = '';
 
@@ -38,6 +39,7 @@ export class GeneraRequisicionComponent implements OnInit {
 
      articulosRequisicion:any=[];     
 
+    //Lista (arreglos) para lenar los deplegables (selects) del forulario
     planteles:any=[];
     partidas:any=[];
     productos:any=[];
@@ -61,7 +63,7 @@ export class GeneraRequisicionComponent implements OnInit {
 
   filtrarProductos(){
     const texto = this.productoBuscado.toLowerCase();
-    this.productosfiltrados = this.productos.filter(p => 
+    this.productosfiltrados = this.productos.filter(p => //se guarda el reultado en productosfiltrados
       p.nombre_producto.toLowerCase().includes(texto)
     );
   }
@@ -76,9 +78,10 @@ export class GeneraRequisicionComponent implements OnInit {
 
       var id_plantel=localStorage.getItem('centro_trabajo');
 
+      //Peticón GET al servidor enviando el ID del plantel guardado en el navegador
       this.traer.http.get( this.API_URL+`/traerPlantelRequisicion/${id_plantel}`)
       .subscribe((res:any)=>{
-      this.planteles=res;
+      this.planteles=res;//Guarda la respuesta del servidor en la lista planteles
       console.log(this.planteles);
       
     });
@@ -106,6 +109,7 @@ export class GeneraRequisicionComponent implements OnInit {
 
     console.log(this.requisicion.partida);
 
+      //Cuando el usuario elige una partida del menú desplegable, trae los productos de esa partida
       this.traer.http.get( this.API_URL+`/traerProductosDesdeTransferir/${this.requisicion.partida}`)
     .subscribe((res:any)=>{
       this.productos=res;
@@ -113,7 +117,7 @@ export class GeneraRequisicionComponent implements OnInit {
       console.log(this.productos);
 
 
-      
+      //Reinicia la selección del producto previo
       this.requisicion.idcosto=null;
       this.requisicion.nombreProducto = ''; 
       
@@ -123,11 +127,13 @@ export class GeneraRequisicionComponent implements OnInit {
 
 
       agregarArticulo(form:NgForm){
-
+        //Si el formulario tiene todos los campos requeridos...
         if(form.valid==true){
 
+                //La cantidad que se solicita es un número entero y mayor a 0
                   if(this.requisicion.cantidadSolicitar <= 0 || Number.isInteger(this.requisicion.cantidadSolicitar)==false){
-  
+              
+              //Si muestra alerta de advertencia
              Swal.fire({
   
             title:"Operación no realizada",
@@ -139,11 +145,13 @@ export class GeneraRequisicionComponent implements OnInit {
   
         }else{
             
-                  this.traer.http.post( this.API_URL+`/TramitarRequisicion`,this.requisicion)
+            //  Todo es válido, se envian los datos al servidor con una petición POST
+            this.traer.http.post( this.API_URL+`/TramitarRequisicion`,this.requisicion)
                     .subscribe((res:any)=>{
                       
                       console.log(res);
                 
+                      //Se revisa si el servidooor del Back, respondio 
                       if(res=="Add"){
                          
                                     Swal.fire(
@@ -177,6 +185,8 @@ export class GeneraRequisicionComponent implements OnInit {
 
         }else{
 
+            //Si el formulario no tiene todos los campos llenos
+
                Swal.fire({
           
                     title:"Operación no realizada",
@@ -190,6 +200,7 @@ export class GeneraRequisicionComponent implements OnInit {
      
       }
 
+      //AQUI SE OCUPA la tabla CONSECUTIVO REQUISICION...para obtener un num.folio 
       TraerConsecutivo(){
 
         var id_plantel=localStorage.getItem('centro_trabajo');
@@ -204,7 +215,6 @@ export class GeneraRequisicionComponent implements OnInit {
     });
 
   }
-
          eliminarArticulo(idarticulo:number){
 
     console.log(idarticulo);
@@ -219,15 +229,17 @@ export class GeneraRequisicionComponent implements OnInit {
 
   }
 
-
+    //Consulta la lista de productos agregados hasta el momento
     getListaArticulosRequisicion(){
 
+    //Limpia y destruye la tabla DataTables previa si ya existía en pantalla
     $('#articulos').DataTable().clear();
     $('#articulos').DataTable().draw();
      $('#articulos').DataTable().destroy();
   
     try{
 
+      //Configura las opciones visuales de la tabla 
       this.dtOptions = {
         pagingType: 'full_numbers',
         pageLength: 10,
@@ -243,14 +255,16 @@ export class GeneraRequisicionComponent implements OnInit {
          var folio=this.requisicion.consecutivo;
          var id=this.requisicion.plantel;
 
+         //Consulta la lista de articulos guardados para este folio e id de plantel 
           this.traer.http.get(this.API_URL+`/getListaArticulosRequisicion/${folio}/${id}`)
           .subscribe((res)=>{
         
-            this.articulosRequisicion=res;
+            this.articulosRequisicion=res;//  Se guarda la lista 
             console.log(this.articulosRequisicion);
     
             this.dtTrigger.next();
 
+              //Muestra o oculta el botón de transferir segun si hay elementos
              if(this.articulosRequisicion.length>0){
               this.mostrarBotonTransferir=true;
             }else{
@@ -268,6 +282,7 @@ export class GeneraRequisicionComponent implements OnInit {
 
   formatoRequisicion(){
 
+    //Muestra la confirmación del usuario 
       Swal.fire({
       title: "¿Estas seguro de terminar la lista?",
       text: "Una vez terminada no podrá agregar nuevos artículos ",
@@ -283,6 +298,7 @@ export class GeneraRequisicionComponent implements OnInit {
 
         if(this.requisicion.plantel>31){
 
+            //Configuración de instrucciones para recibir un archivo Blob o apdf
               const httpOptions = {
         
             headers: new HttpHeaders({

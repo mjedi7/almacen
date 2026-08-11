@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
   templateUrl: './lista-movimientos.component.html',
   styleUrls: ['./lista-movimientos.component.css']
 })
+
+    //Consulta el historial de salidas/movimientos de inventario por plantel para subir documentos que respalden esas saidas
 export class ListaMovimientosComponent implements OnInit {
 
 
@@ -94,19 +96,21 @@ export class ListaMovimientosComponent implements OnInit {
 
   }
 
+        //Se ejecuta cuando el usuario selecciona un archivo desde su computadora
             upload(event:any) {
   
+                //Checa que el primer archivo este seleccionado
             const file: File = event.target.files[0];
         
             if(event.target.files.length > 0){
-  
+                //Valida que el archivo sea realmente un PDF
               if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
   
               this.myFiles=event.target.files; 
               console.log(this.myFiles);
         
           }else{
-  
+            //Si no es un archivo PDF, muestra una alerta y no se guarda 
             Swal.fire({
                       icon:'warning',
                       title:'Error en documento',
