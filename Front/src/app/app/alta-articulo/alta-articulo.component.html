@@ -44,13 +44,16 @@
 	  
 	</div>
 
-  <!-- Descripción -->
-  <div class="form-group">
-    <label><b>Descripción del Articulo</b></label>
-    <input class="form-control" name="descripcion" [(ngModel)]="articulo.descripcion" required>
-    <small *ngIf="f.submitted && f.controls['descripcion']?.invalid" class="text-danger">Obligatorio</small>
-  </div>
-
+	<!-- Descripción -->
+	<div class="form-group">
+	  <label><b>Descripción del Artículo</b></label>
+	  <textarea class="form-control" 
+				name="descripcion" 
+				[(ngModel)]="articulo.descripcion" 
+				rows="4" 
+				required></textarea>
+	  <small *ngIf="f.submitted && f.controls['descripcion']?.invalid" class="text-danger">Obligatorio</small>
+	</div>
 
   <!-- Unidad de medida -->
   <!-- <div class="form-group">
