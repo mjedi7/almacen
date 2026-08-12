@@ -196,21 +196,21 @@ opcionSeleccionadaX() {
   this.articuloValido = false;
   this.terminoBusqueda = ''; 
   this.Recargastock.producto = null; 
-  this.productos = [];           // Limpiamos la lista previa
+  this.productos = [];
   this.productosFiltrados = [];  
   this.direccionSeleccionada = null;
   this.proveedores = []; 
 
   if (!this.Recargastock.partida) return;
 
-  // Llama a la ruta con el ID de la partida seleccionada
-  this.traer.http.get(this.API_URL + `/traerProductos/${this.Recargastock.partida}`)
+  // 🔥 Le agregamos /articulos antes de /traerProductos
+  this.traer.http.get(this.API_URL + `/articulos/traerProductos/${this.Recargastock.partida}`)
     .subscribe({
       next: (res: any) => {
         this.productos = res;
         this.productosFiltrados = res;
       },
-      error: (err) => console.error('Error al traer productos:', err)
+      error: (err) => console.error('Error al traer productos por partida:', err)
     });
 }
 
