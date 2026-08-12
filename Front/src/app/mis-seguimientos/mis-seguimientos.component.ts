@@ -6,6 +6,8 @@ import { NgForm } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { recargaAlmacen } from '../models/nuevoDocumento';
 import Swal from 'sweetalert2';
+import { ProveedoresService } from '../services/proveedores.service';
+import { proveedores } from '../models/proveedores';
 
 @Component({
   selector: 'app-mis-seguimientos',
@@ -73,7 +75,7 @@ export class MisSeguimientosComponent implements OnInit {
    monedaFormateada2:any='$ 0.00';
 
 
-  constructor(private traer:TraerDatosService, private currencyPipe:CurrencyPipe) { }
+  constructor(private traer:TraerDatosService, private currencyPipe:CurrencyPipe, private proveedoresService: ProveedoresService) { }
 
 
 
@@ -176,7 +178,7 @@ export class MisSeguimientosComponent implements OnInit {
   
   
 
-    opcionSeleccionadaX() { 
+   /* opcionSeleccionadaX() { 
   this.articuloValido = false;
   this.terminoBusqueda = ''; 
   this.Recargastock.producto = null; 
@@ -185,6 +187,21 @@ export class MisSeguimientosComponent implements OnInit {
   this.traer.http.get(this.API_URL + `/traerProductos/${this.Recargastock.partida}`)
     .subscribe((res: any) => {
       console.log(res);
+      this.productos = res;
+      this.productosFiltrados = res;
+    });
+}*/
+
+opcionSeleccionadaX() { 
+  this.articuloValido = false;
+  this.terminoBusqueda = ''; 
+  this.Recargastock.producto = null; 
+  this.productosFiltrados = [];
+  this.direccionSeleccionada = null;
+  this.proveedores = []; // Limpiar proveedores al cambiar de partida
+
+  this.traer.http.get(this.API_URL + `/traerProductos/${this.Recargastock.partida}`)
+    .subscribe((res: any) => {
       this.productos = res;
       this.productosFiltrados = res;
     });
@@ -205,7 +222,7 @@ export class MisSeguimientosComponent implements OnInit {
   );
 }
 
-buscarYSeleccionar() {
+/*buscarYSeleccionar() {
   
   const match = this.productos.find(p => p.descripcion === this.terminoBusqueda);
 
@@ -221,6 +238,63 @@ buscarYSeleccionar() {
   } else {
     this.Recargastock.producto = null;
   }
+}*/
+
+buscarYSeleccionar() {
+  const match = this.productos.find(p => p.descripcion === this.terminoBusqueda);
+
+  if (match) {
+    this.Recargastock.producto = match.id;
+    console.log("Producto seleccionado:", this.Recargastock.producto);
+
+    // Resetear proveedor anterior
+    this.direccionSeleccionada = null;
+    this.articuloValido = false;
+
+    // Cargar ÚNICAMENTE los proveedores asociados a este producto
+    this.cargarProveedoresPorProducto(+this.Recargastock.producto);
+
+  } else {
+    this.Recargastock.producto = null;
+    this.proveedores = [];
+    this.direccionSeleccionada = null;
+  }
+}
+
+cargarProveedoresPorProducto(idArticulo: number) {
+  // Usamos el servicio de proveedores con su respuesta tipada
+  this.proveedoresService.traerProveedoresPorArticulo(idArticulo)
+    .subscribe({
+      next: (res: proveedores[]) => {
+        this.proveedores = res;
+
+        if (this.proveedores && this.proveedores.length === 1) {
+          // 💡 SI SOLO HAY 1 PROVEEDOR, SE AUTOCOMPLETA
+          this.direccionSeleccionada = this.proveedores[0].id;
+          this.CapturarValor(); // Obtiene el costo unitario automáticamente
+        } else if (this.proveedores && this.proveedores.length > 1) {
+          // 💡 SI HAY MÁS DE 1, EL USUARIO ELIGE DE LA LISTA YA FILTRADA
+          Swal.fire({
+            title: 'Múltiples proveedores',
+            text: 'Por favor seleccione el proveedor correspondiente para este producto.',
+            icon: 'info',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          // ⚠️ SIN PROVEEDORES ASIGNADOS
+          Swal.fire({
+            title: 'Sin proveedor',
+            text: 'Este producto no tiene ningún proveedor asignado en el almacén.',
+            icon: 'warning'
+          });
+          this.direccionSeleccionada = null;
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar proveedores del producto:', err);
+      }
+    });
 }
   
    traerProveedores(){

@@ -18,6 +18,7 @@ app.use(require('./routes/subirDocumentos'));
 
 app.use('/articulos', require('./routes/articulos'));
 app.use('/partidas', require('./routes/partidas'));
+app.use('/proveedores', require('./routes/proveedores'))
 
 
 app.listen(port);
