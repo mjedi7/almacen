@@ -17,11 +17,13 @@ export class AltaArticuloComponent implements OnInit {
 
     clave: '',
     descripcion: '',
+    unidad_medida: '',
     esActivo: true,
     esBasico: true
   }
 
   partidas: partida[];
+  
   loading = false;
 
  constructor(private artSrv: ArticulosService, private partSrvc: PartidasService) { }
@@ -45,11 +47,13 @@ export class AltaArticuloComponent implements OnInit {
 
     this.articulo.clave = this.articulo.clave?.toUpperCase()?.trim();
     this.articulo.descripcion = this.articulo.descripcion?.trim();
+    this.articulo.unidad_medida = this.articulo.unidad_medida?.trim();
 
     this.artSrv.crearArticulo({
       clave: this.articulo.clave,
       id_partidas: this.articulo.id_partidas,
       descripcion: this.articulo.descripcion,
+      unidad_medida: this.articulo.unidad_medida,
       esActivo: this.articulo.esActivo ?? true,
       esBasico: this.articulo.esBasico ?? true
     }).subscribe({

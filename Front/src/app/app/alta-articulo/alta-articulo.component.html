@@ -20,6 +20,18 @@
     <small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>
   </div>
 
+ 
+  <!-- Unidad de medida -->
+<div class="form-group">
+  <label>Unidad de medida (5 caracteres) ej. pza (pieza), pqte (paquete)</label>
+  <input class="form-control" 
+         name="unidad_medida" 
+         [(ngModel)]="articulo.unidad_medida" 
+         required 
+         maxlength="5" />
+  <small *ngIf="f.submitted && f.controls['unidad_medida']?.invalid" class="text-danger">Obligatorio</small>
+</div>
+
   <!-- Descripción -->
   <div class="form-group">
     <label>Descripción</label>
