@@ -287,7 +287,6 @@ const guardarExistenciasIniciales = async (req, res) => {
           ? 'N/A'
           : data.unidad_medida;
       
-          // 🔥 AHORA USA LA VARIABLE CORRECTA
           const queryText = `
           INSERT INTO almacen (
               id_centrotrabajo,
@@ -304,7 +303,7 @@ const guardarExistenciasIniciales = async (req, res) => {
         `;
       
           const values = [
-              idCentroTrabajo,  // 👈 AQUÍ VA LA VARIABLE CORRECTA
+              idCentroTrabajo,
               item.cantidad,
               unidad,
               data.descripcion,
