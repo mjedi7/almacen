@@ -115,6 +115,28 @@ const obtenerArticuloPorId = async (req, res) => {
   }
 };
 
+// GET /traerProductos/:idPartida
+const traerProductosPorPartida = async (req, res) => {
+  try {
+    const { idPartida } = req.params;
+
+    // FILTRA POR LA PARTIDA SELECCIONADA
+    const query = `
+      SELECT id, descripcion, clave 
+      FROM cat_articulos_general 
+      WHERE id_partidas = $1
+      ORDER BY descripcion ASC
+    `;
+
+    const { rows } = await pool.query(query, [idPartida]);
+    return res.status(200).json(rows);
+
+  } catch (e) {
+    console.error('traerProductosPorPartida error:', e);
+    return res.status(500).json({ ok: false, msg: 'Error al traer productos' });
+  }
+};
+
 // PUT /articulos/:id
 const actualizarArticulo = async (req, res) => {
   try {
@@ -366,5 +388,6 @@ module.exports = {
   actualizarArticulo,
   guardarExistenciasIniciales,
   listarPartidas,
-  listarArticulosGeneral
+  listarArticulosGeneral,
+  traerProductosPorPartida
 };
