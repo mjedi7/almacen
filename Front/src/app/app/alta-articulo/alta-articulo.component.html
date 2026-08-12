@@ -11,7 +11,7 @@
   
   <!-- Combo Partidas (opcional, puede ir null) -->
   <div class="form-group">
-    <label>Partida</label>
+    <label><b>Partida</b></label>
     <select class="form-control" name="id_partidas" [(ngModel)]="articulo.id_partidas" required>
       <!-- <option [ngValue]="null">-- Sin partida --</option> -->
       <option *ngFor="let p of partidas" [ngValue]="p.id">
@@ -21,29 +21,32 @@
   </div>
 
   
-  <!-- Clave -->
-  <div class="form-group">
-    <label>Clave </label>
-    <input class="form-control" name="clave" [(ngModel)]="articulo.clave" required maxlength="20"
-           (input)="articulo.clave = articulo.clave?.toUpperCase()?.trim()" maxlength="4" />
-    <small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>
-  </div>
+	<div class="row">
 
- 
-  <!-- Unidad de medida -->
-<div class="form-group">
-  <label>Unidad de medida</label>
-  <input class="form-control" 
-         name="unidad_medida" 
-         [(ngModel)]="articulo.unidad_medida" 
-         required 
-         maxlength="5" />
-  <small *ngIf="f.submitted && f.controls['unidad_medida']?.invalid" class="text-danger">Obligatorio</small>
-</div>
+	  <!-- Clave -->
+	  <div class="form-group col-md-6">
+		<label><b>Clave</b></label>
+		<input class="form-control" name="clave" [(ngModel)]="articulo.clave" required maxlength="4"
+			   (input)="articulo.clave = articulo.clave?.toUpperCase()?.trim()" />
+		<small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>
+	  </div>
+
+	  <!-- Unidad de medida -->
+	  <div class="form-group col-md-6">
+		<label><b>Unidad de medida</b></label>
+		<input class="form-control" 
+			   name="unidad_medida" 
+			   [(ngModel)]="articulo.unidad_medida" 
+			   required 
+			   maxlength="5" />
+		<small *ngIf="f.submitted && f.controls['unidad_medida']?.invalid" class="text-danger">Obligatorio</small>
+	  </div>
+	  
+	</div>
 
   <!-- Descripción -->
   <div class="form-group">
-    <label>Descripción</label>
+    <label><b>Descripción del Articulo</b></label>
     <input class="form-control" name="descripcion" [(ngModel)]="articulo.descripcion" required>
     <small *ngIf="f.submitted && f.controls['descripcion']?.invalid" class="text-danger">Obligatorio</small>
   </div>
