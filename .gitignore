@@ -1,14 +1,14 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# compiled output
-/dist
-/tmp
-/out-tsc
-# Only exists if Bazel was run
-/bazel-out
+# dependencies (remueve la barra '/' inicial para que aplique a subcarpetas como Back/ y Front/)
+node_modules/
 
-# dependencies
-/node_modules
+# compiled output
+dist/
+tmp/
+out-tsc/
+build/
+/bazel-out
 
 # profiling files
 chrome-profiler-events*.json
@@ -37,24 +37,18 @@ speed-measure-plugin*.json
 /connect.lock
 /coverage
 /libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
 /typings
 
 # System Files
 .DS_Store
 Thumbs.db
 
-# Variables de entorno locales (para no subir llaves o URLs de prueba)
+# Variables de entorno locales
 .env
-.env.local
+.env.*
+!.env.example
 
-# Builds de producción y despliegue
-/dist
-/build
-
-# Logs adicionales de npm / yarn
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
