@@ -6,18 +6,17 @@ const {
   actualizarArticulo, 
   crearArticulo, 
   guardarExistenciasIniciales,
-  listarPartidas,           // nuevo
-  listarArticulosGeneral
-  } = require('../controllers/articulos.controller');
+  listarPartidas,
+  listarArticulosGeneral,
+  traerProductosPorPartida // <--- Nombre corregido aquí
+} = require('../controllers/articulos.controller');
 
 // Rutas específicas PRIMERO (antes de /:id)
 router.get('/', listarArticulos);
 router.get('/partidas', listarPartidas);
-router.get('/general', listarArticulosGeneral);        // nuevo
-//router.get('/articulos/partidas', listarArticulosPartidas);               // nuevo
+router.get('/general', listarArticulosGeneral);
+router.get('/traerProductos/:idPartida', traerProductosPorPartida);
 
-// Agrgado por Oscar
-//router.post('/guardarExistenciasIniciales', guardarExistenciasIniciales);
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 router.post(

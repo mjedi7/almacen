@@ -18,7 +18,12 @@ app.use(require('./routes/subirDocumentos'));
 
 app.use('/articulos', require('./routes/articulos'));
 app.use('/partidas', require('./routes/partidas'));
+<<<<<<< HEAD
 app.use('/unidad-medida', require('./routes/unidad_medida'));
+=======
+app.use('/proveedores', require('./routes/proveedores'))
+
+>>>>>>> c1c31cfdce4e82004943d05247d013c1e6466b6a
 
 app.listen(port);
 console.log('Server on port ' + port);

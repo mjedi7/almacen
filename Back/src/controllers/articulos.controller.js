@@ -20,6 +20,7 @@ const crearArticulo = async (req, res) => {
       clave,
       id_partidas,
       descripcion,
+      unidad_medida,
       esActivo = true,
       esBasico = true,
     } = req.body;
@@ -51,10 +52,10 @@ const crearArticulo = async (req, res) => {
 
     const sql = `
       INSERT INTO cat_articulos
-      (clave, id_partidas, descripcion, esactivo, esbasico)
-      VALUES ($1,$2,$3,$4,$5)
+      (clave, id_partidas, descripcion, unidad_medida, esactivo, esbasico)
+      VALUES ($1,$2,$3,$4,$5,$6)
       RETURNING
-        id, clave, id_partidas, descripcion,
+        id, clave, id_partidas, descripcion, unidad_medida,
         esactivo AS "esActivo",
         esbasico AS "esBasico"
     `;
@@ -63,6 +64,7 @@ const crearArticulo = async (req, res) => {
       clave,
       id_partidas,
       descripcion,
+      unidad_medida,
       Boolean(esActivo),
       Boolean(esBasico),
     ];
@@ -110,6 +112,28 @@ const obtenerArticuloPorId = async (req, res) => {
   } catch (e) {
     console.error('obtenerArticuloPorId error:', e);
     return res.status(500).json({ ok: false, msg: 'Error del servidor' });
+  }
+};
+
+// GET /traerProductos/:idPartida
+const traerProductosPorPartida = async (req, res) => {
+  try {
+    const { idPartida } = req.params;
+
+    // FILTRA POR LA PARTIDA SELECCIONADA
+    const query = `
+      SELECT id, descripcion, clave 
+      FROM cat_articulos_general 
+      WHERE id_partidas = $1
+      ORDER BY descripcion ASC
+    `;
+
+    const { rows } = await pool.query(query, [idPartida]);
+    return res.status(200).json(rows);
+
+  } catch (e) {
+    console.error('traerProductosPorPartida error:', e);
+    return res.status(500).json({ ok: false, msg: 'Error al traer productos' });
   }
 };
 
@@ -263,7 +287,6 @@ const guardarExistenciasIniciales = async (req, res) => {
           ? 'N/A'
           : data.unidad_medida;
       
-          // 🔥 AHORA USA LA VARIABLE CORRECTA
           const queryText = `
           INSERT INTO almacen (
               id_centrotrabajo,
@@ -280,7 +303,7 @@ const guardarExistenciasIniciales = async (req, res) => {
         `;
       
           const values = [
-              idCentroTrabajo,  // 👈 AQUÍ VA LA VARIABLE CORRECTA
+              idCentroTrabajo,
               item.cantidad,
               unidad,
               data.descripcion,
@@ -364,5 +387,6 @@ module.exports = {
   actualizarArticulo,
   guardarExistenciasIniciales,
   listarPartidas,
-  listarArticulosGeneral
+  listarArticulosGeneral,
+  traerProductosPorPartida
 };

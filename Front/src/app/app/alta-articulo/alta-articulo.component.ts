@@ -18,12 +18,18 @@ export class AltaArticuloComponent implements OnInit {
   articulo: articulo = {
     clave: '',
     descripcion: '',
+    unidad_medida: '',
     esActivo: true,
     esBasico: true
   };
 
+<<<<<<< HEAD
   partidas: partida[] = [];
   unidad_medida: unidad_medida[] = [];
+=======
+  partidas: partida[];
+  
+>>>>>>> c1c31cfdce4e82004943d05247d013c1e6466b6a
   loading = false;
 
   // 2. CAMBIAMOS EL TIPO A UnidadMedidaServices EN EL CONSTRUCTOR
@@ -65,12 +71,17 @@ export class AltaArticuloComponent implements OnInit {
 
     this.articulo.clave = this.articulo.clave?.toUpperCase()?.trim();
     this.articulo.descripcion = this.articulo.descripcion?.trim();
+    this.articulo.unidad_medida = this.articulo.unidad_medida?.trim();
 
     this.artSrv.crearArticulo({
       clave: this.articulo.clave,
       id_partidas: this.articulo.id_partidas,
       descripcion: this.articulo.descripcion,
+<<<<<<< HEAD
       id_unidad_medida: this.articulo.id_unidad_medida,
+=======
+      unidad_medida: this.articulo.unidad_medida,
+>>>>>>> c1c31cfdce4e82004943d05247d013c1e6466b6a
       esActivo: this.articulo.esActivo ?? true,
       esBasico: this.articulo.esBasico ?? true
     }).subscribe({
