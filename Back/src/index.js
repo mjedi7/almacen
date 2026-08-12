@@ -18,7 +18,7 @@ app.use(require('./routes/subirDocumentos'));
 
 app.use('/articulos', require('./routes/articulos'));
 app.use('/partidas', require('./routes/partidas'));
-
+app.use('/unidad-medida', require('./routes/unidad_medida'));
 
 app.listen(port);
 console.log('Server on port ' + port);

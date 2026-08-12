@@ -20,6 +20,20 @@
     <small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>
   </div>
 
+   
+  <!-- Combo unidad_medida -->
+<div class="form-group">
+  <label>Unidad de Medida</label>
+  <select class="form-control" name="id_unidad_medida" [(ngModel)]="articulo.id_unidad_medida" required>
+    <option [ngValue]="null" disabled selected>-- Seleccione una unidad --</option>
+    
+    <!-- Fíjate en u.id y u.nombre_medida -->
+    <option *ngFor="let u of unidad_medida" [ngValue]="u.id">
+      {{ u.nombre_medida }}
+    </option>
+  </select>
+</div>
+
   <!-- Descripción -->
   <div class="form-group">
     <label>Descripción</label>
