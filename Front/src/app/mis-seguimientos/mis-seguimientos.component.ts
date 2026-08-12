@@ -108,73 +108,79 @@ export class MisSeguimientosComponent implements OnInit {
 
   }
 
-    RecargarStock(form:NgForm){
-      // linea nacho
+    RecargarStock(form: NgForm) {
+  // 1. Manejo seguro si no se ha seleccionado proveedor
+  this.Recargastock.proveedor = this.direccionSeleccionada ? this.direccionSeleccionada.toString() : '';
 
-      this.Recargastock.proveedor = this.direccionSeleccionada.toString();
-
-      if (!this.Recargastock.partida || !this.Recargastock.producto || 
-      !this.Recargastock.proveedor || !this.Recargastock.cantidad || 
-      !this.Recargastock.fechaAd || !this.Recargastock.folio) {
-    
-    Swal.fire(
-      'Error',
-      '¡Todos los campos son obligatorios antes de enviar!',
-      'warning'
-    );
-    return; 
+  // 2. Validación de campos obligatorios
+  if (
+    !this.Recargastock.partida || 
+    !this.Recargastock.producto || 
+    !this.Recargastock.proveedor || 
+    !this.Recargastock.cantidad || 
+    !this.Recargastock.fechaAd || 
+    !this.Recargastock.folio
+  ) {
+    Swal.fire('Error', '¡Todos los campos son obligatorios antes de enviar!', 'warning');
+    return;
   }
-  
-      console.log(this.Recargastock);
-  
-  
-        this.traer.http.post( this.API_URL+`/recargarStock/${this.Recargastock.producto}/${this.Recargastock.proveedor}`,this.Recargastock)
-          .subscribe((res:any)=>{
-            
-            console.log(res);
-      
-            if(res=="reload"){
-               
-                          Swal.fire(
-                            'Ok',
-                            '¡Los datos fueron agregados al stock!',
-                            'success'
-                          );  
-                          this.articuloValido = false;
-                          this.terminoBusqueda = '';
-                          this.monedaFormateada = '$ 0.00';
-                          this.monedaFormateada2 = '$ 0.00';
-                          this.costo_unitario = 0;
-                          this.direccionSeleccionada = null;
 
-                          this.Recargastock = {
-                            partida: null,
-                            producto: null,
-                            proveedor: '',
-                            folio: '',
-                            cantidad: null,
-                            fechaAd: null,
-                            importe: null,
-                            totalCompra: null
-                          }
-                          form.resetForm();
-            } 
-            else{
+  // 3. Alerta de confirmación antes de guardar
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Se agregarán los datos al stock del almacén',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, guardar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
 
-                 Swal.fire(
+    // 4. Si el usuario presiona "Sí, guardar"
+    if (result.isConfirmed) {
 
-                'Error',
-                'Contacte a soporte',
-                'error'
-          
-            );
+      this.traer.http.post(
+        `${this.API_URL}/recargarStock/${this.Recargastock.producto}/${this.Recargastock.proveedor}`,
+        this.Recargastock
+      ).subscribe({
+        next: (res: any) => {
+          if (res === 'reload') {
+            Swal.fire('¡Guardado!', '¡Los datos fueron agregados al stock!', 'success');
 
-            
-            }
-            
-          });
-  
+            // Reset de variables
+            this.articuloValido = false;
+            this.terminoBusqueda = '';
+            this.monedaFormateada = '$ 0.00';
+            this.monedaFormateada2 = '$ 0.00';
+            this.costo_unitario = 0;
+            this.direccionSeleccionada = null;
+
+            this.Recargastock = {
+              partida: null,
+              producto: null,
+              proveedor: '',
+              folio: '',
+              cantidad: null,
+              fechaAd: null,
+              importe: null,
+              totalCompra: null
+            };
+
+            form.resetForm();
+          } else {
+            Swal.fire('Error', 'Contacte a soporte', 'error');
+          }
+        },
+        error: (err) => {
+          console.error('Error al recargar stock:', err);
+          Swal.fire('Error', 'Ocurrió un problema en el servidor', 'error');
+        }
+      });
+
     }
+  });
+}
   
   
 
