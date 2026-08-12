@@ -1,3 +1,12 @@
+<div class="container">
+
+	<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
+
+		<h3><b>Registrar Nuevo Articulo</b></h3>
+		<hr>
+		
+	</div>
+
 <form #f="ngForm" (ngSubmit)="guardarArticulo(f)" class="card p-4 shadow">
   
   <!-- Combo Partidas (opcional, puede ir null) -->
@@ -23,7 +32,7 @@
  
   <!-- Unidad de medida -->
 <div class="form-group">
-  <label>Unidad de medida (5 caracteres) ej. pza (pieza), pqte (paquete)</label>
+  <label>Unidad de medida</label>
   <input class="form-control" 
          name="unidad_medida" 
          [(ngModel)]="articulo.unidad_medida" 
@@ -65,7 +74,10 @@
     </div> -->
   <!-- </div> -->
 
-  <button class="btn btn-primary btn-sm w-25 m-auto" type="submit" [disabled]="loading || f.invalid">
-    {{ loading ? 'Guardando…' : 'Guardar artículo' }}
-  </button>
+	  <button class="btn btn-primary w-24  m-auto" type="submit" [disabled]="loading || f.invalid">
+		{{ loading ? 'Guardando…' : 'Guardar artículo' }}
+	  </button>
+  
 </form>
+
+</div>
