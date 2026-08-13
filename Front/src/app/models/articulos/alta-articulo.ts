@@ -13,3 +13,4 @@ export interface partida{
     clave: string;
     descripcion: string;
 }
+
