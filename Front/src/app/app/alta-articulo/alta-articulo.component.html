@@ -23,7 +23,7 @@
   
 	<div class="row">
 
-<<<<<<< HEAD
+
    
   <!-- Combo unidad_medida -->
 <div class="form-group">
@@ -44,7 +44,7 @@
     <input class="form-control" name="descripcion" [(ngModel)]="articulo.descripcion" required>
     <small *ngIf="f.submitted && f.controls['descripcion']?.invalid" class="text-danger">Obligatorio</small>
   </div>
-=======
+
 	  <!-- Clave -->
 	  <div class="form-group col-md-6">
 		<label><b>Clave</b></label>
@@ -52,7 +52,7 @@
 			   (input)="articulo.clave = articulo.clave?.toUpperCase()?.trim()" />
 		<small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>
 	  </div>
->>>>>>> c1c31cfdce4e82004943d05247d013c1e6466b6a
+
 
 	  <!-- Unidad de medida -->
 	  <div class="form-group col-md-6">
