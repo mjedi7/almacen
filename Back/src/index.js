@@ -3,7 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 
@@ -18,8 +19,9 @@ app.use(require('./routes/subirDocumentos'));
 
 app.use('/articulos', require('./routes/articulos'));
 app.use('/partidas', require('./routes/partidas'));
-app.use('/proveedores', require('./routes/proveedores'))
+app.use('/unidad-medida', require('./routes/unidad_medida'));
+app.use('/proveedores', require('./routes/proveedores'));
 
-
-app.listen(port);
-console.log('Server on port ' + port);
+app.listen(port, '0.0.0.0', () => {
+  console.log('Server on port ' + port);
+});
