@@ -2,8 +2,7 @@ export interface articulo {
     id?: number;
     clave: string;
     id_partidas?: number | null;
-    id_unidad_medida?: number | null;
-    unidad_medida?: string;
+    unidad_medida_id?: number | null;
     descripcion: string;
     esActivo: boolean;
     esBasico: boolean;

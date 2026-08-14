@@ -32,13 +32,13 @@
       <!-- Combo unidad_medida -->
       <div class="form-group col-md-6">
         <label><b>Unidad de Medida</b></label>
-        <select class="form-control" name="id_unidad_medida" [(ngModel)]="articulo.id_unidad_medida" required>
+        <select class="form-control" name="unidad_medida_id" [(ngModel)]="articulo.unidad_medida_id" required>
           <option [ngValue]="null" disabled selected>-- Seleccione una unidad --</option>
           <option *ngFor="let u of unidad_medida" [ngValue]="u.id">
             {{ u.nombre_medida }}
           </option>
         </select>
-        <small *ngIf="f.submitted && f.controls['id_unidad_medida']?.invalid" class="text-danger">Obligatorio</small>
+        <small *ngIf="f.submitted && f.controls['unidad_medida_id']?.invalid" class="text-danger">Obligatorio</small>
       </div>
     </div>
 

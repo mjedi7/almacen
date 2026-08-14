@@ -20,7 +20,7 @@ const crearArticulo = async (req, res) => {
       clave,
       id_partidas,
       descripcion,
-      unidad_medida,
+      unidad_medida_id,
       esActivo = true,
       esBasico = true,
     } = req.body;
@@ -52,10 +52,10 @@ const crearArticulo = async (req, res) => {
 
     const sql = `
       INSERT INTO cat_articulos
-      (clave, id_partidas, descripcion, unidad_medida, esactivo, esbasico)
+      (clave, id_partidas, descripcion, unidad_medida_id, esactivo, esbasico)
       VALUES ($1,$2,$3,$4,$5,$6)
       RETURNING
-        id, clave, id_partidas, descripcion, unidad_medida,
+        id, clave, id_partidas, descripcion, unidad_medida_id,
         esactivo AS "esActivo",
         esbasico AS "esBasico"
     `;
@@ -64,7 +64,7 @@ const crearArticulo = async (req, res) => {
       clave,
       id_partidas,
       descripcion,
-      unidad_medida,
+      unidad_medida_id,
       Boolean(esActivo),
       Boolean(esBasico),
     ];
