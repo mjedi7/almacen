@@ -1,4 +1,3 @@
-
 <!-- ============================================================== -->
 <!-- Left Sidebar - style you can find in sidebar.scss  -->
 <!-- ============================================================== -->
@@ -11,17 +10,21 @@
 
                 <li class="nav-small-cap" style="text-align: center; padding: 15px 0 1px 0;">
                     <img src="./assets/images/NuevoSICAI2.png" alt="Logo SICAI" style="width: 85%; max-width: 170px;">
-                </li>    
+                </li>
 
                 <!-- <li class="nav-devider"></li> -->
 
                 <li *ngFor="let item of menuItems" style="margin-top: 30px;">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none;  background-color: brown;">
+                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                        style="text-decoration:none;  background-color: brown;">
                         <i class="mdi mdi-store" style="color: #FFF;"></i>
-                        
-                        <span class="hide-menu" style="color:#FFF; background-color: brown;" onmouseover="this.style.cssText='color:Orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item.titulo }} 
-                            <span id="uno" class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+
+                        <span class="hide-menu" style="color:#FFF; background-color: brown;"
+                            onmouseover="this.style.cssText='color:Orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item.titulo }}
+                            <span id="uno" class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item.submenu.length }}
                             </span>
                         </span>
@@ -29,7 +32,10 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown;">
                         <li *ngFor="let subMenuItem of item.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF;  background-color: brown;" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF;  background-color: brown;"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
                 </li>
@@ -55,15 +61,19 @@
                 </li> -->
 
 
-                <!--************ STARTED TRANSFERENCIAS *********--> 
+                <!--************ STARTED TRANSFERENCIAS *********-->
 
                 <li *ngFor="let item3 of menuItems3">
-                    <a *ngIf="vertransferencias" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
+                    <a *ngIf="vertransferencias" class="has-arrow waves-effect waves-dark" href="#"
+                        aria-expanded="false" style="text-decoration:none; background-color: brown">
                         <i class="mdi mdi-repeat" style="color: #FFF; background-color: brown"></i>
-              
-                        <span class="hide-menu" style="color: #FFF; background-color: brown;" onmouseover="this.style.cssText='color:Orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item3.titulo }} 
-                            <span class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+
+                        <span class="hide-menu" style="color: #FFF; background-color: brown;"
+                            onmouseover="this.style.cssText='color:Orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item3.titulo }}
+                            <span class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item3.submenu.length }}
                             </span>
                         </span>
@@ -71,20 +81,27 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown">
                         <li *ngFor="let subMenuItem of item3.submenu">
-                            <a  [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
-                        </li> 
+                            <a [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                        </li>
                     </ul>
                 </li>
 
-                  <!-- ********** STARTED REQUISIONES *************-->
+                <!-- ********** STARTED REQUISIONES *************-->
 
-                <li *ngFor="let item4 of menuItems4">    
+                <li *ngFor="let item4 of menuItems4">
 
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
+                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                        style="text-decoration:none; background-color: brown">
                         <i class="mdi mdi-file-document" style="color: #FFF; background-color: brown"></i>
-                        <span class="hide-menu" style="color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item4.titulo }} 
-                            <span class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+                        <span class="hide-menu" style="color: #FFF; background-color: brown"
+                            onmouseover="this.style.cssText='color:orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item4.titulo }}
+                            <span class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item4.submenu.length }}
                             </span>
                         </span>
@@ -92,7 +109,10 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown">
                         <li *ngFor="let subMenuItem of item4.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
                 </li>
@@ -100,14 +120,18 @@
                 <!-- Menú Movimientos -->
 
 
-                   <li *ngFor="let item4B of menuItems4B">    
+                <li *ngFor="let item4B of menuItems4B">
 
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
+                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                        style="text-decoration:none; background-color: brown">
                         <!-- <i class="mdi mdi-file-document" style="color: #FFF; background-color: brown"></i> -->
                         <i class="mdi mdi-account-switch" style="color: #FFF; background-color: brown"></i>
-                        <span class="hide-menu" style="color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item4B.titulo }} 
-                            <span class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+                        <span class="hide-menu" style="color: #FFF; background-color: brown"
+                            onmouseover="this.style.cssText='color:orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item4B.titulo }}
+                            <span class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item4B.submenu.length }}
                             </span>
                         </span>
@@ -115,7 +139,10 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown">
                         <li *ngFor="let subMenuItem of item4B.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
                 </li>
@@ -125,13 +152,17 @@
 
                 <!-- Menu Articulos -->
 
-                  <li *ngFor="let item55 of menuItems55">    
+                <li *ngFor="let item55 of menuItems55">
 
-                    <a *ngIf="verArticulos" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
+                    <a *ngIf="verArticulos" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                        style="text-decoration:none; background-color: brown">
                         <i class="mdi mdi-view-module" style="color: #FFF; background-color: brown"></i>
-                        <span class="hide-menu" style="color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item55.titulo }} 
-                            <span class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+                        <span class="hide-menu" style="color: #FFF; background-color: brown"
+                            onmouseover="this.style.cssText='color:orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item55.titulo }}
+                            <span class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item55.submenu.length }}
                             </span>
                         </span>
@@ -139,7 +170,10 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown">
                         <li *ngFor="let subMenuItem of item55.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
                 </li>
@@ -150,7 +184,7 @@
 
                 <!-- REPORTES -->
 
-                <li *ngFor="let item44 of menuItems44">    
+                <!--<li *ngFor="let item44 of menuItems44">    
 
                     <a *ngIf="verReportes" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
                         <i class="mdi mdi-chart-areaspline" style="color: #FFF; background-color: brown"></i>
@@ -167,19 +201,52 @@
                             <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
-                </li>
+                </li>-->
+
+                <!-- REPORTES -->
+                <ng-container *ngIf="verReportes">
+                    <li *ngFor="let item44 of menuItems44">
+                        <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                            style="text-decoration:none; background-color: brown">
+                            <i class="mdi mdi-chart-areaspline" style="color: #FFF; background-color: brown"></i>
+                            <span class="hide-menu" style="color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'">
+                                {{ item44.titulo }}
+                                <span class="label label-rouded label-themecolor pull-right"
+                                    style="background-color: rgb(103, 101, 101)">
+                                    {{ item44.submenu.length }}
+                                </span>
+                            </span>
+                        </a>
+
+                        <ul aria-expanded="false" class="collapse" style="background-color: brown">
+                            <li *ngFor="let subMenuItem of item44.submenu">
+                                <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
+                                    style="text-decoration:none;color: #FFF; background-color: brown"
+                                    onmouseover="this.style.cssText='color:orange'"
+                                    onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ng-container>
 
 
-            <!-- usuarios -->
+
+                <!-- usuarios -->
 
 
                 <li *ngFor="let item5 of menuItems5">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
+                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                        style="text-decoration:none; background-color: brown">
                         <i class="mdi mdi-account-multiple" style="color: #FFF; background-color: brown"></i>
                         <!-- <i class="mdi mdi-cash-usd" style="color: #FFF; background-color: brown"></i> -->
-                        <span class="hide-menu" style="color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item5.titulo }} 
-                            <span class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+                        <span class="hide-menu" style="color: #FFF; background-color: brown"
+                            onmouseover="this.style.cssText='color:orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item5.titulo }}
+                            <span class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item5.submenu.length }}
                             </span>
                         </span>
@@ -187,7 +254,10 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown">
                         <li *ngFor="let subMenuItem of item5.submenu">
-                            <a [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            <a [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
                 </li>
@@ -254,7 +324,7 @@
                     </li> -->
 
 
-                    <!-- <li *ngFor="let item9 of menuItems9">
+                <!-- <li *ngFor="let item9 of menuItems9">
                         <a *ngIf="descargas" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
                             <i class="mdi mdi-folder-download" style="color: #FFF; background-color: brown"></i>
                             <span class="hide-menu" style="color: #FFF; background-color: brown"> 
@@ -278,12 +348,16 @@
                         </ul>
                     </li> -->
 
-                    <li *ngFor="let item10 of menuItems10">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
+                <li *ngFor="let item10 of menuItems10">
+                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                        style="text-decoration:none; background-color: brown">
                         <i class="mdi mdi-key" style="color: #FFF; background-color: brown"></i>
-                        <span class="hide-menu" style="color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> 
-                            {{ item10.titulo }} 
-                            <span class="label label-rouded label-themecolor pull-right" style="background-color: rgb(103, 101, 101)">
+                        <span class="hide-menu" style="color: #FFF; background-color: brown"
+                            onmouseover="this.style.cssText='color:orange'"
+                            onmouseout="this.style.cssText='color:white'">
+                            {{ item10.titulo }}
+                            <span class="label label-rouded label-themecolor pull-right"
+                                style="background-color: rgb(103, 101, 101)">
                                 {{ item10.submenu.length }}
                             </span>
                         </span>
@@ -291,7 +365,10 @@
 
                     <ul aria-expanded="false" class="collapse" style="background-color: brown">
                         <li *ngFor="let subMenuItem of item10.submenu">
-                            <a [routerLink]="subMenuItem.url" style="text-decoration:none;color: #FFF; background-color: brown" onmouseover="this.style.cssText='color:orange'" onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
+                            <a [routerLink]="subMenuItem.url"
+                                style="text-decoration:none;color: #FFF; background-color: brown"
+                                onmouseover="this.style.cssText='color:orange'"
+                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
                         </li>
                     </ul>
                 </li>

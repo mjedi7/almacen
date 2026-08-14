@@ -51,7 +51,10 @@ const routes: Routes = [
             {path:'agregar-articulo',component:AltaArticuloComponent,canActivate:[AuthGuard]},
             {path:'lista-movimientos',component:ListaMovimientosComponent,canActivate:[AuthGuard]},
             {path:'usar-articulo',component:UsarArticuloComponent,canActivate:[AuthGuard]},
-            {path: 'cargar-existencias', component: CargarExistenciasComponent, canActivate: [AuthGuard]}
+            {path: 'cargar-existencias', component: CargarExistenciasComponent, canActivate: [AuthGuard]},
+            { path: 'reporte-compras', component: ReporteComprasComponent, canActivate: [AuthGuard] },
+            { path: 'reporte-existencia-x-partida', component: ReporteExistenciaXPartidaComponent, canActivate: [AuthGuard] },
+            { path: 'reporte-movimiento-x-partida', component: ReporteMovimientosXPartidaComponent, canActivate: [AuthGuard] },
 
 
 

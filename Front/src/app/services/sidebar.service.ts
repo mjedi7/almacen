@@ -80,7 +80,7 @@ export class SidebarService {
   ];
 
 
-   menu44: any[] = [
+  /*menu44: any[] = [
     {
           titulo: 'Reportes',
           icono: 'mdi mdi-gauge',
@@ -90,6 +90,18 @@ export class SidebarService {
              { titulo: 'Existencias', url: 'reporte_existencias_x_partida',mostrar:true },
           ]
         },
+  ];*/
+
+    menu44: any[] = [
+    {
+      titulo: 'Reportes',
+      icono: 'mdi mdi-gauge',
+      submenu: [
+         { titulo: 'Reporte Compras', url: 'reporte-compras', mostrar: false },
+         { titulo: 'Existencia x Partida', url: 'reporte-existencia-x-partida', mostrar: false },
+         { titulo: 'Movimiento x Partida', url: 'reporte-movimiento-x-partida', mostrar: false }
+      ]
+    },
   ];
 
 
