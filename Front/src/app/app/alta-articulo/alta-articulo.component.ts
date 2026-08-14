@@ -18,7 +18,7 @@ export class AltaArticuloComponent implements OnInit {
   articulo: articulo = {
     clave: '',
     descripcion: '',
-    unidad_medida: '',
+    unidad_medida_id:null,
     esActivo: true,
     esBasico: true
   };
@@ -27,6 +27,7 @@ export class AltaArticuloComponent implements OnInit {
   unidad_medida: unidad_medida[] = [];
   loading = false;
 
+  // 2. CAMBIAMOS EL TIPO A UnidadMedidaServices EN EL CONSTRUCTOR
   constructor(
     private artSrv: ArticulosService, 
     private partSrvc: PartidasService,
@@ -47,6 +48,8 @@ export class AltaArticuloComponent implements OnInit {
       next: (resp: any) => {
         // Asignamos las unidades recibidas de Express
         this.unidad_medida = resp.unidades || [];
+
+        console.log('Arreglo guardado en unidad_medidacon:', this.unidad_medida);
       },
       error: (err) => {
         console.error('Error al cargar unidades de medida', err);
@@ -65,14 +68,22 @@ export class AltaArticuloComponent implements OnInit {
 
     this.articulo.clave = this.articulo.clave?.toUpperCase()?.trim();
     this.articulo.descripcion = this.articulo.descripcion?.trim();
-    this.articulo.unidad_medida = this.articulo.unidad_medida?.trim();
+
+    console.log('DATOS A ENVIAR:', {
+  clave: this.articulo.clave,
+  id_partidas: this.articulo.id_partidas,
+  unidad_medida_id: this.articulo.unidad_medida_id,
+  descripcion: this.articulo.descripcion,
+  esActivo: this.articulo.esActivo ?? true,
+  esBasico: this.articulo.esBasico ?? true
+});
+
 
     this.artSrv.crearArticulo({
       clave: this.articulo.clave,
       id_partidas: this.articulo.id_partidas,
+      unidad_medida_id: this.articulo.unidad_medida_id,
       descripcion: this.articulo.descripcion,
-      id_unidad_medida: this.articulo.id_unidad_medida,
-      unidad_medida: this.articulo.unidad_medida,
       esActivo: this.articulo.esActivo ?? true,
       esBasico: this.articulo.esBasico ?? true
     }).subscribe({
@@ -92,14 +103,18 @@ export class AltaArticuloComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: () => {
-        this.loading = false;
-        Swal.fire({
-          title: 'Error',
-          icon: 'error',
-          text: 'Ocurrió un error al guardar'
-        });
-      }
+      error: (err) => {
+  this.loading = false;
+
+  console.error('ERROR COMPLETO:', err);
+  console.error('ERROR DEL BACKEND:', err.error);
+
+  Swal.fire({
+    title: 'Error',
+    icon: 'error',
+    text: err.error?.msg || 'Ocurrió un error al guardar'
+  });
+}
     });
   }
 }
