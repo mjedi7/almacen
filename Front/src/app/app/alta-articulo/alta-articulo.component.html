@@ -1,32 +1,34 @@
 <div class="container">
 
-  <div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
-    <h3><b>Registrar Nuevo Articulo</b></h3>
+  <div class="titulo" style="margin: 0 auto; text-align: center; margin-top: 50px;">
+    <h3><b>Registrar Nuevo Artículo</b></h3>
     <hr>
   </div>
 
   <form #f="ngForm" (ngSubmit)="guardarArticulo(f)" class="card p-4 shadow">
-    
+
     <!-- Combo Partidas -->
-    <div class="form-group">
+    <div class="form-group mb-3">
       <label><b>Partida</b></label>
       <select class="form-control" name="id_partidas" [(ngModel)]="articulo.id_partidas" required>
+        <option [ngValue]="null" disabled selected>-- Seleccione una partida --</option>
         <option *ngFor="let p of partidas" [ngValue]="p.id">
           {{ p.clave }} - {{ p.descripcion }}
         </option>
       </select>
+      <small *ngIf="f.submitted && f.controls['id_partidas']?.invalid" class="text-danger">Obligatorio</small>
     </div>
 
     <!-- Fila con Clave y Unidad de Medida juntas -->
-    <div class="row">
-      <!-- Clave -->      
-      <div class="form-group col-md-6">     
-        <label><b>Clave</b></label>     
-        <input class="form-control" name="clave" [(ngModel)]="articulo.clave" required maxlength="4"      
-            (input)="articulo.clave = articulo.clave?.toUpperCase()?.trim()" />      
-        <small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>      
+    <div class="row mb-3">
+      <!-- Clave -->
+      <div class="form-group col-md-6">
+        <label><b>Clave</b></label>
+        <input class="form-control" name="clave" [(ngModel)]="articulo.clave" required maxlength="4"
+          (input)="articulo.clave = articulo.clave?.toUpperCase()?.trim()" />
+        <small *ngIf="f.submitted && f.controls['clave']?.invalid" class="text-danger">Obligatorio</small>
       </div>
-  
+
       <!-- Combo unidad_medida -->
       <div class="form-group col-md-6">
         <label><b>Unidad de Medida</b></label>
@@ -36,23 +38,23 @@
             {{ u.nombre_medida }}
           </option>
         </select>
+        <small *ngIf="f.submitted && f.controls['id_unidad_medida']?.invalid" class="text-danger">Obligatorio</small>
       </div>
     </div>
 
-    <!-- Descripción -->
-    <div class="form-group">
+    <!-- Descripción del Artículo -->
+    <div class="form-group mb-4">
       <label><b>Descripción del Artículo</b></label>
-      <textarea class="form-control" 
-                name="descripcion" 
-                [(ngModel)]="articulo.descripcion" 
-                rows="4" 
-                required></textarea>
+      <textarea class="form-control" name="descripcion" [(ngModel)]="articulo.descripcion" rows="4" required></textarea>
       <small *ngIf="f.submitted && f.controls['descripcion']?.invalid" class="text-danger">Obligatorio</small>
     </div>
 
-    <button class="btn btn-primary w-24 m-auto" type="submit" [disabled]="loading || f.invalid">
-      {{ loading ? 'Guardando…' : 'Guardar artículo' }}
-    </button>
+    <!-- Botón de Guardar -->
+    <div class="text-center">
+      <button class="btn btn-primary px-4" type="submit" [disabled]="loading || f.invalid">
+        {{ loading ? 'Guardando…' : 'Guardar artículo' }}
+      </button>
+    </div>
 
   </form>
 
