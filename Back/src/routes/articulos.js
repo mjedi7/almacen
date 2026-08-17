@@ -8,7 +8,8 @@ const {
   guardarExistenciasIniciales,
   listarPartidas,
   listarArticulosGeneral,
-  traerProductosPorPartida // <--- Nombre corregido aquí
+  relacionarArticuloProveedor,
+  traerProductosPorPartida, // <--- Nombre corregido aquí
 } = require('../controllers/articulos.controller');
 
 // Rutas específicas PRIMERO (antes de /:id)
@@ -24,6 +25,7 @@ router.post(
   validarJWT,
   guardarExistenciasIniciales
 );
+router.post('/relacionarProveedor', relacionarArticuloProveedor);
 
 // Rutas con parámetro dinámico AL FINAL
 router.get('/:id', obtenerArticuloPorId);
