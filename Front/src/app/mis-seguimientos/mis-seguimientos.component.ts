@@ -159,7 +159,7 @@ export class MisSeguimientosComponent implements OnInit {
               showConfirmButton: false
             });
           } else {
-            // ⚠️ SIN PROVEEDOR ASIGNADO: Ofrecer vincularlo en caliente
+            // SIN PROVEEDOR ASIGNADO: Ofrecer vincularlo en caliente
             this.ofrecerVincularProveedor(idArticulo);
           }
         },
@@ -224,6 +224,22 @@ export class MisSeguimientosComponent implements OnInit {
           console.error('Error al vincular proveedor:', err);
           Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
         }
+      });
+
+      this.direccionSeleccionada = idProveedor;
+      this.proveedoresService.traerProveedoresPorArticulo(idArticulo).subscribe({
+
+        next: (res: any) =>{
+          this.proveedores = res || [];
+
+          this.CapturarValor();
+        },
+
+        error: (err) => {
+          console.error('Error al vincular proveedor:', err);
+          Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
+        }
+        
       });
   }
 

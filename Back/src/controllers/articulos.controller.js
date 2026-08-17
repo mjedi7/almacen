@@ -393,7 +393,7 @@ const relacionarArticuloProveedor = async (req, res) => {
     }
 
     const existe = await pool.query(
-      `SELECT id FROM costos WHERE id_articulo =$1 AND id_proveedor = $2 esactivo = true LIMIT 1`, [Number(articulo_id), Number(proveedor_id)]
+      `SELECT id FROM costos WHERE id_articulo =$1 AND id_proveedor = $2 AND esactivo = true LIMIT 1`, [Number(articulo_id), Number(proveedor_id)]
     );
 
     if (existe.rows.length > 0) {
@@ -405,9 +405,9 @@ const relacionarArticuloProveedor = async (req, res) => {
     }
 
     const insertQuery = (
-      `INSERT INTO costos (id_articulo, id_proveedor, costo, fecha_inicio, esactivo)
+      `INSERT INTO costos (id_articulo, id_proveedor, precio_unitario, fecha_inicio, esactivo)
       VALUES ($1, $2, $3, NOW(), true)
-      RETURNING id, id_articulo, id_proveedor, costo`
+      RETURNING id, id_articulo, id_proveedor, precio_unitario`
     )
 
     const { rows } = await pool.query(insertQuery, [
@@ -421,7 +421,7 @@ const relacionarArticuloProveedor = async (req, res) => {
       msg: 'Artículo relacionado con el proveedor exitosamente',
       relacion: rows[0]
     });
-  } catch (err) {
+  } catch (error) {
 
     console.error('relacionarArticuloProveedor error:', error);
     return res.status(500).json({
