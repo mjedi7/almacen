@@ -24,47 +24,37 @@ const getPlantelRequisicion = async(req, res) => {
 
 
 const TramitarRequisicion = async(req, res) => {
-
     try {
+        var { plantel, partida, idcosto, fecha, cantidadSolicitar, consecutivo, nombreProducto } = req.body;
 
-          var { plantel,partida,idcosto,fecha,cantidadSolicitar,consecutivo,nombreProducto} = req.body;
-
-
-     const BuscarDuplicado = await pool.query('SELECT folio_solicitud,id_costos FROM solicitud_material WHERE folio_solicitud= $1 and id_costos=$2 and id_centrotrabajo_solicitante=$3;', [consecutivo,idcosto,plantel]);
-    
-     if(BuscarDuplicado.rowCount > 0){
-                res.json("Duplicado");
-     }else{
-
-           console.log(req.body);
-
-      var response = await pool.query('select nombre_producto from almacen where id_costos='+idcosto);
-                 var nom_producto = response.rows[0].nombre_producto;
-
-                if(response){
-
-                var response2 = await pool.query(' INSERT INTO solicitud_material(folio_solicitud,id_centrotrabajo_solicitante,fecha_solicitud,esactivo,esautorizado,id_costos,cantidad_solicitada,nom_articulo) VALUES ($1, $2, $3, $4, $5, $6,$7,$8)',
-                [ consecutivo,plantel,fecha,true,true,idcosto,cantidadSolicitar,nom_producto]);  
-
-                }else{
-                    res.json("Error");
-                }
-
-                res.json("Add");    
-
-     }
-
-
+        const BuscarDuplicado = await pool.query(
+            'SELECT folio_solicitud, id_costos FROM solicitud_material WHERE folio_solicitud = $1 AND id_costos = $2 AND id_centrotrabajo_solicitante = $3;',
+            [consecutivo, idcosto, plantel]
+        );
         
+        if (BuscarDuplicado.rowCount > 0) {
+            return res.json("Duplicado");
+        }
+
+        console.log(req.body);
+
+        // Buscar el producto en almacen
+        const response = await pool.query('SELECT nombre_producto FROM almacen WHERE id_costos = $1 LIMIT 1;', [idcosto]);
+        
+        // Si existe en almacen toma su nombre, si no, usa el que viene en la petición o un texto por defecto
+        const nom_producto = response.rows.length > 0 ? response.rows[0].nombre_producto : (nombreProducto || 'Artículo sin nombre');
+
+        await pool.query(
+            'INSERT INTO solicitud_material(folio_solicitud, id_centrotrabajo_solicitante, fecha_solicitud, esactivo, esautorizado, id_costos, cantidad_solicitada, nom_articulo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+            [consecutivo, plantel, fecha, true, true, idcosto, cantidadSolicitar, nom_producto]
+        );
+
+        return res.json("Add");
+
     } catch (error) {
-
-        res.json("ErrorProducto");
-        
+        console.error("Error al tramitar requisicion:", error);
+        return res.status(500).json("ErrorProducto");
     }
-
-
-  
-
 };
 
 

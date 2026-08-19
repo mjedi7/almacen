@@ -1,7 +1,7 @@
 const { response } = require('express');
 const { Pool } = require('pg');
-const archiver=require('archiver');
-const path=require('path');
+const archiver = require('archiver');
+const path = require('path');
 const fs = require('fs');
 
 
@@ -12,10 +12,10 @@ const pool = new Pool({
     password: process.env.PASSWORD_BD,
     database: process.env.DATABASE_BD,
     port: process.env.PORT_BD
-    
+
 })
 
- jasper = require('node-jasper')({
+jasper = require('node-jasper')({
     path: '../../lib/jasperreports-6.19.1',
     reports: {
 
@@ -24,37 +24,37 @@ const pool = new Pool({
             jasper: '../../reports/Reporte_General.jasper'
         },
 
-         FormatoRequisicion: {
+        FormatoRequisicion: {
             jasper: '../../reports/Reporte_Requisicion.jasper'
         },
-         FormatoRequisicionPlantel: {
+        FormatoRequisicionPlantel: {
             jasper: '../../reports/Reporte_Requisicion_Plantel.jasper'
         },
-         FormatoRequisicionDG: {
+        FormatoRequisicionDG: {
             jasper: '../../reports/Reporte_Requisicion_DG.jasper'
         },
-          ListaArticulosSurtidos: {
+        ListaArticulosSurtidos: {
             jasper: '../../reports/ListaArticulosSurtidos.jasper'
         },
         ListaArticulosSurtidosSinMontos: {
             jasper: '../../reports/ListaArticulosSurtidosSinMontos.jasper'
         },
-          reporte_movimiento_x_partida: {
+        reporte_movimiento_x_partida: {
             jasper: '../../reports/Movimientos_x_partida.jasper'
         },
         reporte_movimiento_x_partida_todos: {
             jasper: '../../reports/Movimientos_x_partida_todos.jasper'
         },
-          reporte_existencias_x_partida: {
+        reporte_existencias_x_partida: {
             jasper: '../../reports/reporte_existencias_x_partida.jasper'
         },
-          reporte_existencias_x_partida_todas: {
+        reporte_existencias_x_partida_todas: {
             jasper: '../../reports/reporte_existencias_x_partida_todas.jasper'
         },
         reporte_de_compras_todas: {
             jasper: '../../reports/reporte_de_compras_todas.jasper'
         },
-         reporte_de_compras_x_partida: {
+        reporte_de_compras_x_partida: {
             jasper: '../../reports/reporte_de_compras_x_partida.jasper'
         },
         reporte_de_compras_x_proveedor: {
@@ -72,12 +72,11 @@ const pool = new Pool({
     },
     conns: {
         dbserverCECyTEV: {
-            //Datos local
-            host: '172.16.0.148',
-            port: 5432,
-            dbname: 'almacen',
-            user: 'postgres',
-            pass: 'admin',
+            host: process.env.HOST_BD || 'localhost',
+            port: process.env.PORT_BD || 5432,
+            dbname: process.env.DATABASE_BD || 'almacen',
+            user: process.env.USER_BD || 'postgres',
+            pass: process.env.PASSWORD_BD || 'admin',
             driver: 'pg'
         }
     },
@@ -107,7 +106,7 @@ function generarPDF(nombreReporte, parametros, nombreArchivo) {
 /////////////////////////////////////                          /////////////////////////////////////
 
 
-const ReporteGeneralPorPlantel = async(req, res) => {
+const ReporteGeneralPorPlantel = async (req, res) => {
 
     var idPlantel = req.params.idPlantel;
 
@@ -136,12 +135,12 @@ const ReporteGeneralPorPlantel = async(req, res) => {
 };
 
 
-const FormatoRequisicion = async(req, res) => {
+const FormatoRequisicion = async (req, res) => {
 
     var idPlantel = req.params.idPlantel;
-    var folio=req.params.folio;
+    var folio = req.params.folio;
 
-            let FormatoRequisicion = {
+    let FormatoRequisicion = {
         report: 'FormatoRequisicion',
         data: {
             ID_PLANTEL: parseInt(idPlantel),
@@ -158,10 +157,10 @@ const FormatoRequisicion = async(req, res) => {
             'Content-Length': pdf.length
         });
 
-          const response4 = await pool.query('SELECT folio_requisicion from consecutivo_requisicion where id_centrotrabajo='+idPlantel);
-          var nuevoConsecutivo=response4.rows[0].folio_requisicion + 1;
+        const response4 = await pool.query('SELECT folio_requisicion from consecutivo_requisicion where id_centrotrabajo=' + idPlantel);
+        var nuevoConsecutivo = response4.rows[0].folio_requisicion + 1;
 
-          var response5 = await pool.query('UPDATE consecutivo_requisicion SET folio_requisicion=$1 WHERE id_centrotrabajo=$2',[nuevoConsecutivo,idPlantel]);
+        var response5 = await pool.query('UPDATE consecutivo_requisicion SET folio_requisicion=$1 WHERE id_centrotrabajo=$2', [nuevoConsecutivo, idPlantel]);
 
         res.send(pdf);
 
@@ -173,12 +172,12 @@ const FormatoRequisicion = async(req, res) => {
 };
 
 
-const FormatoRequisicionPlantel = async(req, res) => {
+const FormatoRequisicionPlantel = async (req, res) => {
 
     var idPlantel = req.params.idPlantel;
-    var folio=req.params.folio;
+    var folio = req.params.folio;
 
-            let  FormatoRequisicionPlantel = {
+    let FormatoRequisicionPlantel = {
         report: 'FormatoRequisicionPlantel',
         data: {
             ID_PLANTEL: parseInt(idPlantel),
@@ -195,10 +194,10 @@ const FormatoRequisicionPlantel = async(req, res) => {
             'Content-Length': pdf.length
         });
 
-          const response4 = await pool.query('SELECT num_folio from consecutivo_usar_articulo_plantel where id_centrotrabajo='+idPlantel);
-          var nuevoConsecutivo=response4.rows[0].num_folio + 1;
+        const response4 = await pool.query('SELECT num_folio from consecutivo_usar_articulo_plantel where id_centrotrabajo=' + idPlantel);
+        var nuevoConsecutivo = response4.rows[0].num_folio + 1;
 
-          var response5 = await pool.query('UPDATE consecutivo_usar_articulo_plantel SET num_folio=$1 WHERE id_centrotrabajo=$2',[nuevoConsecutivo,idPlantel]);
+        var response5 = await pool.query('UPDATE consecutivo_usar_articulo_plantel SET num_folio=$1 WHERE id_centrotrabajo=$2', [nuevoConsecutivo, idPlantel]);
 
         res.send(pdf);
 
@@ -211,12 +210,12 @@ const FormatoRequisicionPlantel = async(req, res) => {
 
 
 
-const FormatoRequisicionDG = async(req, res) => {
+const FormatoRequisicionDG = async (req, res) => {
 
     var idPlantel = req.params.idPlantel;
-    var folio=req.params.folio;
+    var folio = req.params.folio;
 
-            let FormatoRequisicionDG = {
+    let FormatoRequisicionDG = {
         report: 'FormatoRequisicionDG',
         data: {
             ID_PLANTEL: parseInt(idPlantel),
@@ -232,10 +231,10 @@ const FormatoRequisicionDG = async(req, res) => {
             'Content-Length': pdf.length
         });
 
-          const response4 = await pool.query('SELECT folio_requisicion from consecutivo_requisicion where id_centrotrabajo='+idPlantel);
-          var nuevoConsecutivo=response4.rows[0].folio_requisicion + 1;
+        const response4 = await pool.query('SELECT folio_requisicion from consecutivo_requisicion where id_centrotrabajo=' + idPlantel);
+        var nuevoConsecutivo = response4.rows[0].folio_requisicion + 1;
 
-          var response5 = await pool.query('UPDATE consecutivo_requisicion SET folio_requisicion=$1 WHERE id_centrotrabajo=$2',[nuevoConsecutivo,idPlantel]);
+        var response5 = await pool.query('UPDATE consecutivo_requisicion SET folio_requisicion=$1 WHERE id_centrotrabajo=$2', [nuevoConsecutivo, idPlantel]);
 
         res.send(pdf);
 
@@ -246,13 +245,13 @@ const FormatoRequisicionDG = async(req, res) => {
 
 };
 
-const ListaArticulosSurtidos = async(req, res) => {
+const ListaArticulosSurtidos = async (req, res) => {
 
     var idPlantel = req.params.plantel;
-    var folio=req.params.folio;
+    var folio = req.params.folio;
 
-    console.log("xxx: "+idPlantel);
-      console.log("xxx= "+folio);
+    console.log("xxx: " + idPlantel);
+    console.log("xxx= " + folio);
 
     let ListaArticulosSurtidos = {
         report: 'ListaArticulosSurtidos',
@@ -275,18 +274,18 @@ const ListaArticulosSurtidos = async(req, res) => {
         });
 
         // Asegurar que la carpeta existe
-            if (!fs.existsSync(folderPath)){
-                fs.mkdirSync(folderPath);
-            }
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath);
+        }
 
-                    fs.writeFile(filePath, pdf, 'binary', (err) => {
-                if (err) {
-                    console.error('Error al guardar el archivo:', err);
-                } else {
-                    console.log('PDF guardado exitosamente en:', filePath);
-                    res.json("pdf1-Generado")
-                }
-            });
+        fs.writeFile(filePath, pdf, 'binary', (err) => {
+            if (err) {
+                console.error('Error al guardar el archivo:', err);
+            } else {
+                console.log('PDF guardado exitosamente en:', filePath);
+                res.json("pdf1-Generado")
+            }
+        });
 
     } catch (error) {
         console.log(error);
@@ -294,13 +293,13 @@ const ListaArticulosSurtidos = async(req, res) => {
 
 };
 
-const ListaArticulosSurtidosSinMontos = async(req, res) => {
+const ListaArticulosSurtidosSinMontos = async (req, res) => {
 
     var idPlantel = req.params.plantel;
-    var folio=req.params.folio;
+    var folio = req.params.folio;
 
-    console.log("xxx: "+idPlantel);
-      console.log("xxx= "+folio);
+    console.log("xxx: " + idPlantel);
+    console.log("xxx= " + folio);
 
     let ListaArticulosSurtidosSinMontos = {
         report: 'ListaArticulosSurtidosSinMontos',
@@ -310,7 +309,7 @@ const ListaArticulosSurtidosSinMontos = async(req, res) => {
         },
     };
 
-     try {
+    try {
 
         let pdf = jasper.pdf(ListaArticulosSurtidosSinMontos);
 
@@ -323,18 +322,18 @@ const ListaArticulosSurtidosSinMontos = async(req, res) => {
         });
 
         // Asegurar que la carpeta existe
-            if (!fs.existsSync(folderPath)){
-                fs.mkdirSync(folderPath);
-            }
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath);
+        }
 
-                    fs.writeFile(filePath, pdf, 'binary', (err) => {
-                if (err) {
-                    console.error('Error al guardar el archivo:', err);
-                } else {
-                    console.log('PDF guardado exitosamente en:', filePath);
-                     res.json("pdf2-Generado")
-                }
-            });
+        fs.writeFile(filePath, pdf, 'binary', (err) => {
+            if (err) {
+                console.error('Error al guardar el archivo:', err);
+            } else {
+                console.log('PDF guardado exitosamente en:', filePath);
+                res.json("pdf2-Generado")
+            }
+        });
 
 
         // res.send(pdf);
@@ -347,45 +346,45 @@ const ListaArticulosSurtidosSinMontos = async(req, res) => {
 
 
 
-const reporte_movimiento_x_partida = async(req, res) => {
+const reporte_movimiento_x_partida = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var partida=req.body.partida;
-  var fechaIni=req.body.fechaIni;
-  var fechaFin=req.body.fechaFin;
+    var partida = req.body.partida;
+    var fechaIni = req.body.fechaIni;
+    var fechaFin = req.body.fechaFin;
 
-  var fechaIni2=new Date(fechaIni);
-  var fechaFin2=new Date(fechaFin);
+    var fechaIni2 = new Date(fechaIni);
+    var fechaFin2 = new Date(fechaFin);
 
- const fechaEnviar1=fechaIni2.toISOString().slice(0, 10);
- const  fechaEnviar2=fechaFin2.toISOString().slice(0, 10);
+    const fechaEnviar1 = fechaIni2.toISOString().slice(0, 10);
+    const fechaEnviar2 = fechaFin2.toISOString().slice(0, 10);
 
- var anio=fechaEnviar1.slice(0,4);
- console.log(anio);
- var mes=fechaEnviar1.slice(5,7);
- console.log(mes)
- var dia=fechaEnviar1.slice(8,10);
- console.log(dia);
+    var anio = fechaEnviar1.slice(0, 4);
+    console.log(anio);
+    var mes = fechaEnviar1.slice(5, 7);
+    console.log(mes)
+    var dia = fechaEnviar1.slice(8, 10);
+    console.log(dia);
 
- 
- var anio2=fechaEnviar2.slice(0,4);
- console.log(anio2);
- var mes2=fechaEnviar2.slice(5,7);
- console.log(mes2)
- var dia2=fechaEnviar2.slice(8,10);
- console.log(dia2);
 
- var enviarFecha1=dia+"-"+mes+"-"+anio;
- var enviarFecha2=dia2+"-"+mes2+"-"+anio2;
+    var anio2 = fechaEnviar2.slice(0, 4);
+    console.log(anio2);
+    var mes2 = fechaEnviar2.slice(5, 7);
+    console.log(mes2)
+    var dia2 = fechaEnviar2.slice(8, 10);
+    console.log(dia2);
+
+    var enviarFecha1 = dia + "-" + mes + "-" + anio;
+    var enviarFecha2 = dia2 + "-" + mes2 + "-" + anio2;
 
 
     let reporte_movimiento_x_partida = {
         report: 'reporte_movimiento_x_partida',
         data: {
             ID_PARTIDA: partida,
-            FECHA_INICIO:enviarFecha1,
-            FECHA_FIN:enviarFecha2
+            FECHA_INICIO: enviarFecha1,
+            FECHA_FIN: enviarFecha2
         },
     };
 
@@ -405,47 +404,47 @@ const reporte_movimiento_x_partida = async(req, res) => {
 };
 
 
-const reporte_de_compras_todas = async(req, res) => {
+const reporte_de_compras_todas = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var partida=req.body.partida;
-  var fechaIni=req.body.fechaIni;
-  var fechaFin=req.body.fechaFin;
-   var fechaReport=req.body.fechaReporte;
+    var partida = req.body.partida;
+    var fechaIni = req.body.fechaIni;
+    var fechaFin = req.body.fechaFin;
+    var fechaReport = req.body.fechaReporte;
 
-  var fechaIni2=new Date(fechaIni);
-  var fechaFin2=new Date(fechaFin);
+    var fechaIni2 = new Date(fechaIni);
+    var fechaFin2 = new Date(fechaFin);
 
- const fechaEnviar1=fechaIni2.toISOString().slice(0, 10);
- const  fechaEnviar2=fechaFin2.toISOString().slice(0, 10);
+    const fechaEnviar1 = fechaIni2.toISOString().slice(0, 10);
+    const fechaEnviar2 = fechaFin2.toISOString().slice(0, 10);
 
- var anio=fechaEnviar1.slice(0,4);
- console.log(anio);
- var mes=fechaEnviar1.slice(5,7);
- console.log(mes)
- var dia=fechaEnviar1.slice(8,10);
- console.log(dia);
+    var anio = fechaEnviar1.slice(0, 4);
+    console.log(anio);
+    var mes = fechaEnviar1.slice(5, 7);
+    console.log(mes)
+    var dia = fechaEnviar1.slice(8, 10);
+    console.log(dia);
 
- 
- var anio2=fechaEnviar2.slice(0,4);
- console.log(anio2);
- var mes2=fechaEnviar2.slice(5,7);
- console.log(mes2)
- var dia2=fechaEnviar2.slice(8,10);
- console.log(dia2);
 
- var enviarFecha1=dia+"-"+mes+"-"+anio;
- var enviarFecha2=dia2+"-"+mes2+"-"+anio2;
+    var anio2 = fechaEnviar2.slice(0, 4);
+    console.log(anio2);
+    var mes2 = fechaEnviar2.slice(5, 7);
+    console.log(mes2)
+    var dia2 = fechaEnviar2.slice(8, 10);
+    console.log(dia2);
+
+    var enviarFecha1 = dia + "-" + mes + "-" + anio;
+    var enviarFecha2 = dia2 + "-" + mes2 + "-" + anio2;
 
 
     let reporte_de_compras_todas = {
         report: 'reporte_de_compras_todas',
         data: {
             // ID_PARTIDA: partida,
-            FechaParaReporte:fechaReport,
-            FechaInicioReporte:enviarFecha1,
-            FechaFinReporte:enviarFecha2,
+            FechaParaReporte: fechaReport,
+            FechaInicioReporte: enviarFecha1,
+            FechaFinReporte: enviarFecha2,
         },
     };
 
@@ -464,48 +463,48 @@ const reporte_de_compras_todas = async(req, res) => {
     }
 };
 
-const reporte_de_compras_x_partida = async(req, res) => {
+const reporte_de_compras_x_partida = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var partida=parseInt(req.body.partida);
-  var fechaIni=req.body.fechaIni;
-  var fechaFin=req.body.fechaFin;
-   var fechaReport=req.body.fechaReporte;
+    var partida = parseInt(req.body.partida);
+    var fechaIni = req.body.fechaIni;
+    var fechaFin = req.body.fechaFin;
+    var fechaReport = req.body.fechaReporte;
 
-  var fechaIni2=new Date(fechaIni);
-  var fechaFin2=new Date(fechaFin);
+    var fechaIni2 = new Date(fechaIni);
+    var fechaFin2 = new Date(fechaFin);
 
- const fechaEnviar1=fechaIni2.toISOString().slice(0, 10);
- const  fechaEnviar2=fechaFin2.toISOString().slice(0, 10);
+    const fechaEnviar1 = fechaIni2.toISOString().slice(0, 10);
+    const fechaEnviar2 = fechaFin2.toISOString().slice(0, 10);
 
- var anio=fechaEnviar1.slice(0,4);
- console.log(anio);
- var mes=fechaEnviar1.slice(5,7);
- console.log(mes)
- var dia=fechaEnviar1.slice(8,10);
- console.log(dia);
+    var anio = fechaEnviar1.slice(0, 4);
+    console.log(anio);
+    var mes = fechaEnviar1.slice(5, 7);
+    console.log(mes)
+    var dia = fechaEnviar1.slice(8, 10);
+    console.log(dia);
 
- 
- var anio2=fechaEnviar2.slice(0,4);
- console.log(anio2);
- var mes2=fechaEnviar2.slice(5,7);
- console.log(mes2)
- var dia2=fechaEnviar2.slice(8,10);
- console.log(dia2);
 
- var enviarFecha1=dia+"-"+mes+"-"+anio;
- var enviarFecha2=dia2+"-"+mes2+"-"+anio2;
+    var anio2 = fechaEnviar2.slice(0, 4);
+    console.log(anio2);
+    var mes2 = fechaEnviar2.slice(5, 7);
+    console.log(mes2)
+    var dia2 = fechaEnviar2.slice(8, 10);
+    console.log(dia2);
+
+    var enviarFecha1 = dia + "-" + mes + "-" + anio;
+    var enviarFecha2 = dia2 + "-" + mes2 + "-" + anio2;
 
 
     let reporte_de_compras_x_partida = {
         report: 'reporte_de_compras_x_partida',
         data: {
             // ID_PARTIDA: partida,
-            FechaParaReporte:fechaReport,
-            FechaInicioReporte:enviarFecha1,
-            FechaFinReporte:enviarFecha2,
-            IdPartida:partida
+            FechaParaReporte: fechaReport,
+            FechaInicioReporte: enviarFecha1,
+            FechaFinReporte: enviarFecha2,
+            IdPartida: partida
         },
     };
 
@@ -525,45 +524,45 @@ const reporte_de_compras_x_partida = async(req, res) => {
 };
 
 
-const reporte_movimiento_x_partida_todos = async(req, res) => {
+const reporte_movimiento_x_partida_todos = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var partida=req.body.partida;
-  var fechaIni=req.body.fechaIni;
-  var fechaFin=req.body.fechaFin;
+    var partida = req.body.partida;
+    var fechaIni = req.body.fechaIni;
+    var fechaFin = req.body.fechaFin;
 
-  var fechaIni2=new Date(fechaIni);
-  var fechaFin2=new Date(fechaFin);
+    var fechaIni2 = new Date(fechaIni);
+    var fechaFin2 = new Date(fechaFin);
 
- const fechaEnviar1=fechaIni2.toISOString().slice(0, 10);
- const  fechaEnviar2=fechaFin2.toISOString().slice(0, 10);
+    const fechaEnviar1 = fechaIni2.toISOString().slice(0, 10);
+    const fechaEnviar2 = fechaFin2.toISOString().slice(0, 10);
 
- var anio=fechaEnviar1.slice(0,4);
- console.log(anio);
- var mes=fechaEnviar1.slice(5,7);
- console.log(mes)
- var dia=fechaEnviar1.slice(8,10);
- console.log(dia);
+    var anio = fechaEnviar1.slice(0, 4);
+    console.log(anio);
+    var mes = fechaEnviar1.slice(5, 7);
+    console.log(mes)
+    var dia = fechaEnviar1.slice(8, 10);
+    console.log(dia);
 
- 
- var anio2=fechaEnviar2.slice(0,4);
- console.log(anio2);
- var mes2=fechaEnviar2.slice(5,7);
- console.log(mes2)
- var dia2=fechaEnviar2.slice(8,10);
- console.log(dia2);
 
- var enviarFecha1=dia+"-"+mes+"-"+anio;
- var enviarFecha2=dia2+"-"+mes2+"-"+anio2;
+    var anio2 = fechaEnviar2.slice(0, 4);
+    console.log(anio2);
+    var mes2 = fechaEnviar2.slice(5, 7);
+    console.log(mes2)
+    var dia2 = fechaEnviar2.slice(8, 10);
+    console.log(dia2);
+
+    var enviarFecha1 = dia + "-" + mes + "-" + anio;
+    var enviarFecha2 = dia2 + "-" + mes2 + "-" + anio2;
 
 
     let reporte_movimiento_x_partida_todos = {
         report: 'reporte_movimiento_x_partida_todos',
         data: {
             ID_PARTIDA: partida,
-            FECHA_INICIO:enviarFecha1,
-            FECHA_FIN:enviarFecha2
+            FECHA_INICIO: enviarFecha1,
+            FECHA_FIN: enviarFecha2
         },
     };
 
@@ -583,48 +582,48 @@ const reporte_movimiento_x_partida_todos = async(req, res) => {
 };
 
 
-const reporte_de_compras_x_proveedor = async(req, res) => {
+const reporte_de_compras_x_proveedor = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var idproveedor=parseInt(req.body.idproveedor);
-  var fechaIni=req.body.fechaIni;
-  var fechaFin=req.body.fechaFin;
-   var fechaReport=req.body.fechaReporte;
+    var idproveedor = parseInt(req.body.idproveedor);
+    var fechaIni = req.body.fechaIni;
+    var fechaFin = req.body.fechaFin;
+    var fechaReport = req.body.fechaReporte;
 
-  var fechaIni2=new Date(fechaIni);
-  var fechaFin2=new Date(fechaFin);
+    var fechaIni2 = new Date(fechaIni);
+    var fechaFin2 = new Date(fechaFin);
 
- const fechaEnviar1=fechaIni2.toISOString().slice(0, 10);
- const  fechaEnviar2=fechaFin2.toISOString().slice(0, 10);
+    const fechaEnviar1 = fechaIni2.toISOString().slice(0, 10);
+    const fechaEnviar2 = fechaFin2.toISOString().slice(0, 10);
 
- var anio=fechaEnviar1.slice(0,4);
- console.log(anio);
- var mes=fechaEnviar1.slice(5,7);
- console.log(mes)
- var dia=fechaEnviar1.slice(8,10);
- console.log(dia);
+    var anio = fechaEnviar1.slice(0, 4);
+    console.log(anio);
+    var mes = fechaEnviar1.slice(5, 7);
+    console.log(mes)
+    var dia = fechaEnviar1.slice(8, 10);
+    console.log(dia);
 
- 
- var anio2=fechaEnviar2.slice(0,4);
- console.log(anio2);
- var mes2=fechaEnviar2.slice(5,7);
- console.log(mes2)
- var dia2=fechaEnviar2.slice(8,10);
- console.log(dia2);
 
- var enviarFecha1=dia+"-"+mes+"-"+anio;
- var enviarFecha2=dia2+"-"+mes2+"-"+anio2;
+    var anio2 = fechaEnviar2.slice(0, 4);
+    console.log(anio2);
+    var mes2 = fechaEnviar2.slice(5, 7);
+    console.log(mes2)
+    var dia2 = fechaEnviar2.slice(8, 10);
+    console.log(dia2);
+
+    var enviarFecha1 = dia + "-" + mes + "-" + anio;
+    var enviarFecha2 = dia2 + "-" + mes2 + "-" + anio2;
 
 
     let reporte_de_compras_x_proveedor = {
         report: 'reporte_de_compras_x_proveedor',
         data: {
-          
-            FechaParaReporte:fechaReport,
-            FechaInicioReporte:enviarFecha1,
-            FechaFinReporte:enviarFecha2,
-            IdProveedor:idproveedor
+
+            FechaParaReporte: fechaReport,
+            FechaInicioReporte: enviarFecha1,
+            FechaFinReporte: enviarFecha2,
+            IdProveedor: idproveedor
         },
     };
 
@@ -645,29 +644,29 @@ const reporte_de_compras_x_proveedor = async(req, res) => {
 
 
 
-const reporte_existencias_x_partida = async(req, res) => {
+const reporte_existencias_x_partida = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var partida=req.body.partida;
-  var centro_trabajo=req.body.centro_trabajo;
-  var fechaReporte=req.body.fecha;
+    var partida = req.body.partida;
+    var centro_trabajo = req.body.centro_trabajo;
+    var fechaReporte = req.body.fecha;
 
-  var D=new Date(fechaReporte)
+    var D = new Date(fechaReporte)
 
-  var anio=D.getFullYear();
-  var dia=D.getDate()+1;
-  var mes=D.getMonth()+1;
+    var anio = D.getFullYear();
+    var dia = D.getDate() + 1;
+    var mes = D.getMonth() + 1;
 
-  var Completa=dia+"/"+mes+"/"+anio
-  console.log(Completa);
- 
+    var Completa = dia + "/" + mes + "/" + anio
+    console.log(Completa);
+
     let reporte_existencias_x_partida = {
         report: 'reporte_existencias_x_partida',
         data: {
             ID_PLANTEL: centro_trabajo,
-            Clave_Partida:partida,
-            FechaParaReporte:Completa
+            Clave_Partida: partida,
+            FechaParaReporte: Completa
         },
     };
 
@@ -687,30 +686,30 @@ const reporte_existencias_x_partida = async(req, res) => {
 };
 
 
-const reporte_existencias_x_partida_todas = async(req, res) => {
+const reporte_existencias_x_partida_todas = async (req, res) => {
 
-  console.log(req.body);
+    console.log(req.body);
 
-  var partida=req.body.partida;
-  var centro_trabajo=req.body.centro_trabajo;
-   var fechaReporte=req.body.fecha;
+    var partida = req.body.partida;
+    var centro_trabajo = req.body.centro_trabajo;
+    var fechaReporte = req.body.fecha;
 
-  var D=new Date(fechaReporte)
+    var D = new Date(fechaReporte)
 
-  var anio=D.getFullYear();
-  var dia=D.getDate()+1;
-  var mes=D.getMonth()+1;
+    var anio = D.getFullYear();
+    var dia = D.getDate() + 1;
+    var mes = D.getMonth() + 1;
 
-  var Completa=dia+"/"+mes+"/"+anio
-  console.log(Completa);
+    var Completa = dia + "/" + mes + "/" + anio
+    console.log(Completa);
 
- 
+
     let reporte_existencias_x_partida_todas = {
         report: 'reporte_existencias_x_partida_todas',
         data: {
             ID_PLANTEL: centro_trabajo,
-            Clave_Partida:partida,
-            FechaParaReporte:Completa
+            Clave_Partida: partida,
+            FechaParaReporte: Completa
         },
     };
 
@@ -729,9 +728,9 @@ const reporte_existencias_x_partida_todas = async(req, res) => {
     }
 };
 
-const descargarzip = async(req, res) => {
+const descargarzip = async (req, res) => {
 
-      try {
+    try {
 
         console.log("LLego a descargar ZIP")
 
@@ -774,8 +773,8 @@ const descargarzip = async(req, res) => {
         //Eliminamos lo PDF ALV
 
         setTimeout(() => {
-  
-                fs.rm(carpetaPDFs, { recursive: true, force: true }, (err) => {
+
+            fs.rm(carpetaPDFs, { recursive: true, force: true }, (err) => {
                 if (err) {
                     console.error('Error eliminando carpeta:', err);
                 } else {
@@ -785,7 +784,7 @@ const descargarzip = async(req, res) => {
 
         }, 2000);
 
-     
+
 
     } catch (error) {
         console.error('Error generando ZIP:', error);
@@ -805,13 +804,13 @@ const descargarzip = async(req, res) => {
 
 
 
-const generarDocumento = async(req, res) => {
+const generarDocumento = async (req, res) => {
 
-    var numidentificador=req.params.numidentificador;
-    var fecha_registrox=req.params.fecha_registrox;
-    var EmiteAuxiliar=req.params.Emite;
+    var numidentificador = req.params.numidentificador;
+    var fecha_registrox = req.params.fecha_registrox;
+    var EmiteAuxiliar = req.params.Emite;
 
- 
+
     console.log(req.body)
 
     var {
@@ -823,7 +822,7 @@ const generarDocumento = async(req, res) => {
         prioridad,
         areaTurnada,
         idDepartamentoRecibe,
-        idDepartamentoEmite,       
+        idDepartamentoEmite,
         nomDepartamentoEmite,
         referenciaDocumento,
         asuntoDocumento,
@@ -835,112 +834,112 @@ const generarDocumento = async(req, res) => {
         direccionFirmante
     } = req.body;
 
-    var idDependenciaexterna=areaQueEmite;
+    var idDependenciaexterna = areaQueEmite;
 
 
 
-    const datosBase = await pool.query("select * from documentos_generados where referencia='"+referenciaDocumento+"'");
+    const datosBase = await pool.query("select * from documentos_generados where referencia='" + referenciaDocumento + "'");
 
 
-    if(datosBase.rowCount>0){
+    if (datosBase.rowCount > 0) {
 
         console.log("IF  Repetido")
         res.json("Repetido");
 
-     }else{
+    } else {
 
 
-    if(areaQueEmite>=100){
+        if (areaQueEmite >= 100) {
 
-      areaQueEmite=EmiteAuxiliar;
+            areaQueEmite = EmiteAuxiliar;
 
-    }else{
-        areaQueEmite=areaQueEmite;
-    }
+        } else {
+            areaQueEmite = areaQueEmite;
+        }
 
 
         console.log("enter en ELSE")
 
 
-        if(areaQueEmite==99){
-            var ruta="Documentos/Direccion/"+numidentificador+"";
-        }else if(areaQueEmite==98){
-            var ruta="Documentos/Academica/"+numidentificador+"";
-        }else if(areaQueEmite==97){
-            var ruta="Documentos/Administrativa/"+numidentificador+"";
-        }else if(areaQueEmite==96){
-            var ruta="Documentos/Vinculacion/"+numidentificador+"";
-        }else if(areaQueEmite==95){
-            var ruta="Documentos/Planeacion/"+numidentificador+"";
-        }else if(areaQueEmite==94){
-            var ruta="Documentos/Tecnologia/"+numidentificador+"";
-        }else if(areaQueEmite==93){
-            var ruta="Documentos/Juridico/"+numidentificador+"";
-          }else if(areaQueEmite==92){
-            var ruta="Documentos/Transparencia/"+numidentificador+"";
-          }else if(areaQueEmite==91){
-            var ruta="Documentos/UnidadGenero/"+numidentificador+"";
-          }else if(areaQueEmite==90){
-            var ruta="Documentos/Oficialia/"+numidentificador+"";
-          }
-    
+        if (areaQueEmite == 99) {
+            var ruta = "Documentos/Direccion/" + numidentificador + "";
+        } else if (areaQueEmite == 98) {
+            var ruta = "Documentos/Academica/" + numidentificador + "";
+        } else if (areaQueEmite == 97) {
+            var ruta = "Documentos/Administrativa/" + numidentificador + "";
+        } else if (areaQueEmite == 96) {
+            var ruta = "Documentos/Vinculacion/" + numidentificador + "";
+        } else if (areaQueEmite == 95) {
+            var ruta = "Documentos/Planeacion/" + numidentificador + "";
+        } else if (areaQueEmite == 94) {
+            var ruta = "Documentos/Tecnologia/" + numidentificador + "";
+        } else if (areaQueEmite == 93) {
+            var ruta = "Documentos/Juridico/" + numidentificador + "";
+        } else if (areaQueEmite == 92) {
+            var ruta = "Documentos/Transparencia/" + numidentificador + "";
+        } else if (areaQueEmite == 91) {
+            var ruta = "Documentos/UnidadGenero/" + numidentificador + "";
+        } else if (areaQueEmite == 90) {
+            var ruta = "Documentos/Oficialia/" + numidentificador + "";
+        }
+
         try {
             var response = await pool.query(' INSERT INTO documentos_generados( tipo, area_que_emite,tipo_atencion,persona_que_emite,tipo_documento,prioridad,area_turnada,fecha_sello_recibido,id_departamento_turnado,departamento_emite,referencia,asunto,fecha_documento,fecha_limite_respuesta,resumen,url,estatus,direccion_firmante,fecha_registro,id_externo) VALUES ($1, $2, $3, $4, $5, $6, ' +
-                '$7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) returning id as ultimoid; ', [tipo, areaQueEmite, tipoAtencion, personaQueEmite, tipoDocumento, prioridad, areaTurnada,fechaRecepcion,idDepartamentoRecibe,idDepartamentoEmite,referenciaDocumento,asuntoDocumento,
-                    fechaDocumento, fechaLimiteRespuesta, resumen,ruta,estatus,direccionFirmante,fecha_registrox,idDependenciaexterna
-                ]);
-                
-                var ultimoID = response.rows[0].ultimoid;
-    
-                if(response){
-    
+                '$7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) returning id as ultimoid; ', [tipo, areaQueEmite, tipoAtencion, personaQueEmite, tipoDocumento, prioridad, areaTurnada, fechaRecepcion, idDepartamentoRecibe, idDepartamentoEmite, referenciaDocumento, asuntoDocumento,
+                fechaDocumento, fechaLimiteRespuesta, resumen, ruta, estatus, direccionFirmante, fecha_registrox, idDependenciaexterna
+            ]);
+
+            var ultimoID = response.rows[0].ultimoid;
+
+            if (response) {
+
                 const response2 = await pool.query("select * from  folios_unicos");
-    
+
                 if (response2.rowCount > 0) {
-    
-                     var incremento= parseInt(response2.rows[0].folio_unico) + 1;
-                     const Fecha = new Date();
-                     let anio = Fecha.getFullYear();
-    
-                     const response3 = await pool.query('UPDATE folios_unicos SET folio_unico=$1,anio=$2 WHERE (id=1)', [
+
+                    var incremento = parseInt(response2.rows[0].folio_unico) + 1;
+                    const Fecha = new Date();
+                    let anio = Fecha.getFullYear();
+
+                    const response3 = await pool.query('UPDATE folios_unicos SET folio_unico=$1,anio=$2 WHERE (id=1)', [
                         incremento,
                         anio
                     ]);
-    
+
                     const response4 = await pool.query('UPDATE documentos_generados SET folio_unico=$1 WHERE (id=$2)', [
                         incremento,
                         ultimoID
                     ]);
-    
-                    var mensaje="Registrado";
-    
-                    res.status(200).json({ incremento, mensaje});
-            
-            
+
+                    var mensaje = "Registrado";
+
+                    res.status(200).json({ incremento, mensaje });
+
+
                 } else {
                     res.json("NoEncontrado");
                 }
-    
+
             }
-    
+
         } catch (error) {
             console.log("Error: " + error);
         }
 
-     }
+    }
 
- 
+
 };
 
 
 // INICIA GUARDADO MULTIPLE DEPARTAMENTO
 
 
-const generarDocumentoMultipleEnvio = async(req, res) => {
+const generarDocumentoMultipleEnvio = async (req, res) => {
 
-    var numidentificador=req.params.numidentificador;
-    var fecha_registrox=req.params.fecha_registrox;
-    var id_externo=req.params.id_externo;
+    var numidentificador = req.params.numidentificador;
+    var fecha_registrox = req.params.fecha_registrox;
+    var id_externo = req.params.id_externo;
 
 
     console.log(req.body)
@@ -956,7 +955,7 @@ const generarDocumentoMultipleEnvio = async(req, res) => {
         prioridad,
         areaTurnada,
         idDepartamentoRecibe,
-        idDepartamentoEmite,       
+        idDepartamentoEmite,
         nomDepartamentoEmite,
         referenciaDocumento,
         asuntoDocumento,
@@ -968,70 +967,70 @@ const generarDocumentoMultipleEnvio = async(req, res) => {
         direccionFirmante,
         multipleenviox
     } = req.body;
- 
-
-        if(areaQueEmite==99){
-            var ruta="Documentos/Direccion/"+numidentificador+"";
-        }else if(areaQueEmite==98){
-            var ruta="Documentos/Academica/"+numidentificador+"";
-        }else if(areaQueEmite==97){
-            var ruta="Documentos/Administrativa/"+numidentificador+"";
-        }else if(areaQueEmite==96){
-            var ruta="Documentos/Vinculacion/"+numidentificador+"";
-        }else if(areaQueEmite==95){
-            var ruta="Documentos/Planeacion/"+numidentificador+"";
-        }else if(areaQueEmite==94){
-            var ruta="Documentos/Tecnologia/"+numidentificador+"";
-        }else if(areaQueEmite==93){
-            var ruta="Documentos/Juridico/"+numidentificador+"";
-          }else if(areaQueEmite==92){
-            var ruta="Documentos/Transparencia/"+numidentificador+"";
-          }else if(areaQueEmite==91){
-            var ruta="Documentos/UnidadGenero/"+numidentificador+"";
-          }else if(areaQueEmite==90){
-            var ruta="Documentos/Oficialia/"+numidentificador+"";
-          }
 
 
-          for(var i=0 ;i<req.body.multipleenviox.length;i++){
+    if (areaQueEmite == 99) {
+        var ruta = "Documentos/Direccion/" + numidentificador + "";
+    } else if (areaQueEmite == 98) {
+        var ruta = "Documentos/Academica/" + numidentificador + "";
+    } else if (areaQueEmite == 97) {
+        var ruta = "Documentos/Administrativa/" + numidentificador + "";
+    } else if (areaQueEmite == 96) {
+        var ruta = "Documentos/Vinculacion/" + numidentificador + "";
+    } else if (areaQueEmite == 95) {
+        var ruta = "Documentos/Planeacion/" + numidentificador + "";
+    } else if (areaQueEmite == 94) {
+        var ruta = "Documentos/Tecnologia/" + numidentificador + "";
+    } else if (areaQueEmite == 93) {
+        var ruta = "Documentos/Juridico/" + numidentificador + "";
+    } else if (areaQueEmite == 92) {
+        var ruta = "Documentos/Transparencia/" + numidentificador + "";
+    } else if (areaQueEmite == 91) {
+        var ruta = "Documentos/UnidadGenero/" + numidentificador + "";
+    } else if (areaQueEmite == 90) {
+        var ruta = "Documentos/Oficialia/" + numidentificador + "";
+    }
 
-    
+
+    for (var i = 0; i < req.body.multipleenviox.length; i++) {
+
+
         try {
             var response = await pool.query(' INSERT INTO documentos_generados( tipo, area_que_emite,tipo_atencion,persona_que_emite,tipo_documento,prioridad,area_turnada,fecha_sello_recibido,id_departamento_turnado,departamento_emite,referencia,asunto,fecha_documento,fecha_limite_respuesta,resumen,url,estatus,direccion_firmante,fecha_registro,id_externo) VALUES ($1, $2, $3, $4, $5, $6, ' +
-                '$7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) returning id as ultimoid; ', [tipo, areaQueEmite, tipoAtencion, personaQueEmite, tipoDocumento, prioridad, areaTurnada,fechaRecepcion,multipleenviox[i],idDepartamentoEmite,referenciaDocumento,asuntoDocumento,
-                    fechaDocumento, fechaLimiteRespuesta, resumen,ruta,estatus,direccionFirmante,fecha_registrox,id_externo
-                ]);
-                
-                var ultimoID = response.rows[0].ultimoid;
-    
-                if(response){
-    
+                '$7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) returning id as ultimoid; ', [tipo, areaQueEmite, tipoAtencion, personaQueEmite, tipoDocumento, prioridad, areaTurnada, fechaRecepcion, multipleenviox[i], idDepartamentoEmite, referenciaDocumento, asuntoDocumento,
+                fechaDocumento, fechaLimiteRespuesta, resumen, ruta, estatus, direccionFirmante, fecha_registrox, id_externo
+            ]);
+
+            var ultimoID = response.rows[0].ultimoid;
+
+            if (response) {
+
                 const response2 = await pool.query("select * from  folios_unicos");
-    
+
                 if (response2.rowCount > 0) {
-    
-                     var incremento= parseInt(response2.rows[0].folio_unico) + 1;
-                     const Fecha = new Date();
-                     let anio = Fecha.getFullYear();
-    
-                     const response3 = await pool.query('UPDATE folios_unicos SET folio_unico=$1,anio=$2 WHERE (id=1)', [
+
+                    var incremento = parseInt(response2.rows[0].folio_unico) + 1;
+                    const Fecha = new Date();
+                    let anio = Fecha.getFullYear();
+
+                    const response3 = await pool.query('UPDATE folios_unicos SET folio_unico=$1,anio=$2 WHERE (id=1)', [
                         incremento,
                         anio
                     ]);
-    
+
                     const response4 = await pool.query('UPDATE documentos_generados SET folio_unico=$1 WHERE (id=$2)', [
                         incremento,
                         ultimoID
                     ]);
-    
-                    var mensaje="Registrado";          
-            
+
+                    var mensaje = "Registrado";
+
                 } else {
                     res.json("NoEncontrado");
                 }
-    
+
             }
-    
+
         } catch (error) {
             console.log("Error: " + error);
         }
@@ -1039,8 +1038,8 @@ const generarDocumentoMultipleEnvio = async(req, res) => {
 
     }
 
-    res.status(200).json({ incremento, mensaje});
- 
+    res.status(200).json({ incremento, mensaje });
+
 };
 // TERMINA MULTTIPLE GUARDADO
 
@@ -1049,11 +1048,11 @@ const generarDocumentoMultipleEnvio = async(req, res) => {
 
 // INICIA MULTIPLE GUARDADO A MULTIPLES DIRECCIONES **************************************
 
-const generarDocumentoMultipleEnvioDirecciones = async(req, res) => {
+const generarDocumentoMultipleEnvioDirecciones = async (req, res) => {
 
-    var numidentificador=req.params.numidentificador;
-    var fecha_registrox=req.params.fecha_registrox;
-    var id_externo=req.params.id_externo;
+    var numidentificador = req.params.numidentificador;
+    var fecha_registrox = req.params.fecha_registrox;
+    var id_externo = req.params.id_externo;
 
 
     console.log(req.body)
@@ -1069,7 +1068,7 @@ const generarDocumentoMultipleEnvioDirecciones = async(req, res) => {
         prioridad,
         areaTurnada,
         idDepartamentoRecibe,
-        idDepartamentoEmite,       
+        idDepartamentoEmite,
         nomDepartamentoEmite,
         referenciaDocumento,
         asuntoDocumento,
@@ -1083,70 +1082,70 @@ const generarDocumentoMultipleEnvioDirecciones = async(req, res) => {
         multipleenviodireccionesx
 
     } = req.body;
- 
-
-        if(areaQueEmite==99){
-            var ruta="Documentos/Direccion/"+numidentificador+"";
-        }else if(areaQueEmite==98){
-            var ruta="Documentos/Academica/"+numidentificador+"";
-        }else if(areaQueEmite==97){
-            var ruta="Documentos/Administrativa/"+numidentificador+"";
-        }else if(areaQueEmite==96){
-            var ruta="Documentos/Vinculacion/"+numidentificador+"";
-        }else if(areaQueEmite==95){
-            var ruta="Documentos/Planeacion/"+numidentificador+"";
-        }else if(areaQueEmite==94){
-            var ruta="Documentos/Tecnologia/"+numidentificador+"";
-        }else if(areaQueEmite==93){
-            var ruta="Documentos/Juridico/"+numidentificador+"";
-          }else if(areaQueEmite==92){
-            var ruta="Documentos/Transparencia/"+numidentificador+"";
-          }else if(areaQueEmite==91){
-            var ruta="Documentos/UnidadGenero/"+numidentificador+"";
-          }else if(areaQueEmite==90){
-            var ruta="Documentos/Oficialia/"+numidentificador+"";
-          }
 
 
-          for(var i=0 ;i<req.body.multipleenviodireccionesx.length;i++){
+    if (areaQueEmite == 99) {
+        var ruta = "Documentos/Direccion/" + numidentificador + "";
+    } else if (areaQueEmite == 98) {
+        var ruta = "Documentos/Academica/" + numidentificador + "";
+    } else if (areaQueEmite == 97) {
+        var ruta = "Documentos/Administrativa/" + numidentificador + "";
+    } else if (areaQueEmite == 96) {
+        var ruta = "Documentos/Vinculacion/" + numidentificador + "";
+    } else if (areaQueEmite == 95) {
+        var ruta = "Documentos/Planeacion/" + numidentificador + "";
+    } else if (areaQueEmite == 94) {
+        var ruta = "Documentos/Tecnologia/" + numidentificador + "";
+    } else if (areaQueEmite == 93) {
+        var ruta = "Documentos/Juridico/" + numidentificador + "";
+    } else if (areaQueEmite == 92) {
+        var ruta = "Documentos/Transparencia/" + numidentificador + "";
+    } else if (areaQueEmite == 91) {
+        var ruta = "Documentos/UnidadGenero/" + numidentificador + "";
+    } else if (areaQueEmite == 90) {
+        var ruta = "Documentos/Oficialia/" + numidentificador + "";
+    }
 
-    
+
+    for (var i = 0; i < req.body.multipleenviodireccionesx.length; i++) {
+
+
         try {
             var response = await pool.query(' INSERT INTO documentos_generados( tipo, area_que_emite,tipo_atencion,persona_que_emite,tipo_documento,prioridad,area_turnada,fecha_sello_recibido,departamento_emite,referencia,asunto,fecha_documento,fecha_limite_respuesta,resumen,url,estatus,direccion_firmante,fecha_registro,id_externo) VALUES ($1, $2, $3, $4, $5, $6, ' +
-                '$7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19) returning id as ultimoid; ', [tipo, areaQueEmite, tipoAtencion, personaQueEmite, tipoDocumento, prioridad, multipleenviodireccionesx[i],fechaRecepcion,idDepartamentoEmite,referenciaDocumento,asuntoDocumento,
-                    fechaDocumento, fechaLimiteRespuesta, resumen,ruta,estatus,direccionFirmante,fecha_registrox,id_externo
-                ]);
-                
-                var ultimoID = response.rows[0].ultimoid;
-    
-                if(response){
-    
+                '$7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19) returning id as ultimoid; ', [tipo, areaQueEmite, tipoAtencion, personaQueEmite, tipoDocumento, prioridad, multipleenviodireccionesx[i], fechaRecepcion, idDepartamentoEmite, referenciaDocumento, asuntoDocumento,
+                fechaDocumento, fechaLimiteRespuesta, resumen, ruta, estatus, direccionFirmante, fecha_registrox, id_externo
+            ]);
+
+            var ultimoID = response.rows[0].ultimoid;
+
+            if (response) {
+
                 const response2 = await pool.query("select * from  folios_unicos");
-    
+
                 if (response2.rowCount > 0) {
-    
-                     var incremento= parseInt(response2.rows[0].folio_unico) + 1;
-                     const Fecha = new Date();
-                     let anio = Fecha.getFullYear();
-    
-                     const response3 = await pool.query('UPDATE folios_unicos SET folio_unico=$1,anio=$2 WHERE (id=1)', [
+
+                    var incremento = parseInt(response2.rows[0].folio_unico) + 1;
+                    const Fecha = new Date();
+                    let anio = Fecha.getFullYear();
+
+                    const response3 = await pool.query('UPDATE folios_unicos SET folio_unico=$1,anio=$2 WHERE (id=1)', [
                         incremento,
                         anio
                     ]);
-    
+
                     const response4 = await pool.query('UPDATE documentos_generados SET folio_unico=$1 WHERE (id=$2)', [
                         incremento,
                         ultimoID
                     ]);
-    
-                    var mensaje="Registrado";          
-            
+
+                    var mensaje = "Registrado";
+
                 } else {
                     res.json("NoEncontrado");
                 }
-    
+
             }
-    
+
         } catch (error) {
             console.log("Error: " + error);
         }
@@ -1154,8 +1153,8 @@ const generarDocumentoMultipleEnvioDirecciones = async(req, res) => {
 
     }
 
-    res.status(200).json({ incremento, mensaje});
- 
+    res.status(200).json({ incremento, mensaje });
+
 };
 
 
@@ -1211,11 +1210,11 @@ module.exports = {
     ListaArticulosSurtidos,
     ListaArticulosSurtidosSinMontos,
     reporte_movimiento_x_partida,
-   reporte_movimiento_x_partida_todos,
+    reporte_movimiento_x_partida_todos,
     reporte_existencias_x_partida,
     reporte_existencias_x_partida_todas,
     reporte_de_compras_todas,
     reporte_de_compras_x_partida,
     reporte_de_compras_x_proveedor
-   
+
 }
