@@ -1,9 +1,4 @@
-console.log('Controlador cargado');
-// Arriba en articulos.js:
-
-
 const { Pool } = require('pg');
-
 const pool = new Pool({
   host: process.env.HOST_BD,
   user: process.env.USER_BD,
@@ -11,6 +6,26 @@ const pool = new Pool({
   database: process.env.DATABASE_BD,
   port: Number(process.env.PORT_BD || 5432),
 });
+
+// GET /articulos
+const listarArticulos = async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM cat_articulos ORDER BY id ASC');
+    return res.status(200).json(rows);
+  } catch (e) {
+    return res.status(500).json({ ok: false, msg: 'Error al listar artículos', error: e.message });
+  }
+};
+
+// GET /articulos/partidas
+const listarPartidas = async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM cat_partidas ORDER BY clave ASC');
+    return res.status(200).json(rows);
+  } catch (e) {
+    return res.status(500).json({ ok: false, msg: 'Error al listar partidas', error: e.message });
+  }
+};
 
 // POST /articulos
 const crearArticulo = async (req, res) => {
@@ -31,7 +46,6 @@ const crearArticulo = async (req, res) => {
       return res.status(400).json({ ok: false, msg: 'Faltan datos obligatorios' });
     }
 
-<<<<<<< HEAD
     const query = `
       INSERT INTO cat_articulos (
         clave,
@@ -46,37 +60,6 @@ const crearArticulo = async (req, res) => {
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
-=======
-
-    clave = String(clave).toUpperCase().trim();
-    descripcion = String(descripcion).toUpperCase().trim();
-
-    if (id_partidas === '' || id_partidas === undefined) {
-      id_partidas = null;
-    }
-
-    const existeEnPartida = await pool.query(` 
-      SELECT id FROM public.cat_articulos WHERE clave = $1 AND id_partidas = $2 LIMIT 1
-      `, [clave, id_partidas]
-    );
-
-    if (existeEnPartida.rows.length > 0) {
-      return res.status(400).json({
-        ok: false,
-        msg: "La clave ${clave} ya existe dentro de la partida seleccionada"
-      });
-    }
-
-
-    const sql = `
-      INSERT INTO cat_articulos
-      (clave, id_partidas, descripcion, unidad_medida_id, esactivo, esbasico)
-      VALUES ($1,$2,$3,$4,$5,$6)
-      RETURNING
-        id, clave, id_partidas, descripcion, unidad_medida_id,
-        esactivo AS "esActivo",
-        esbasico AS "esBasico"
->>>>>>> 70e18827ca76f434aa4a3fe958300749adc9bf2f
     `;
 
     const values = [
@@ -95,17 +78,8 @@ const crearArticulo = async (req, res) => {
     return res.status(201).json({ ok: true, articulo: rows[0] });
 
   } catch (e) {
-<<<<<<< HEAD
     console.error('Error al crear articulo:', e);
     return res.status(500).json({ ok: false, msg: 'Error al crear artículo', error: e.message });
-=======
-    console.error('crearArticulo error:', e);
-    if (e.code === '23505') {
-
-      return res.status(409).json({ ok: false, msg: 'Clave de artículo duplicada' });
-    }
-    return res.status(500).json({ ok: false, msg: 'Error del servidor' });
->>>>>>> 70e18827ca76f434aa4a3fe958300749adc9bf2f
   }
 };
 
@@ -152,27 +126,23 @@ const obtenerSiguienteClave = async (req, res) => {
       return res.status(400).json({ ok: false, msg: 'ID de partida requerido' });
     }
 
-    // Busca la clave numérica más alta para esa partida específica y le suma 1
     const query = `
-      SELECT LPAD(
-        (COALESCE(
-          MAX(
-            CASE 
-              WHEN clave ~ '^[0-9]+$' THEN clave::integer 
-              ELSE NULLIF(regexp_replace(clave, '[^0-9]', '', 'g'), '')::integer 
-            END
-          ), 
-          0
-        ) + 1)::text, 
-        3, 
-        '0'
-      ) AS siguiente_clave
+      SELECT COALESCE(
+        MAX(
+          CASE 
+            WHEN clave ~ '^[0-9]+$' THEN clave::integer 
+            ELSE NULLIF(regexp_replace(clave, '[^0-9]', '', 'g'), '')::integer 
+          END
+        ), 
+        0
+      ) + 1 AS siguiente_numero
       FROM cat_articulos
       WHERE id_partidas = $1::integer
     `;
 
     const { rows } = await pool.query(query, [Number(idPartida)]);
-    const clave = rows[0]?.siguiente_clave || '001';
+    const num = rows[0]?.siguiente_numero || 1;
+    const clave = num < 1000 ? String(num).padStart(3, '0') : String(num);
 
     return res.status(200).json({ ok: true, clave });
 
@@ -187,7 +157,6 @@ const traerProductosPorPartida = async (req, res) => {
   try {
     const { idPartida } = req.params;
 
-    // FILTRA POR LA PARTIDA SELECCIONADA
     const query = `
       SELECT id, descripcion, clave 
       FROM cat_articulos_general 
@@ -262,47 +231,22 @@ const actualizarArticulo = async (req, res) => {
   }
 };
 
-// GET /articulos
-const listarArticulos = async (req, res) => {
-  try {
-    const { rows } = await pool.query(`
-      SELECT
-        id,
-        clave,
-        id_partidas,
-        descripcion,
-        esactivo AS "esActivo",
-        esbasico AS "esBasico"
-      FROM cat_articulos
-      WHERE esactivo = true
-      ORDER BY id DESC
-    `);
-    return res.json({ ok: true, articulos: rows });
-  } catch (e) {
-    console.error('listarArticulos error:', e);
-    return res.status(500).json({ ok: false, msg: 'Error al listar los artículos' });
-  }
-};
-
-
 // Agregado por Oscar
 const guardarExistenciasIniciales = async (req, res) => {
   const client = await pool.connect();
   try {
-
     console.log('URL:', req.originalUrl);
     console.log('METHOD:', req.method);
     console.log('USUARIO JWT:', req.usuario);
 
-    const articulosACargar = req.body; // Es la listaTemporal de Angular
+    const articulosACargar = req.body;
 
-    await client.query('BEGIN'); // Iniciamos transacción para seguridad
+    await client.query('BEGIN');
 
     console.log('BODY:', req.body);
     console.log('TIPO:', typeof req.body);
     console.log('LONGITUD:', req.body.length);
 
-    // 🔥 NUEVA LÍNEA: Extraer id_centrotrabajo del JWT
     const { email, id_centrotrabajo } = req.usuario;
 
     if (!id_centrotrabajo) {
@@ -317,34 +261,29 @@ const guardarExistenciasIniciales = async (req, res) => {
     console.log('Usuario:', email, '→ Plantel:', idCentroTrabajo);
 
     for (const item of articulosACargar) {
-
-      // Obtener datos del artículo
       const articulo = await client.query(`
-              SELECT descripcion, unidad_medida, id_partidas
-              FROM cat_articulos_general
-              WHERE id = $1
-          `, [item.id_articulo]);
+        SELECT descripcion, unidad_medida, id_partidas
+        FROM cat_articulos_general
+        WHERE id = $1
+      `, [item.id_articulo]);
 
       console.log('RESULTADO SELECT:', articulo.rows);
 
       const data = articulo.rows[0];
 
-      // Obtener costo del artículo
       const costo = await client.query(`
-            SELECT id
-            FROM costos
-            WHERE id_articulo = $1
-              AND esactivo = true
-            ORDER BY fecha_inicio DESC
-            LIMIT 1
-        `, [item.id_articulo]);
+        SELECT id
+        FROM costos
+        WHERE id_articulo = $1
+          AND esactivo = true
+        ORDER BY fecha_inicio DESC
+        LIMIT 1
+      `, [item.id_articulo]);
 
       const costoData = costo.rows[0];
-
       const idCosto = costoData ? costoData.id : null;
 
       console.log('COSTO ENCONTRADO:', idCosto);
-
 
       if (!data) {
         throw new Error('Artículo no encontrado: ' + item.id_articulo);
@@ -355,19 +294,19 @@ const guardarExistenciasIniciales = async (req, res) => {
         : data.unidad_medida;
 
       const queryText = `
-          INSERT INTO almacen (
-              id_centrotrabajo,
-              existencias,
-              fecha_adquisicion,
-              esactivo,
-              unidad,
-              descripcion,
-              id_partida,
-              nombre_producto,
-              id_costos
-          )
-          VALUES ($1, $2, NOW(), true, $3, $4, $5, $6, $7)
-        `;
+        INSERT INTO almacen (
+          id_centrotrabajo,
+          existencias,
+          fecha_adquisicion,
+          esactivo,
+          unidad,
+          descripcion,
+          id_partida,
+          nombre_producto,
+          id_costos
+        )
+        VALUES ($1, $2, NOW(), true, $3, $4, $5, $6, $7)
+      `;
 
       const values = [
         idCentroTrabajo,
@@ -380,7 +319,6 @@ const guardarExistenciasIniciales = async (req, res) => {
       ];
 
       console.log('INSERTANDO:', values);
-
       await client.query(queryText, values);
     }
 
@@ -388,7 +326,6 @@ const guardarExistenciasIniciales = async (req, res) => {
     await client.query('COMMIT');
     console.log('DESPUÉS DE COMMIT');
 
-    // devolver Status
     return res.status(200).json({
       ok: true,
       mensaje: "Inventario en Dirección General actualizado correctamente"
@@ -403,52 +340,25 @@ const guardarExistenciasIniciales = async (req, res) => {
   }
 };
 
-
-// Agregado por Oscar
-// GET /articulos/partidas
-const listarPartidas = async (req, res) => {
-  try {
-    const { rows } = await pool.query(`
-      SELECT id, clave, descripcion
-      FROM cat_partidas
-      WHERE esactivo = true
-      ORDER BY clave ASC
-    `);
-    return res.json({ ok: true, partidas: rows });
-  } catch (e) {
-    console.error('listarPartidas error:', e);
-    return res.status(500).json({ ok: false, msg: 'Error al listar partidas' });
-  }
-};
-
-// GET /articulos/general?id_partidas=1
+// GET /articulos/general
 const listarArticulosGeneral = async (req, res) => {
   try {
-    const { id_partidas } = req.query;
-
-    let sql = `
-      SELECT id, clave, id_partidas, descripcion, unidad_medida
-      FROM cat_articulos_general
+    const query = `
+      SELECT a.*, p.clave AS partida_clave, p.descripcion AS partida_descripcion, u.nombre_medida
+      FROM cat_articulos a
+      LEFT JOIN cat_partidas p ON a.id_partidas = p.id
+      LEFT JOIN cat_unidades_medida u ON a.unidad_medida_id = u.id
+      ORDER BY a.id ASC
     `;
-    const params = [];
-
-    if (id_partidas) {
-      sql += ` WHERE id_partidas = $1`;
-      params.push(String(id_partidas));
-    }
-
-    sql += ` ORDER BY descripcion ASC`;
-
-    const { rows } = await pool.query(sql, params);
-    return res.json({ ok: true, articulos: rows });
+    const { rows } = await pool.query(query);
+    return res.status(200).json(rows);
   } catch (e) {
-    console.error('listarArticulosGeneral error:', e);
-    return res.status(500).json({ ok: false, msg: 'Error al listar artículos generales' });
+    return res.status(500).json({ ok: false, msg: 'Error al listar general', error: e.message });
   }
 };
 
+// POST /articulos/relacionarProveedor
 const relacionarArticuloProveedor = async (req, res) => {
-
   try {
     const { articulo_id, proveedor_id, costo = 0.00 } = req.body;
 
@@ -460,7 +370,8 @@ const relacionarArticuloProveedor = async (req, res) => {
     }
 
     const existe = await pool.query(
-      `SELECT id FROM costos WHERE id_articulo =$1 AND id_proveedor = $2 AND esactivo = true LIMIT 1`, [Number(articulo_id), Number(proveedor_id)]
+      `SELECT id FROM costos WHERE id_articulo = $1 AND id_proveedor = $2 AND esactivo = true LIMIT 1`,
+      [Number(articulo_id), Number(proveedor_id)]
     );
 
     if (existe.rows.length > 0) {
@@ -471,11 +382,11 @@ const relacionarArticuloProveedor = async (req, res) => {
       });
     }
 
-    const insertQuery = (
-      `INSERT INTO costos (id_articulo, id_proveedor, precio_unitario, fecha_inicio, esactivo)
+    const insertQuery = `
+      INSERT INTO costos (id_articulo, id_proveedor, precio_unitario, fecha_inicio, esactivo)
       VALUES ($1, $2, $3, NOW(), true)
-      RETURNING id, id_articulo, id_proveedor, precio_unitario`
-    )
+      RETURNING id, id_articulo, id_proveedor, precio_unitario
+    `;
 
     const { rows } = await pool.query(insertQuery, [
       Number(articulo_id),
@@ -489,16 +400,13 @@ const relacionarArticuloProveedor = async (req, res) => {
       relacion: rows[0]
     });
   } catch (error) {
-
     console.error('relacionarArticuloProveedor error:', error);
     return res.status(500).json({
       ok: false,
       msg: 'Error en el servidor al relacionar artículo y proveedor',
       error: error.message
     });
-
   }
-
 };
 
 module.exports = {
@@ -510,9 +418,6 @@ module.exports = {
   listarPartidas,
   listarArticulosGeneral,
   traerProductosPorPartida,
-<<<<<<< HEAD
   obtenerSiguienteClave,
-=======
-  relacionarArticuloProveedor
->>>>>>> 70e18827ca76f434aa4a3fe958300749adc9bf2f
+  relacionarArticuloProveedor // Exportada correctamente
 };
