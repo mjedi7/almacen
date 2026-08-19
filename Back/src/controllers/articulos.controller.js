@@ -15,7 +15,6 @@ const pool = new Pool({
 // POST /articulos
 const crearArticulo = async (req, res) => {
   try {
-
     let {
       clave,
       id_partidas,
@@ -23,61 +22,49 @@ const crearArticulo = async (req, res) => {
       unidad_medida_id,
       esActivo = true,
       esBasico = true,
+      limite_max_a = 0,
+      limite_max_b = 0,
+      limite_max_c = 0
     } = req.body;
 
-    if (!clave || !descripcion) {
-      return res.status(400).json({ ok: false, msg: 'Faltan campos obligatorios' });
+    if (!descripcion || !id_partidas || !clave) {
+      return res.status(400).json({ ok: false, msg: 'Faltan datos obligatorios' });
     }
 
-   
-    clave = String(clave).toUpperCase().trim();
-    descripcion = String(descripcion).toUpperCase().trim();
-
-    if (id_partidas === '' || id_partidas === undefined) {
-      id_partidas = null;
-    }
-
-      const existeEnPartida = await pool.query (` 
-      SELECT id FROM public.cat_articulos WHERE clave = $1 AND id_partidas = $2 LIMIT 1
-      `, [clave, id_partidas]
-    );
-
-    if(existeEnPartida.rows.length >0) {
-      return res.status(400).json({
-        ok: false,
-        msg: "La clave ${clave} ya existe dentro de la partida seleccionada"
-      });
-    }
-
-
-    const sql = `
-      INSERT INTO cat_articulos
-      (clave, id_partidas, descripcion, unidad_medida_id, esactivo, esbasico)
-      VALUES ($1,$2,$3,$4,$5,$6)
-      RETURNING
-        id, clave, id_partidas, descripcion, unidad_medida_id,
-        esactivo AS "esActivo",
-        esbasico AS "esBasico"
+    const query = `
+      INSERT INTO cat_articulos (
+        clave,
+        id_partidas,
+        descripcion,
+        unidad_medida_id,
+        esactivo,
+        esbasico,
+        limite_max_a,
+        limite_max_b,
+        limite_max_c
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
     `;
 
-    const params = [
-      clave,
-      id_partidas,
-      descripcion,
-      unidad_medida_id,
+    const values = [
+      String(clave).trim(),
+      Number(id_partidas),
+      String(descripcion).toUpperCase().trim(),
+      unidad_medida_id ? Number(unidad_medida_id) : null,
       Boolean(esActivo),
       Boolean(esBasico),
+      limite_max_a,
+      limite_max_b,
+      limite_max_c
     ];
 
-    const { rows } = await pool.query(sql, params);
+    const { rows } = await pool.query(query, values);
     return res.status(201).json({ ok: true, articulo: rows[0] });
+
   } catch (e) {
-    console.error('crearArticulo error:', e);
-    if (e.code === '23505') {
-     
-      return res.status(409).json({ ok: false, msg: 'Clave de artículo duplicada' });
-    }
-    return res.status(500).json({ ok: false, msg: 'Error del servidor' });
+    console.error('Error al crear articulo:', e);
+    return res.status(500).json({ ok: false, msg: 'Error al crear artículo', error: e.message });
   }
 };
 
@@ -112,6 +99,45 @@ const obtenerArticuloPorId = async (req, res) => {
   } catch (e) {
     console.error('obtenerArticuloPorId error:', e);
     return res.status(500).json({ ok: false, msg: 'Error del servidor' });
+  }
+};
+
+// GET /articulos/siguiente-clave/:idPartida
+const obtenerSiguienteClave = async (req, res) => {
+  try {
+    const { idPartida } = req.params;
+
+    if (!idPartida || idPartida === 'null' || idPartida === 'undefined') {
+      return res.status(400).json({ ok: false, msg: 'ID de partida requerido' });
+    }
+
+    // Busca la clave numérica más alta para esa partida específica y le suma 1
+    const query = `
+      SELECT LPAD(
+        (COALESCE(
+          MAX(
+            CASE 
+              WHEN clave ~ '^[0-9]+$' THEN clave::integer 
+              ELSE NULLIF(regexp_replace(clave, '[^0-9]', '', 'g'), '')::integer 
+            END
+          ), 
+          0
+        ) + 1)::text, 
+        3, 
+        '0'
+      ) AS siguiente_clave
+      FROM cat_articulos
+      WHERE id_partidas = $1::integer
+    `;
+
+    const { rows } = await pool.query(query, [Number(idPartida)]);
+    const clave = rows[0]?.siguiente_clave || '001';
+
+    return res.status(200).json({ ok: true, clave });
+
+  } catch (e) {
+    console.error('Error al obtener siguiente clave:', e);
+    return res.status(500).json({ ok: false, msg: 'Error al obtener la siguiente clave', error: e.message });
   }
 };
 
@@ -388,5 +414,6 @@ module.exports = {
   guardarExistenciasIniciales,
   listarPartidas,
   listarArticulosGeneral,
-  traerProductosPorPartida
+  traerProductosPorPartida,
+  obtenerSiguienteClave,
 };

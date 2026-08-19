@@ -16,8 +16,14 @@ export class ArticulosService {
     //  API_URI = environment.uri_api;
 
   crearArticulo(dto: Omit<articulo, 'id'>){
+
     return this.http.post<{ok: boolean; articulo: articulo}>(`${this.API}/articulos`, dto)
   }
+
+  obtenerSiguienteClave(idPartida: number | string): Observable<any> {
+  // Asegúrate de incluir el prefijo /articulos
+  return this.http.get(`${this.API}/articulos/siguiente-clave/${idPartida}`);
+}
 
   obtenerArticulo(id: Number){
     return this.http.get<{ok: boolean, articulo: articulo}>(`${this.API}/articulos/${id}`);

@@ -12,7 +12,8 @@ export const environment = {
 // uri_api: 'http://sige.cecytev.edu.mx/api'
 //  uri_api: 'http://172.16.0.154:3000'
 //uri_api: 'http://172.16.0.148:3000'
-uri_api: 'http://172.16.0.148:3000'
+//uri_api: 'http://172.16.0.148:3000'
+//uri_api: 'http://localhost:3000'
     // uri_api: 'http://172.16.1.7:3000'
 
   

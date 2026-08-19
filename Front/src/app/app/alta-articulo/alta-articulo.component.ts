@@ -4,8 +4,6 @@ import { ArticulosService } from 'src/app/services/articulos.service';
 import { articulo, partida, unidad_medida } from 'src/app/models/articulos/alta-articulo'; 
 import Swal from 'sweetalert2';
 import { PartidasService } from 'src/app/services/partidas.service'; 
-
-// 1. IMPORTAMOS CON EL NOMBRE EXACTO DE TU CLASE Y ARCHIVO
 import { UnidadMedidaServices } from 'src/app/services/unidad_medida.service'; 
 
 @Component({
@@ -17,6 +15,7 @@ export class AltaArticuloComponent implements OnInit {
 
   articulo: articulo = {
     clave: '',
+    id_partidas: null, // <-- Inicializado explícitamente
     descripcion: '',
     unidad_medida_id: null,
     esActivo: true,
@@ -55,6 +54,25 @@ export class AltaArticuloComponent implements OnInit {
     });
   }
 
+  onPartidaChange(idPartida: any): void {
+  if (!idPartida) {
+    this.articulo.clave = '';
+    return;
+  }
+
+  this.artSrv.obtenerSiguienteClave(idPartida).subscribe({
+    next: (resp: any) => {
+      if (resp?.ok) {
+        this.articulo.clave = resp.clave; // Asigna '2722'
+      }
+    },
+    error: (err) => {
+      console.error('Error al obtener la siguiente clave:', err);
+      this.articulo.clave = ''; // Deja vacío si falla en vez de forzar 001
+    }
+  });
+}
+
   guardarArticulo(f: NgForm): void {
     if (f.invalid || this.loading) {
       f.control.markAllAsTouched();
@@ -62,48 +80,46 @@ export class AltaArticuloComponent implements OnInit {
     }
 
     this.loading = true;
-
-    this.articulo.clave = this.articulo.clave?.toUpperCase()?.trim();
     this.articulo.descripcion = this.articulo.descripcion?.trim();
 
-    console.log('DATOS A ENVIAR:', {
+    const payload = {
       clave: this.articulo.clave,
       id_partidas: this.articulo.id_partidas,
-      unidad_medida_id: this.articulo.unidad_medida_id,
+      unidad_medida_id: this.articulo.unidad_medida_id || null,
       descripcion: this.articulo.descripcion,
       esActivo: this.articulo.esActivo ?? true,
       esBasico: this.articulo.esBasico ?? true
-    });
+    };
 
-    this.artSrv.crearArticulo({
-      clave: this.articulo.clave,
-      id_partidas: this.articulo.id_partidas,
-      unidad_medida_id: this.articulo.unidad_medida_id,
-      descripcion: this.articulo.descripcion,
-      esActivo: this.articulo.esActivo ?? true,
-      esBasico: this.articulo.esBasico ?? true
-    }).subscribe({
+    console.log('BODY ENVIADO:', payload); // Abre la consola de Chrome (F12) para verificar qué valores van
+
+    this.artSrv.crearArticulo(payload).subscribe({
       next: (resp) => {
         if (resp?.ok) {
           Swal.fire({
             title: 'Guardado',
             icon: 'success',
-            text: 'Articulo guardado correctamente' 
+            text: 'Artículo guardado correctamente' 
           });
+
+          // Resetear formulario
+          f.resetForm({ esActivo: true, esBasico: true, id_partidas: null, unidad_medida_id: null });
+          this.articulo.clave = '';
+
+         
         } else {
           Swal.fire({
             title: 'Error',
             icon: 'warning',
-            text: 'No se pudo guardar el articulo'
+            text: 'No se pudo guardar el artículo'
           });
         }
         this.loading = false;
       },
       error: (err) => {
         this.loading = false;
-
         console.error('ERROR COMPLETO:', err);
-        console.error('ERROR DEL BACKEND:', err.error);
+        console.error('DETALLE ERROR BACKEND:', err.error);
 
         Swal.fire({
           title: 'Error',

@@ -8,13 +8,18 @@ const {
   guardarExistenciasIniciales,
   listarPartidas,
   listarArticulosGeneral,
-  traerProductosPorPartida // <--- Nombre corregido aquí
+  traerProductosPorPartida, // <--- Nombre corregido aquí
+  obtenerSiguienteClave,
 } = require('../controllers/articulos.controller');
 
 // Rutas específicas PRIMERO (antes de /:id)
 router.get('/', listarArticulos);
 router.get('/partidas', listarPartidas);
 router.get('/general', listarArticulosGeneral);
+/*router.get('/siguiente-clave/:idPartida', (req, res, next) => {
+  console.log('>>> ¡Petición recibida en siguiente-clave con ID:', req.params.idPartida);
+  obtenerSiguienteClave(req, res, next);
+});*/
 router.get('/traerProductos/:idPartida', traerProductosPorPartida);
 
 const { validarJWT } = require('../middlewares/validar-jwt');
