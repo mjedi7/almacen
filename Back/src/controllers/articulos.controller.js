@@ -31,6 +31,7 @@ const crearArticulo = async (req, res) => {
       return res.status(400).json({ ok: false, msg: 'Faltan datos obligatorios' });
     }
 
+<<<<<<< HEAD
     const query = `
       INSERT INTO cat_articulos (
         clave,
@@ -45,6 +46,37 @@ const crearArticulo = async (req, res) => {
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
+=======
+
+    clave = String(clave).toUpperCase().trim();
+    descripcion = String(descripcion).toUpperCase().trim();
+
+    if (id_partidas === '' || id_partidas === undefined) {
+      id_partidas = null;
+    }
+
+    const existeEnPartida = await pool.query(` 
+      SELECT id FROM public.cat_articulos WHERE clave = $1 AND id_partidas = $2 LIMIT 1
+      `, [clave, id_partidas]
+    );
+
+    if (existeEnPartida.rows.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        msg: "La clave ${clave} ya existe dentro de la partida seleccionada"
+      });
+    }
+
+
+    const sql = `
+      INSERT INTO cat_articulos
+      (clave, id_partidas, descripcion, unidad_medida_id, esactivo, esbasico)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      RETURNING
+        id, clave, id_partidas, descripcion, unidad_medida_id,
+        esactivo AS "esActivo",
+        esbasico AS "esBasico"
+>>>>>>> 70e18827ca76f434aa4a3fe958300749adc9bf2f
     `;
 
     const values = [
@@ -63,8 +95,17 @@ const crearArticulo = async (req, res) => {
     return res.status(201).json({ ok: true, articulo: rows[0] });
 
   } catch (e) {
+<<<<<<< HEAD
     console.error('Error al crear articulo:', e);
     return res.status(500).json({ ok: false, msg: 'Error al crear artículo', error: e.message });
+=======
+    console.error('crearArticulo error:', e);
+    if (e.code === '23505') {
+
+      return res.status(409).json({ ok: false, msg: 'Clave de artículo duplicada' });
+    }
+    return res.status(500).json({ ok: false, msg: 'Error del servidor' });
+>>>>>>> 70e18827ca76f434aa4a3fe958300749adc9bf2f
   }
 };
 
@@ -246,50 +287,50 @@ const listarArticulos = async (req, res) => {
 
 // Agregado por Oscar
 const guardarExistenciasIniciales = async (req, res) => {
-    const client = await pool.connect();
-    try {
+  const client = await pool.connect();
+  try {
 
-      console.log('URL:', req.originalUrl);
-      console.log('METHOD:', req.method);
-      console.log('USUARIO JWT:', req.usuario);
+    console.log('URL:', req.originalUrl);
+    console.log('METHOD:', req.method);
+    console.log('USUARIO JWT:', req.usuario);
 
-        const articulosACargar = req.body; // Es la listaTemporal de Angular
-        
-        await client.query('BEGIN'); // Iniciamos transacción para seguridad
+    const articulosACargar = req.body; // Es la listaTemporal de Angular
 
-        console.log('BODY:', req.body);
-        console.log('TIPO:', typeof req.body);
-        console.log('LONGITUD:', req.body.length);
+    await client.query('BEGIN'); // Iniciamos transacción para seguridad
 
-        // 🔥 NUEVA LÍNEA: Extraer id_centrotrabajo del JWT
-        const { email, id_centrotrabajo } = req.usuario;
+    console.log('BODY:', req.body);
+    console.log('TIPO:', typeof req.body);
+    console.log('LONGITUD:', req.body.length);
 
-        if (!id_centrotrabajo) {
-          await client.query('ROLLBACK');
-          return res.status(400).json({ 
-            ok: false, 
-            error: "No se encontró el id del centro de trabajo en el JWT" 
-          });
-        }
+    // 🔥 NUEVA LÍNEA: Extraer id_centrotrabajo del JWT
+    const { email, id_centrotrabajo } = req.usuario;
 
-        const idCentroTrabajo = id_centrotrabajo;
-        console.log('Usuario:', email, '→ Plantel:', idCentroTrabajo);
+    if (!id_centrotrabajo) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        ok: false,
+        error: "No se encontró el id del centro de trabajo en el JWT"
+      });
+    }
 
-        for (const item of articulosACargar) {
+    const idCentroTrabajo = id_centrotrabajo;
+    console.log('Usuario:', email, '→ Plantel:', idCentroTrabajo);
 
-          // Obtener datos del artículo
-          const articulo = await client.query(`
+    for (const item of articulosACargar) {
+
+      // Obtener datos del artículo
+      const articulo = await client.query(`
               SELECT descripcion, unidad_medida, id_partidas
               FROM cat_articulos_general
               WHERE id = $1
           `, [item.id_articulo]);
-          
-          console.log('RESULTADO SELECT:', articulo.rows);
-      
-          const data = articulo.rows[0];
 
-          // Obtener costo del artículo
-          const costo = await client.query(`
+      console.log('RESULTADO SELECT:', articulo.rows);
+
+      const data = articulo.rows[0];
+
+      // Obtener costo del artículo
+      const costo = await client.query(`
             SELECT id
             FROM costos
             WHERE id_articulo = $1
@@ -297,23 +338,23 @@ const guardarExistenciasIniciales = async (req, res) => {
             ORDER BY fecha_inicio DESC
             LIMIT 1
         `, [item.id_articulo]);
-        
-        const costoData = costo.rows[0];
-        
-        const idCosto = costoData ? costoData.id : null;
-        
-        console.log('COSTO ENCONTRADO:', idCosto);
-        
-        
-          if (!data) {
-              throw new Error('Artículo no encontrado: ' + item.id_articulo);
-          }
-      
-          const unidad = (data.unidad_medida === '\\N' || !data.unidad_medida)
-          ? 'N/A'
-          : data.unidad_medida;
-      
-          const queryText = `
+
+      const costoData = costo.rows[0];
+
+      const idCosto = costoData ? costoData.id : null;
+
+      console.log('COSTO ENCONTRADO:', idCosto);
+
+
+      if (!data) {
+        throw new Error('Artículo no encontrado: ' + item.id_articulo);
+      }
+
+      const unidad = (data.unidad_medida === '\\N' || !data.unidad_medida)
+        ? 'N/A'
+        : data.unidad_medida;
+
+      const queryText = `
           INSERT INTO almacen (
               id_centrotrabajo,
               existencias,
@@ -327,39 +368,39 @@ const guardarExistenciasIniciales = async (req, res) => {
           )
           VALUES ($1, $2, NOW(), true, $3, $4, $5, $6, $7)
         `;
-      
-          const values = [
-              idCentroTrabajo,
-              item.cantidad,
-              unidad,
-              data.descripcion,
-              parseInt(data.id_partidas),
-              data.descripcion,
-              idCosto
-          ];
-      
-          console.log('INSERTANDO:', values);
-      
-          await client.query(queryText, values);
-        }
 
-        console.log('ANTES DE COMMIT');
-        await client.query('COMMIT');
-        console.log('DESPUÉS DE COMMIT');
+      const values = [
+        idCentroTrabajo,
+        item.cantidad,
+        unidad,
+        data.descripcion,
+        parseInt(data.id_partidas),
+        data.descripcion,
+        idCosto
+      ];
 
-        // devolver Status
-        return res.status(200).json({
-            ok: true,
-            mensaje: "Inventario en Dirección General actualizado correctamente"
-        });
+      console.log('INSERTANDO:', values);
 
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.log("Error en carga de inventario: " + error);
-        res.status(500).json({ ok: false, error: error.message });
-    } finally {
-        client.release();
+      await client.query(queryText, values);
     }
+
+    console.log('ANTES DE COMMIT');
+    await client.query('COMMIT');
+    console.log('DESPUÉS DE COMMIT');
+
+    // devolver Status
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Inventario en Dirección General actualizado correctamente"
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.log("Error en carga de inventario: " + error);
+    res.status(500).json({ ok: false, error: error.message });
+  } finally {
+    client.release();
+  }
 };
 
 
@@ -406,6 +447,60 @@ const listarArticulosGeneral = async (req, res) => {
   }
 };
 
+const relacionarArticuloProveedor = async (req, res) => {
+
+  try {
+    const { articulo_id, proveedor_id, costo = 0.00 } = req.body;
+
+    if (!articulo_id || !proveedor_id) {
+      return res.status(400).json({
+        ok: false,
+        msg: 'articulo_id u proveedor_id son obligatorios'
+      });
+    }
+
+    const existe = await pool.query(
+      `SELECT id FROM costos WHERE id_articulo =$1 AND id_proveedor = $2 AND esactivo = true LIMIT 1`, [Number(articulo_id), Number(proveedor_id)]
+    );
+
+    if (existe.rows.length > 0) {
+      return res.status(200).json({
+        ok: true,
+        msg: 'El articulo ya se encontraba relacionado con este proveedor',
+        id: existe.rows[0].id
+      });
+    }
+
+    const insertQuery = (
+      `INSERT INTO costos (id_articulo, id_proveedor, precio_unitario, fecha_inicio, esactivo)
+      VALUES ($1, $2, $3, NOW(), true)
+      RETURNING id, id_articulo, id_proveedor, precio_unitario`
+    )
+
+    const { rows } = await pool.query(insertQuery, [
+      Number(articulo_id),
+      Number(proveedor_id),
+      Number(costo)
+    ]);
+
+    return res.status(201).json({
+      ok: true,
+      msg: 'Artículo relacionado con el proveedor exitosamente',
+      relacion: rows[0]
+    });
+  } catch (error) {
+
+    console.error('relacionarArticuloProveedor error:', error);
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error en el servidor al relacionar artículo y proveedor',
+      error: error.message
+    });
+
+  }
+
+};
+
 module.exports = {
   crearArticulo,
   listarArticulos,
@@ -415,5 +510,9 @@ module.exports = {
   listarPartidas,
   listarArticulosGeneral,
   traerProductosPorPartida,
+<<<<<<< HEAD
   obtenerSiguienteClave,
+=======
+  relacionarArticuloProveedor
+>>>>>>> 70e18827ca76f434aa4a3fe958300749adc9bf2f
 };
