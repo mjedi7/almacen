@@ -142,7 +142,7 @@ const getAlumnos = async(req, res) => {
 };
 
 
-const registrarStock = async(req, res) => {
+/*const registrarStock = async(req, res) => {
 
 
     var { partida,producto,fechaAd,cantidad,unidad,descripcion,proveedor,telefono,direccion,costo,iva,total,folio,centro_trabajo,subTotal} = req.body;
@@ -206,6 +206,84 @@ const registrarStock = async(req, res) => {
     }
 
 
+};*/
+
+const registrarStock = async(req, res) => {
+    var { 
+        partida,
+        producto,
+        fechaAd,
+        cantidad,
+        unidad,
+        descripcion,
+        proveedor,
+        telefono,
+        direccion,
+        costo,
+        iva,
+        total,
+        folio,
+        centro_trabajo,
+        subTotal
+    } = req.body;
+
+    // Aseguramos capturar la partida si viniera con cualquiera de los nombres
+    var idPartida = partida || req.body.id_partidas;
+
+    try {
+        var comprobarDuplicado = await pool.query(
+            'SELECT * FROM costos WHERE id_articulo = $1 AND id_proveedor = $2 AND precio_unitario = $3',
+            [producto, proveedor, costo]
+        );
+
+        if (comprobarDuplicado.rowCount > 0) {
+            return res.json('Duplicado');
+        } else {
+            iva = 16;
+
+            var response1 = await pool.query(
+                'SELECT id, descripcion FROM cat_articulos WHERE id = $1',
+                [producto]
+            );
+            var nombreProducto = response1.rows[0].descripcion;
+
+            var response = await pool.query(
+                'INSERT INTO costos(id_articulo, id_proveedor, precio_unitario, iva, precio_total, fecha_inicio, esactivo) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id AS ultimoid;',
+                [producto, proveedor, costo, iva, total, fechaAd, true]
+            );
+
+            var ultimoID = response.rows[0].ultimoid;
+
+            if (response) {
+                var response2 = await pool.query(
+                    'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+                    [centro_trabajo, ultimoID, cantidad, fechaAd, true, unidad, descripcion, idPartida, nombreProducto]
+                );
+            } else {
+                return res.json("Error");
+            }
+
+            if (response2) {
+                // AQUÍ AGREGAMOS id_partidas Y EL PARÁMETRO $6 (idPartida)
+                var response3 = await pool.query(
+                    'INSERT INTO compras(id_costo, total_articulos, fecha_compra, folio_compra, esactivo, id_partidas) VALUES ($1, $2, $3, $4, $5, $6)',
+                    [ultimoID, cantidad, fechaAd, folio, true, idPartida]
+                );
+            }
+
+            const impuestoReal = (parseFloat(subTotal) * 0.16) || 0;
+
+            await pool.query(
+                'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                [folio, proveedor, fechaAd, subTotal, impuestoReal, total, idPartida]
+            );
+
+            return res.json("Save");
+        }
+    } catch (error) {
+        console.log(error);
+        return res.json("Error");
+    }
 };
 
 
@@ -248,7 +326,7 @@ const transferirArticulosPlantel = async(req, res) => {
 
 
 
-const recargarStock = async(req, res) => {
+/*const recargarStock = async(req, res) => {
 
 
     var idArticulo=req.params.idproducto;
@@ -309,6 +387,62 @@ const recargarStock = async(req, res) => {
         res.json("Error al insertar en compras reporte");
       }
 
+};*/
+
+const recargarStock = async(req, res) => {
+    console.log("=== BODY RECIBIDO ===", req.body);
+    console.log("req.body.partida:", req.body.partida);
+    console.log("req.body.id_partidas:", req.body.id_partidas);
+    var idArticulo = req.params.idproducto;
+    var idProveedor = req.params.idproveedor;
+
+    // Acepta partida tanto si viene como 'partida' o como 'id_partidas'
+    var idPartida = req.body.partida || req.body.id_partidas;
+    console.log("--> idPartida final a insertar:", idPartida);
+    var cantidad = req.body.cantidad;
+    var fechaAd = req.body.fechaAd;
+    var folio = req.body.folio;
+    var idProv = req.body.proveedor || idProveedor;
+
+    // Manejo de montos con fallback para evitar NaN
+    var subtotal = req.body.subTotal || req.body.importe || (req.body.costo * cantidad) || 0;
+    var impuesto = (subtotal * 0.16).toFixed(2);
+    var totalFinal = req.body.total || req.body.totalCompra || (parseFloat(subtotal) + parseFloat(impuesto));
+
+    try {
+        var response = await pool.query(
+            'SELECT costos.id, id_articulo, id_proveedor, existencias FROM costos ' +
+            'INNER JOIN almacen ON costos.id = almacen.id_costos WHERE id_articulo = $1 AND id_proveedor = $2',
+            [idArticulo, idProveedor]
+        );
+
+        if (response.rowCount > 0) {
+            var idCosto = response.rows[0].id;
+            var existencia = response.rows[0].existencias;
+            let nuevaExistencia = parseInt(existencia) + parseInt(cantidad);
+
+            await pool.query('UPDATE almacen SET existencias = $1 WHERE id_costos = $2', [nuevaExistencia, idCosto]);
+
+            var response3 = await pool.query(
+    'INSERT INTO compras(id_costo, total_articulos, fecha_compra, folio_compra, esactivo, id_partidas) VALUES ($1, $2, $3, $4, $5, $6)',
+    [idCosto, cantidad, fechaAd, folio, true, idPartida]
+);
+
+            if (response3) {
+                await pool.query(
+                    'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                    [folio, idProv, fechaAd, subtotal, impuesto, totalFinal, idPartida]
+                );
+                return res.json("Save");
+            }
+        } else {
+            console.log("SinRegistro");
+            return res.json("SinRegistro");
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json("Error");
+    }
 };
 
 

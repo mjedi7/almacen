@@ -1,17 +1,16 @@
-
 <div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
 
-    <h3><b>Registrar Nueva Compra</b></h3>
-<hr>
+  <h3><b>Registrar Nueva Compra</b></h3>
+  <hr>
 </div>
 
 
-<form (ngSubmit)="AgregarStock(f)" #f="ngForm" >
+<form (ngSubmit)="AgregarStock(f)" #f="ngForm">
 
-    <div class="form-row mt-5">
-   
-      
-      <div class="form-group col-md-3">
+  <div class="form-row mt-5">
+
+
+    <!--<div class="form-group col-md-3">
         <label for="inputPassword4">Partida</label>
         <select [(ngModel)]="stock.partida" id="areaEmite" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required ngModel #Partida="ngModel">       
           <ng-container *ngFor="let stock of  partidas" >
@@ -19,10 +18,23 @@
           </ng-container>
           </select>
           <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
+      </div>-->
+
+    <div class="form-group col-md-3">
+      <label for="inputPartida">Partida</label>
+      <select [(ngModel)]="stock.partida" id="inputPartida" class="form-control" name="Partida"
+        (change)="opcionSeleccionadaX()" required #Partida="ngModel">
+        <option [ngValue]="null" disabled selected>Selecciona una partida</option>
+        <ng-container *ngFor="let item of partidas">
+          <option [value]="item.id">{{item.clave}} -- {{item.descripcion}}</option>
+        </ng-container>
+      </select>
+      <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
 
-      <!-- <div class="form-group col-md-3">
+    <!-- <div class="form-group col-md-3">
         <label for="inputPassword4">Producto</label>
         <select [(ngModel)]="stock.producto" id="areaEmite" class="form-control" name="Producto" required required ngModel #Producto="ngModel">       
           <ng-container *ngFor="let producto of productos" >
@@ -33,28 +45,16 @@
       </div>  -->
 
 
-      <!-- Inicia -->
+    <!-- Inicia -->
 
-        <div class="form-group col-md-3" style="position: relative;">
-            <label for="inputProducto">Producto</label>
-            <input
-                type="text"
-                class="form-control"
-                id="inputProducto"
-                name="Producto"
-                autocomplete="off"
-                [(ngModel)]="productoBuscado"
-                (input)="filtrarProductos()"
-                [ngModelOptions]="{standalone: true}"
-                placeholder="Escribe el nombre del artículo"
-                required
-                ngModel #Producto="ngModel"
-            />
-             <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-            <ul
-                *ngIf="productosFiltrados.length > 0"
-            class="list-group mt-1"
-            style="
+    <div class="form-group col-md-3" style="position: relative;">
+      <label for="inputProducto">Producto</label>
+      <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
+        [(ngModel)]="productoBuscado" (input)="filtrarProductos()" [ngModelOptions]="{standalone: true}"
+        placeholder="Escribe el nombre del artículo" required ngModel #Producto="ngModel" />
+      <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+      <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
                 position: absolute;
                 z-index: 1000;
                 width: 100%;
@@ -63,20 +63,16 @@
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                 background-color: white;
                 border: 1px solid #ccc;
-            "
-            >
-                <li
-                class="list-group-item list-group-item-action"
-                *ngFor="let producto of productosFiltrados"
-                (click)="seleccionarProducto(producto)"
-                >
-                {{ producto.descripcion }}
-                </li>
-            </ul>
-        </div> 
+            ">
+        <li class="list-group-item list-group-item-action" *ngFor="let producto of productosFiltrados"
+          (click)="seleccionarProducto(producto)">
+          {{ producto.descripcion }}
+        </li>
+      </ul>
+    </div>
 
 
-      <!-- Fin -->
+    <!-- Fin -->
 
 
 
@@ -84,127 +80,161 @@
 
 
 
-      
-          <div class="form-group col-md-2">
-            <label for="inputAddress">Fecha de adquisición</label>
-            <input [(ngModel)]="stock.fechaAd" type="date" class="form-control" name="FechaAdqui" id="inputAddress" placeholder="" required #FechaAdqui="ngModel">
-            <small *ngIf="FechaAdqui.invalid && FechaAdqui.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
+
+    <div class="form-group col-md-2">
+      <label for="inputAddress">Fecha de adquisición</label>
+      <input [(ngModel)]="stock.fechaAd" type="date" class="form-control" name="FechaAdqui" id="inputAddress"
+        placeholder="" required #FechaAdqui="ngModel">
+      <small *ngIf="FechaAdqui.invalid && FechaAdqui.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
 
 
-       <div class="form-group col-md-2">
-            <label for="inputAddress">Cantidad adquirida</label>
-            <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress" (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel">
-            <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
+    <div class="form-group col-md-2">
+      <label for="inputAddress">Cantidad adquirida</label>
+      <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress"
+        (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel">
+      <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
 
-          <div class="form-group col-md-2">
-        <label for="inputPassword4">Unidad</label>
-        <select [(ngModel)]="stock.unidad" id="areaEmite" class="form-control" name="Partida" required required ngModel #unidad="ngModel">       
-          <ng-container >
-                 <option>Litros</option>
-                 <option>Kilos</option>
-                 <option>Bultos </option>
-                 <option>Paquetes</option>
-                 <option>Metros</option>
-                 <option>Piezas</option>
-                 <option>Otro</option>
-          </ng-container>
-          </select>
-          <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
-
-     
-</div>
-
-    <div class="form-row">
+    <div class="form-group col-md-2">
+      <label for="inputPassword4">Unidad</label>
+      <select [(ngModel)]="stock.unidad" id="areaEmite" class="form-control" name="Partida" required required ngModel
+        #unidad="ngModel">
+        <ng-container>
+          <option>Litros</option>
+          <option>Kilos</option>
+          <option>Bultos </option>
+          <option>Paquetes</option>
+          <option>Metros</option>
+          <option>Piezas</option>
+          <option>Otro</option>
+        </ng-container>
+      </select>
+      <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
 
-        <div class="form-group col-md-3">
-            <label for="inputAddress">Descripción y/o comentario</label>
-            <input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="inputAddress" placeholder="" required required #Comentario="ngModel">
-            <small *ngIf="Comentario.invalid && Comentario.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
+  </div>
 
-          <div class="form-group col-md-3">
-        <label for="inputPassword4">Proveedor</label>
-        <select [(ngModel)]="stock.proveedor" id="areaEmite" class="form-control" name="Proveedor" [(ngModel)]="direccionSeleccionada" (change)="CapturarValor()"  required ngModel #Proveedor="ngModel">       
-          <ng-container *ngFor="let proveedor of proveedores">
-                <option [value]="proveedor.id">{{proveedor.razon_social}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
-
-         <div class="form-group col-md-3">
-            <label for="inputAddress">Teléfono</label>
-            <input [(ngModel)]="stock.telefono" type="text" class="form-control" name="Telefono" id="inputAddress" placeholder="" readonly #Telefono="ngModel">
-            <small *ngIf="Telefono.invalid && Telefono.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
- 
-
-           <div class="form-group col-md-3">
-            <label for="inputAddress">Dirección</label>
-            <input [(ngModel)]="stock.direccion" type="text" class="form-control" name="Dirreccion" id="inputAddress" placeholder="" readonly #Direccion="ngModel">
-            <small *ngIf="Direccion.invalid && Direccion.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-           </div>
+  <div class="form-row">
 
 
-           <div class="form-group col-md-2">
-            <label for="inputAddress">Costo unitario</label>
-            <input [(ngModel)]="stock.costo" type="text" class="form-control" name="Costo" id="inputAddress" (change)="calculoCompra()" placeholder="" required #Costo="ngModel">
-            <small *ngIf="Costo.invalid && Costo.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
+    <div class="form-group col-md-3">
+      <label for="inputAddress">Descripción y/o comentario</label>
+      <input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="inputAddress"
+        placeholder="" required required #Comentario="ngModel">
+      <small *ngIf="Comentario.invalid && Comentario.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
-             <div class="form-group col-md-2">
-            <label for="inputAddress">Importe</label>
-            <input type="text" class="form-control" name="subTotal" id="inputAddress" [value]="monedaFormateada2" (change)="calculoCompra()" placeholder="" required readonly>
-    
-          </div>
+    <!--<div class="form-group col-md-3">
+      <label for="inputPassword4">Proveedor</label>
+      <select [(ngModel)]="stock.proveedor" id="areaEmite" class="form-control" name="Proveedor"
+        [(ngModel)]="direccionSeleccionada" (change)="CapturarValor()" required ngModel #Proveedor="ngModel">
+        <ng-container *ngFor="let proveedor of proveedores">
+          <option [value]="proveedor.id">{{proveedor.razon_social}}</option>
+        </ng-container>
+      </select>
+      <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>-->
 
-            <div class="form-group col-md-2">
-            <label for="inputAddress">IVA</label>
-            <input [(ngModel)]="stock.iva" type="text" class="form-control" name="Iva" id="inputAddress" placeholder="" readonly #Iva="ngModel">
-            <small *ngIf="Iva.invalid && Iva.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
+    <div class="form-group col-md-3">
+      <label for="inputProveedor">Proveedor</label>
+      <select [(ngModel)]="direccionSeleccionada" id="inputProveedor" class="form-control" name="Proveedor"
+        (change)="CapturarValor()" required #Proveedor="ngModel">
+        <option [ngValue]="null" disabled selected>Selecciona un proveedor</option>
+        <ng-container *ngFor="let prov of proveedores">
+          <option [value]="prov.id">{{prov.razon_social}}</option>
+        </ng-container>
+      </select>
+      <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
-              <div class="form-group col-md-3">
-            <label for="inputAddress">Total de compra</label>
-            <input  type="text" class="form-control" name="Total" id="inputAddress" [value]="monedaFormateada" placeholder="" required readonly >
-  
-          </div>
+    <div class="form-group col-md-3">
+      <label for="inputAddress">Teléfono</label>
+      <input [(ngModel)]="stock.telefono" type="text" class="form-control" name="Telefono" id="inputAddress"
+        placeholder="" readonly #Telefono="ngModel">
+      <small *ngIf="Telefono.invalid && Telefono.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
 
-          <div class="form-group col-md-3">
-            <label for="inputAddress">Folio de compra</label>
-            <input [(ngModel)]="stock.folio" type="text" class="form-control" name="Folio" id="inputAddress" placeholder="" required>
-          </div>
+
+    <div class="form-group col-md-3">
+      <label for="inputAddress">Dirección</label>
+      <input [(ngModel)]="stock.direccion" type="text" class="form-control" name="Dirreccion" id="inputAddress"
+        placeholder="" readonly #Direccion="ngModel">
+      <small *ngIf="Direccion.invalid && Direccion.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
+
+
+    <div class="form-group col-md-2">
+      <label for="inputAddress">Costo unitario</label>
+      <input [(ngModel)]="stock.costo" type="text" class="form-control" name="Costo" id="inputAddress"
+        (change)="calculoCompra()" placeholder="" required #Costo="ngModel">
+      <small *ngIf="Costo.invalid && Costo.touched" class="form-text text-danger animated fadeIn">Campo
+        Obligatorio</small>
+    </div>
+
+    <div class="form-group col-md-2">
+      <label for="inputAddress">Importe</label>
+      <input type="text" class="form-control" name="subTotal" id="inputAddress" [value]="monedaFormateada2"
+        (change)="calculoCompra()" placeholder="" required readonly>
 
     </div>
 
-   
-    <!-- CHECKBOX -->
+    <div class="form-group col-md-2">
+      <label for="inputAddress">IVA</label>
+      <input [(ngModel)]="stock.iva" type="text" class="form-control" name="Iva" id="inputAddress" placeholder=""
+        readonly #Iva="ngModel">
+      <small *ngIf="Iva.invalid && Iva.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+    </div>
 
-    <div class="form-row mt-3">
-
-      <ng-container *ngFor="let multiple of deptosmultipleEnvio; let i=index">
-
-        <input class="form-check-input form-group col-md-2" type="checkbox" value="" id="flexCheckDefault{{i}}" >
-        <label class="form-check-label" for="flexCheckDefault{{i}}" style="padding-right: 10px;">
-          <p style="font-size: 14px;">{{multiple.nombre_completo}}</p>
-        </label>
-
-      </ng-container>
+    <div class="form-group col-md-3">
+      <label for="inputAddress">Total de compra</label>
+      <input type="text" class="form-control" name="Total" id="inputAddress" [value]="monedaFormateada" placeholder=""
+        required readonly>
 
     </div>
 
-    <!-- END CHECKBOX -->
-
-  
-    <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
-        <button style="padding:10px;margin-right: 10px;"type="submit" class="btn btn-primary"><span class="mdi mdi-content-save"></span> Guardar</button>
-        <!-- <button style="padding:10px;" routerLink="/dashboard" type="submit" class="btn btn-danger">Cancelar/Regresar</button> -->
+    <div class="form-group col-md-3">
+      <label for="inputAddress">Folio de compra</label>
+      <input [(ngModel)]="stock.folio" type="text" class="form-control" name="Folio" id="inputAddress" placeholder=""
+        required>
     </div>
-  
+
+  </div>
+
+
+  <!-- CHECKBOX -->
+
+  <div class="form-row mt-3">
+
+    <ng-container *ngFor="let multiple of deptosmultipleEnvio; let i=index">
+
+      <input class="form-check-input form-group col-md-2" type="checkbox" value="" id="flexCheckDefault{{i}}">
+      <label class="form-check-label" for="flexCheckDefault{{i}}" style="padding-right: 10px;">
+        <p style="font-size: 14px;">{{multiple.nombre_completo}}</p>
+      </label>
+
+    </ng-container>
+
+  </div>
+
+  <!-- END CHECKBOX -->
+
+
+  <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
+    <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-primary"><span
+        class="mdi mdi-content-save"></span> Guardar</button>
+    <!-- <button style="padding:10px;" routerLink="/dashboard" type="submit" class="btn btn-danger">Cancelar/Regresar</button> -->
+  </div>
+
 </form>

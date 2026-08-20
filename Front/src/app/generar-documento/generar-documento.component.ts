@@ -103,6 +103,7 @@ result:any=[];
 
   AgregarStock(form:NgForm){
 
+    console.log("--> 1. THIS.STOCK EN ANGULAR:", this.stock);
     if(form.valid==true && this.stock.cantidad>0){
 
             this.traer.http.post( this.API_URL+`/registrarStock`,this.stock)
@@ -181,6 +182,7 @@ result:any=[];
 
     var idproveedor=this.direccionSeleccionada;
     console.log(idproveedor);
+    this.stock.proveedor = idproveedor.toString();
 
         this.traer.http.get( this.API_URL+`/traerDatosProveedores/${idproveedor}`)
     .subscribe((res:any)=>{
