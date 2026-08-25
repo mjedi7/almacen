@@ -214,7 +214,7 @@ const registrarStock = async(req, res) => {
         producto,
         fechaAd,
         cantidad,
-        unidad,
+        id_unidad_medida,
         descripcion,
         proveedor,
         telefono,
@@ -229,6 +229,7 @@ const registrarStock = async(req, res) => {
 
     // Aseguramos capturar la partida si viniera con cualquiera de los nombres
     var idPartida = partida || req.body.id_partidas;
+    var id_unidad_medida = id_unidad_medida || unidad;
 
     try {
         var comprobarDuplicado = await pool.query(
@@ -256,8 +257,8 @@ const registrarStock = async(req, res) => {
 
             if (response) {
                 var response2 = await pool.query(
-                    'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-                    [centro_trabajo, ultimoID, cantidad, fechaAd, true, unidad, descripcion, idPartida, nombreProducto]
+                    'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, id_unidad_medida, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+                    [centro_trabajo, ultimoID, cantidad, fechaAd, true, id_unidad_medida, descripcion, idPartida, nombreProducto]
                 );
             } else {
                 return res.json("Error");

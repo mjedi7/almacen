@@ -101,23 +101,19 @@
 
 
     <div class="form-group col-md-2">
-      <label for="inputPassword4">Unidad</label>
-      <select [(ngModel)]="stock.unidad" id="areaEmite" class="form-control" name="Partida" required required ngModel
-        #unidad="ngModel">
-        <ng-container>
-          <option>Litros</option>
-          <option>Kilos</option>
-          <option>Bultos </option>
-          <option>Paquetes</option>
-          <option>Metros</option>
-          <option>Piezas</option>
-          <option>Otro</option>
-        </ng-container>
+      <label for="id_unidad_medida">Unidad</label>
+      <select [(ngModel)]="stock.id_unidad_medida" id="id_unidad_medida" class="form-control" name="id_unidad_medida"
+        required #unidad="ngModel">
+        <option [ngValue]="null" disabled selected>Selecciona una opción</option>
+        <option *ngFor="let item of (unidadesMedida || [])" [value]="item.id">
+          {{ item.nombre_medida }}
+        </option>
       </select>
-      <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
 
+      <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">
+        Campo Obligatorio
+      </small>
+    </div>
 
   </div>
 
