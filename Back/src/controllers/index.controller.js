@@ -467,56 +467,92 @@ const eliminarArticulo= async(req, res) => {
 };
 
 
-const confirmarTransferencia= async(req, res) => {
 
-    var consecutivo=req.params.consecutivo
+const confirmarTransferencia = async (req, res) => {
+  var consecutivo = req.params.consecutivo;
 
-        const response = await pool.query('SELECT * from movimientosdg where folio_transferencia='+consecutivo);  
+  const response = await pool.query('SELECT * FROM movimientosdg WHERE folio_transferencia = $1', [consecutivo]);
 
-    if(response.rowCount > 0){
+  if (response.rowCount > 0) {
+    for (var i = 0; i < response.rowCount; i++) {
+      const movimiento = response.rows[i];
 
-      for(var i=0;i<response.rowCount;i++){
+      const seleccion = await pool.query(
+        'SELECT * FROM almacen WHERE id_centrotrabajo = $1 AND id_costos = $2',
+        [movimiento.id_centrotrabajo_transfiere, movimiento.id_costos]
+      );
 
-            const seleccion = await pool.query('SELECT * from almacen where id_centrotrabajo='+response.rows[i].id_centrotrabajo_transfiere+' and id_costos='+response.rows[i].id_costos);  
-                              
+      if (seleccion.rowCount <= 0) {
+        // Traemos la información complementaria del producto desde el almacén central (47) o catálogo
+        const datosArticulo = await pool.query(
+          `SELECT 
+             ca.id_partidas AS id_partida,
+             ca.unidad_medida_id AS id_unidad_medida,
+             ca.descripcion
+           FROM costos co
+           INNER JOIN cat_articulos ca ON co.id_articulo = ca.id
+           WHERE co.id = $1`,
+          [movimiento.id_costos]
+        );
 
-            if(seleccion.rowCount<=0){
+        const info = datosArticulo.rows[0] || {};
 
-                console.log("****************** "+response.rows[i].num_articulos_solicitados);
-
-                var insertarEnAlmacen = await pool.query('INSERT INTO almacen(id_centrotrabajo,id_costos,existencias,fecha_adquisicion,esactivo,nombre_producto) VALUES ($1, $2, $3, $4, $5,$6)',
-                [response.rows[i].id_centrotrabajo_transfiere,response.rows[i].id_costos,response.rows[i].num_articulos_solicitados,response.rows[i].fecha,true,response.rows[i].nom_articulo]);  
-
-            }else{
-      
-                 var existenciaActualizada=parseInt(response.rows[i].num_articulos_solicitados) +  parseInt(seleccion.rows[0].existencias);
-                 var actualizacionAlmacen = await pool.query('UPDATE almacen SET existencias=$1 WHERE id_costos='+response.rows[i].id_costos+ ' and id_centrotrabajo= '+response.rows[i].id_centrotrabajo_transfiere, [existenciaActualizada]);
-
-            }
-
-
-        console.log(response.rows[i].num_articulos_solicitados);
-
-        const response2 = await pool.query('SELECT id_costos,existencias from almacen where id_costos='+response.rows[i].id_costos+ ' and id_centrotrabajo=47');
-        console.log(response2.rows[0].existencias)
-
-         var nuevostock= parseInt(response2.rows[0].existencias) - parseInt(response.rows[i].num_articulos_solicitados);
-         console.log(nuevostock);
-
-
-          var response3 = await pool.query('UPDATE almacen SET existencias=$1 WHERE id_costos='+response.rows[i].id_costos+ ' and id_centrotrabajo=47', [nuevostock]);
-
+        var insertarEnAlmacen = await pool.query(
+          `INSERT INTO almacen (
+            id_centrotrabajo,
+            id_costos,
+            existencias,
+            fecha_adquisicion,
+            esactivo,
+            nombre_producto,
+            id_partida,
+            id_unidad_medida,
+            descripcion
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [
+            movimiento.id_centrotrabajo_transfiere,
+            movimiento.id_costos,
+            movimiento.num_articulos_solicitados,
+            movimiento.fecha,
+            true,
+            movimiento.nom_articulo,
+            info.id_partida || null,
+            info.id_unidad_medida || null,
+            info.descripcion || null
+          ]
+        );
+      } else {
+        var existenciaActualizada = parseInt(movimiento.num_articulos_solicitados) + parseInt(seleccion.rows[0].existencias);
+        await pool.query(
+          'UPDATE almacen SET existencias = $1 WHERE id_costos = $2 AND id_centrotrabajo = $3',
+          [existenciaActualizada, movimiento.id_costos, movimiento.id_centrotrabajo_transfiere]
+        );
       }
 
-          const response4 = await pool.query('SELECT folio_transferencia from consecutivo where id=1');
-          var nuevoConsecutivo=response4.rows[0].folio_transferencia + 1;
+      // Descontar del almacén central (47)
+      const response2 = await pool.query(
+        'SELECT id_costos, existencias FROM almacen WHERE id_costos = $1 AND id_centrotrabajo = 47',
+        [movimiento.id_costos]
+      );
 
-           var response5 = await pool.query('UPDATE consecutivo SET folio_transferencia=$1 WHERE id=1',[nuevoConsecutivo]);
-
-          res.json("ListaOk");
-
+      if (response2.rowCount > 0) {
+        var nuevostock = parseInt(response2.rows[0].existencias) - parseInt(movimiento.num_articulos_solicitados);
+        await pool.query(
+          'UPDATE almacen SET existencias = $1 WHERE id_costos = $2 AND id_centrotrabajo = 47',
+          [nuevostock, movimiento.id_costos]
+        );
+      }
     }
-    
+
+    // Incrementar consecutivo
+    const response4 = await pool.query('SELECT folio_transferencia FROM consecutivo WHERE id = 1');
+    var nuevoConsecutivo = response4.rows[0].folio_transferencia + 1;
+    await pool.query('UPDATE consecutivo SET folio_transferencia = $1 WHERE id = 1', [nuevoConsecutivo]);
+
+    res.json("ListaOk");
+  } else {
+    res.json("NoMovimientos");
+  }
 };
 
 const confirmarTransferenciaEnPlantel= async(req, res) => {
