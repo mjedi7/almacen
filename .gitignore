@@ -2,6 +2,7 @@
 
 # dependencies (remueve la barra '/' inicial para que aplique a subcarpetas como Back/ y Front/)
 node_modules/
+**/node_modules/
 
 # compiled output
 dist/
