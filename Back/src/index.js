@@ -74,6 +74,7 @@ app.use(require('./routes/generarDocumentoRespuesta'));
 app.use(require('./routes/requisiciones'));
 app.use(require('./routes/subirDocumentos'));
 app.use(require('./routes/index')); // index siempre al final de las rutas
+app.use(require('./routes/reportesPDFKit')); 
 
 app.listen(port, '0.0.0.0', () => {
   console.log('Server on port ' + port);
