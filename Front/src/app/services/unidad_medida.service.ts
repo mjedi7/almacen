@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
   providedIn: 'root'
 })
 export class UnidadMedidaServices {
-  private baseUrl: string = 'http://localhost:3000';
+  private baseUrl: string = 'http://172.16.0.100:4200';
 
   constructor(private http: HttpClient) { }
 
