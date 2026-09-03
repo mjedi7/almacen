@@ -8068,6 +8068,12 @@ class SidebarComponent {
     }
     getpetmisosModulos() {
         var permiso = parseInt(localStorage.getItem('permiso'));
+
+        // Usuarios: solo administrador (permiso 0)
+        if (this.menuItems5?.[0]?.submenu?.[0]) {
+        this.menuItems5[0].submenu[0].mostrar = (permiso === 0);
+        }
+        
         if (permiso == 1) {
             //Almacen
             this.menuItems[0].submenu[0].mostrar = true;

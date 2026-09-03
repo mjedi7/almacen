@@ -63,6 +63,7 @@ export class SidebarComponent implements OnInit {
   getpetmisosModulos() {
     const permisoRaw = localStorage.getItem('permiso');
     var permiso = parseInt(permisoRaw || '0');
+    this.muestraUsuarios = (permiso === 0);
 
     if (permiso === 1) {
       // Almacen

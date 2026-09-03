@@ -5,6 +5,7 @@ import { PagesComponent } from './pages.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 import { AuthGuard } from '../guards/auth.guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 import { PermisosModulosComponent } from './permisos-modulos/permisos-modulos.component';
 import { GenerarDocumentoComponent } from '../generar-documento/generar-documento.component';
@@ -38,10 +39,10 @@ const routes: Routes = [
             {path: 'permisos-modulos',component:PermisosModulosComponent,canActivate:[AuthGuard]},
             {path: 'generar-documento',component:GenerarDocumentoComponent,canActivate:[AuthGuard]},
             {path: 'mis-seguimientos',component:MisSeguimientosComponent,canActivate:[AuthGuard]},
-            {path: 'lista-usuarios',component:ListaUsuariosComponent,canActivate:[AuthGuard]},
+            {path: 'lista-usuarios', component: ListaUsuariosComponent, canActivate: [AuthGuard, AdminGuard]},
             {path: 'por-contestar', component:PorContestarComponent,canActivate:[AuthGuard]},
             {path: 'estadistico-general', component:EstadisticoGeneralComponent,canActivate:[AuthGuard]},
-            {path: 'cambio-password',component:CambioPasswordComponent,canActivate:[AuthGuard]},
+            {path: 'cambio-password', component: CambioPasswordComponent, canActivate: [AuthGuard, AdminGuard]},
             {path: 'existencias',component:ExistenciasComponent,canActivate:[AuthGuard]},
             {path:'generar-requisicion',component:GeneraRequisicionComponent,canActivate:[AuthGuard]},
             {path:'requisiciones-pendientes',component:RequisicionesPendientesComponent,canActivate:[AuthGuard]},

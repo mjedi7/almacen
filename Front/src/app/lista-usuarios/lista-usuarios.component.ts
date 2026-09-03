@@ -36,6 +36,10 @@ export class ListaUsuariosComponent implements OnInit {
 
     usuarios:any=[]
 
+    usuarioSeleccionado: any = null;
+    nuevaPassword: string = '';
+    confirmarPassword: string = '';
+
   constructor(private traer:TraerDatosService,private moda:NgbModal) { }
 
   ngOnInit(): void {
@@ -77,7 +81,7 @@ export class ListaUsuariosComponent implements OnInit {
    };
    
 try{
-     this.traer.http.get( this.API_URL+`/getUsuarios/${localStorage.getItem('centro_trabajo')}`)
+     this.traer.http.get(this.API_URL + `/gettodosusuarios`)
      .subscribe((res:any)=>{
    
        this.usuarios=res;
@@ -115,8 +119,78 @@ try{
           
             });
 
+            
  }
 
+cambiarPassword() {
 
+  if (!this.nuevaPassword || !this.confirmarPassword) {
+
+    Swal.fire({
+      icon: 'warning',
+      text: 'Debe ingresar y confirmar la nueva contraseña'
+    });
+
+    return;
+  }
+
+  if (this.nuevaPassword !== this.confirmarPassword) {
+
+    Swal.fire({
+      icon: 'warning',
+      text: 'Las contraseñas no coinciden'
+    });
+
+    return;
+  }
+
+  this.traer.http.put(
+    this.API_URL + `/actualizar/${this.usuarioSeleccionado.usuario}/${this.nuevaPassword}`,
+    {}
+  ).subscribe((res) => {
+
+    if (res === 'Actualizado') {
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Contraseña actualizada',
+        text: 'La contraseña del usuario fue actualizada correctamente'
+      });
+
+      this.nuevaPassword = '';
+      this.confirmarPassword = '';
+      this.usuarioSeleccionado = null;
+
+    } else {
+
+      Swal.fire({
+        icon: 'error',
+        text: 'No se pudo actualizar la contraseña'
+      });
+
+    }
+
+  }, (err: HttpErrorResponse) => {
+
+    console.log(err);
+
+    Swal.fire({
+      icon: 'error',
+      text: 'Ocurrió un error al actualizar la contraseña'
+    });
+
+  });
 
 }
+
+seleccionarUsuario(usuario: any, modal: any) {
+
+  this.usuarioSeleccionado = usuario;
+  this.nuevaPassword = '';
+  this.confirmarPassword = '';
+
+  this.moda.open(modal);
+}
+
+}
+

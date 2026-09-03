@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 
-const { traerPartidas,traerProductos,traerProveedores,datosDelProveedor, traerPlanteles, traerTotalDisponible, traerConsecutivo, traerDatosAdmin, traerProductosDesdeTransferir, traerConsecutivoRequisicion, getUsuarios, traerPlanteles2, datosCostosArticulo, traerProductosDesdeUsarArticuloPlantel, traerConsecutivoUsarArticuloPlantel} = require('../controllers/traerDatosGenerales.controller.js');
+const { traerPartidas,traerProductos,traerProveedores,datosDelProveedor, traerPlanteles, traerTotalDisponible, traerConsecutivo, traerDatosAdmin, traerProductosDesdeTransferir, traerConsecutivoRequisicion, getUsuarios, getTodosUsuarios, traerPlanteles2, datosCostosArticulo, traerProductosDesdeUsarArticuloPlantel, traerConsecutivoUsarArticuloPlantel} = require('../controllers/traerDatosGenerales.controller.js');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 router.get('/traerPartidas', traerPartidas);        //Ruta para traer PArtidas
@@ -21,7 +21,8 @@ router.get('/traerConsecutivoPlantelesUsarArticulo/:plantel',traerConsecutivoUsa
 
 
 
-router.get('/getusuarios/:area',getUsuarios);
+router.get('/getusuarios/:area', getUsuarios);
+router.get('/gettodosusuarios', getTodosUsuarios);
 
 
 router.get('/traerCostoArticulo/:idProveedor/:idProducto',datosCostosArticulo);
