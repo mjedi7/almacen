@@ -24,7 +24,7 @@ export class MisSeguimientosComponent implements OnInit {
   partidas: any = [];
   productos: any = [];
   proveedores: any = [];
-  catalogoProveedores: any = []; // Lista completa para cuando toque dar de alta relación
+  catalogoProveedores: any = [];
   datosproveedor: any = [];
 
   tipo: string;
@@ -76,10 +76,9 @@ export class MisSeguimientosComponent implements OnInit {
     this.fecha_registrox = `${this.day}-${this.month}-${anio}`;
 
     this.traerPartidas();
-    this.traerProveedoresCatalogo(); // Cargamos todos los proveedores para tenerlos listos
+    this.traerProveedoresCatalogo();
   }
 
-  // Traer catálogo general de proveedores
   traerProveedoresCatalogo() {
     this.traer.http.get(`${this.API_URL}/traerProveedores`).subscribe({
       next: (res: any) => {
@@ -146,11 +145,9 @@ export class MisSeguimientosComponent implements OnInit {
           this.proveedores = res || [];
 
           if (this.proveedores.length === 1) {
-            // 💡 1 PROVEEDOR: Se autoselecciona y valida
             this.direccionSeleccionada = this.proveedores[0].id;
             this.CapturarValor();
           } else if (this.proveedores.length > 1) {
-            // 💡 MÁS DE 1 PROVEEDOR: El usuario escoge
             Swal.fire({
               title: 'Múltiples proveedores',
               text: 'Seleccione el proveedor correspondiente para este producto.',
@@ -159,7 +156,6 @@ export class MisSeguimientosComponent implements OnInit {
               showConfirmButton: false
             });
           } else {
-            // SIN PROVEEDOR ASIGNADO: Ofrecer vincularlo en caliente
             this.ofrecerVincularProveedor(idArticulo);
           }
         },
@@ -167,11 +163,7 @@ export class MisSeguimientosComponent implements OnInit {
       });
   }
 
-  // ==========================================================
-  // VINCULACIÓN EN CALIENTE CON SWEETALERT2
-  // ==========================================================
   ofrecerVincularProveedor(idArticulo: number) {
-    // Armamos las opciones del select dinámicamente con el catálogo
     const opciones: any = {};
     this.catalogoProveedores.forEach((prov: any) => {
       opciones[prov.id] = prov.nombre || prov.razon_social || `Proveedor #${prov.id}`;
@@ -205,41 +197,22 @@ export class MisSeguimientosComponent implements OnInit {
   }
 
   relacionarArticuloProveedor(idArticulo: number, idProveedor: number) {
-    // Payload según lo que reciba tu endpoint de vinculación
     const payload = {
       articulo_id: idArticulo,
       proveedor_id: idProveedor
     };
 
-    // Usas tu endpoint de vinculación (ej. /relacionarArticuloProveedor o en proveedoresService)
     this.traer.http.post(`${this.API_URL}/articulos/relacionarProveedor`, payload)
       .subscribe({
         next: (resp: any) => {
           Swal.fire('¡Relacionado!', 'El artículo fue vinculado al proveedor con éxito', 'success');
-
-          // Volvemos a recargar los proveedores del producto para que se autoseleccione
+          this.direccionSeleccionada = idProveedor;
           this.cargarProveedoresPorProducto(idArticulo);
         },
         error: (err) => {
           console.error('Error al vincular proveedor:', err);
           Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
         }
-      });
-
-      this.direccionSeleccionada = idProveedor;
-      this.proveedoresService.traerProveedoresPorArticulo(idArticulo).subscribe({
-
-        next: (res: any) =>{
-          this.proveedores = res || [];
-
-          this.CapturarValor();
-        },
-
-        error: (err) => {
-          console.error('Error al vincular proveedor:', err);
-          Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
-        }
-        
       });
   }
 
@@ -322,7 +295,7 @@ export class MisSeguimientosComponent implements OnInit {
           this.Recargastock
         ).subscribe({
           next: (res: any) => {
-            if (res === 'reload') {
+            if (res === 'Save' || res === 'reload' || res?.ok) {
               Swal.fire('¡Guardado!', '¡Los datos fueron agregados al stock!', 'success');
 
               this.articuloValido = false;
@@ -344,13 +317,15 @@ export class MisSeguimientosComponent implements OnInit {
               };
 
               form.resetForm();
+            } else if (res === 'SinRegistro') {
+              Swal.fire('Atención', 'El artículo no cuenta con un costo o registro asignado con este proveedor en el almacén.', 'warning');
             } else {
               Swal.fire('Error', 'Contacte a soporte', 'error');
             }
           },
           error: (err) => {
             console.error('Error al recargar stock:', err);
-            Swal.fire('Error', 'Ocurrió un problema en el servidor', 'error');
+            Swal.fire('Error', 'Ocurrió un problema en el servidor al procesar la compra', 'error');
           }
         });
       }
