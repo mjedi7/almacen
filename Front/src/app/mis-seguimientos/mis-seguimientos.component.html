@@ -20,19 +20,55 @@
         <small *ngIf="Partida.invalid && Partida.touched" class="text-danger">Campo Obligatorio</small>
       </div>
 
-     <div class="form-group col-md-4">
-      <label>Producto (Busque y seleccione)</label>
-      <input type="text" 
-             class="form-control" 
-             placeholder="Escriba el nombre del producto..."
-             [(ngModel)]="terminoBusqueda"
-             name="Busqueda" 
-             (input)="buscarYSeleccionar()"
-             list="listaProductos"
-             [attr.disabled]="!Recargastock.partida ? '' : null"> <datalist id="listaProductos">
-        <option *ngFor="let p of productosFiltrados" [value]="p.descripcion">
-      </datalist>
+     <div class="form-group col-md-4 position-relative">
+  <label>Producto</label>
+
+  <!-- Control Único: Escribes para filtrar o haces clic para abrir la lista -->
+  <div class="input-group">
+    <input type="text"
+           class="form-control"
+           placeholder="-- Seleccione o busque un producto --"
+           [(ngModel)]="terminoBusqueda"
+           name="BusquedaProducto"
+           (focus)="abrirDropdown()"
+           (input)="filtrarProductos()"
+           [disabled]="!Recargastock.partida"
+           autocomplete="off"
+           required>
+    
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" 
+              type="button" 
+              (click)="alternarDropdown()"
+              [disabled]="!Recargastock.partida">
+        ▼
+      </button>
     </div>
+  </div>
+
+  <!-- Menú flotante con scroll -->
+  <div *ngIf="mostrarDropdown && productosFiltrados.length > 0" 
+       class="dropdown-menu show w-100 shadow" 
+       style="max-height: 250px; overflow-y: auto; z-index: 1050; display: block;">
+    <button type="button" 
+            class="dropdown-item text-wrap py-2" 
+            *ngFor="let prod of productosFiltrados"
+            (click)="seleccionarProducto(prod)">
+      <strong *ngIf="prod.clave">{{ prod.clave }} - </strong> {{ prod.descripcion }}
+    </button>
+  </div>
+
+  <div *ngIf="mostrarDropdown && productosFiltrados.length === 0" 
+       class="dropdown-menu show w-100 p-2 text-muted" 
+       style="display: block;">
+    <small>No se encontraron productos coincidentes</small>
+  </div>
+
+  <!-- Validación visual si no hay producto amarrado -->
+  <small *ngIf="!Recargastock.producto && terminoBusqueda && !mostrarDropdown" class="text-danger">
+    Debe seleccionar una opción de la lista
+  </small>
+</div>
 
     <div class="form-group col-md-4">
         <label>Proveedor</label>

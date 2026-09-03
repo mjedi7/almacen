@@ -88,39 +88,83 @@ export class MisSeguimientosComponent implements OnInit {
     });
   }
 
-  opcionSeleccionadaX() {
-    this.articuloValido = false;
-    this.terminoBusqueda = '';
-    this.Recargastock.producto = null;
-    this.productos = [];
-    this.productosFiltrados = [];
-    this.direccionSeleccionada = null;
-    this.proveedores = [];
+  // Agrega esta propiedad arriba junto a las demás
+mostrarDropdown: boolean = false;
 
-    if (!this.Recargastock.partida) return;
+// 1. Al cambiar de partida, resetea y llena la lista
+opcionSeleccionadaX() {
+  this.articuloValido = false;
+  this.terminoBusqueda = '';
+  this.Recargastock.producto = null;
+  this.productos = [];
+  this.productosFiltrados = [];
+  this.direccionSeleccionada = null;
+  this.proveedores = [];
+  this.mostrarDropdown = false;
 
-    this.traer.http.get(`${this.API_URL}/articulos/traerProductos/${this.Recargastock.partida}`)
-      .subscribe({
-        next: (res: any) => {
-          this.productos = res;
-          this.productosFiltrados = res;
-        },
-        error: (err) => console.error('Error al traer productos por partida:', err)
-      });
-  }
+  if (!this.Recargastock.partida) return;
 
-  buscarProducto() {
+  this.traer.http.get(`${this.API_URL}/articulos/traerProductos/${this.Recargastock.partida}`)
+    .subscribe({
+      next: (res: any) => {
+        this.productos = res || [];
+        this.productosFiltrados = [...this.productos];
+      },
+      error: (err) => console.error('Error al traer productos por partida:', err)
+    });
+}
+
+// 2. Control de visibilidad del desplegable
+abrirDropdown() {
+  if (this.Recargastock.partida) {
+    this.mostrarDropdown = true;
     if (!this.terminoBusqueda) {
-      this.productosFiltrados = this.productos;
-      return;
+      this.productosFiltrados = [...this.productos];
     }
-
-    const busqueda = this.terminoBusqueda.toLowerCase();
-    this.productosFiltrados = this.productos.filter(p =>
-      p.descripcion?.toLowerCase().includes(busqueda) ||
-      p.idproducto?.toString().toLowerCase().includes(busqueda)
-    );
   }
+}
+
+alternarDropdown() {
+  if (!this.Recargastock.partida) return;
+  this.mostrarDropdown = !this.mostrarDropdown;
+  if (this.mostrarDropdown && !this.terminoBusqueda) {
+    this.productosFiltrados = [...this.productos];
+  }
+}
+
+// 3. Filtro en caliente conforme escribe
+filtrarProductos() {
+  this.mostrarDropdown = true;
+  this.Recargastock.producto = null; // Invalida hasta que elija uno oficial de la lista
+  this.articuloValido = false;
+  this.proveedores = [];
+  this.direccionSeleccionada = null;
+
+  const busqueda = (this.terminoBusqueda || '').toLowerCase().trim();
+  if (!busqueda) {
+    this.productosFiltrados = [...this.productos];
+    return;
+  }
+
+  this.productosFiltrados = this.productos.filter(p =>
+    (p.descripcion && p.descripcion.toLowerCase().includes(busqueda)) ||
+    (p.clave && p.clave.toLowerCase().includes(busqueda)) ||
+    (p.idproducto && p.idproducto.toString().includes(busqueda)) ||
+    (p.id && p.id.toString().includes(busqueda))
+  );
+}
+
+// 4. Click en el producto de la lista (asigna el ID real directo)
+seleccionarProducto(prod: any) {
+  const idReal = prod.id || prod.idproducto;
+  this.Recargastock.producto = idReal;
+  this.terminoBusqueda = prod.clave ? `${prod.clave} - ${prod.descripcion}` : prod.descripcion;
+  this.mostrarDropdown = false;
+
+  this.direccionSeleccionada = null;
+  this.articuloValido = false;
+  this.cargarProveedoresPorProducto(+idReal);
+}
 
   buscarYSeleccionar() {
     const match = this.productos.find(p => p.descripcion === this.terminoBusqueda);
