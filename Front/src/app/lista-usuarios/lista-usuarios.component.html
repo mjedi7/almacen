@@ -20,6 +20,7 @@
                 <th style="text-align:center;width: 250px;">Nombre</th>
                 <th style="text-align:center;width: 150px;">Área</th>
                 <th style="text-align:center;width: 150px;">Activo</th>
+                <th style="text-align:center;width: 180px;">Acciones</th>
    
             </tr>
         </thead>
@@ -31,7 +32,8 @@
                 <td style="text-align:center;">{{ usuario.nombre}}</td>
                 <td style="text-align:center;">{{ usuario.nombrearea}}</td>
                 <td style="text-align:center;">{{ usuario.activo ? 'Si' : 'No'}}</td>
-                
+                <td style="text-align:center;">
+                <button type="button" class="btn btn-warning btn-sm" (click)="seleccionarUsuario(usuario, cambioPasswordModal)">Cambiar contraseña</button></td>                
             </tr>
         </tbody>
     </table>
@@ -105,3 +107,100 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Cambiar contraseña -->
+<ng-template #cambioPasswordModal let-modal>
+
+    <div class="modal-header">
+        <h5 class="modal-title">
+            Cambiar contraseña
+        </h5>
+
+        <button
+            type="button"
+            class="close"
+            aria-label="Close"
+            (click)="modal.dismiss()">
+
+            <span aria-hidden="true">&times;</span>
+
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="form-group">
+
+            <label>Usuario</label>
+
+            <input
+                type="text"
+                class="form-control"
+                [value]="usuarioSeleccionado?.usuario"
+                readonly>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Nombre</label>
+
+            <input
+                type="text"
+                class="form-control"
+                [value]="usuarioSeleccionado?.nombre"
+                readonly>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Nueva contraseña</label>
+
+            <input
+                [(ngModel)]="nuevaPassword"
+                type="password"
+                class="form-control"
+                name="nuevaPassword"
+                placeholder="Nueva contraseña">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Confirmar contraseña</label>
+
+            <input
+                [(ngModel)]="confirmarPassword"
+                type="password"
+                class="form-control"
+                name="confirmarPassword"
+                placeholder="Confirmar contraseña">
+
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="modal.dismiss()">
+
+            Cancelar
+
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-success"
+            (click)="cambiarPassword()">
+
+            Actualizar contraseña
+
+        </button>
+
+    </div>
+
+</ng-template>

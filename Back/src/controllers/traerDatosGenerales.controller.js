@@ -568,10 +568,37 @@ const traerNombreArchivoRespuesta = async(req, res) => {
 
 const getUsuarios = async(req, res) => {
 
-    var centro_trabajo=req.params.area
+    var centro_trabajo = req.params.area;
 
-    const response = await pool.query("select id_usuario,numempleado,usuario,nombre,clave_area,nombre_completo as nombrearea,usuarios.esactivo as activo from usuarios inner join cat_direccion_area on usuarios.clave_area=cast (cat_direccion_area.clave as integer) where centro_trabajo="+centro_trabajo);
+    const response = await pool.query(
+        "select id_usuario,numempleado,usuario,nombre,clave_area,nombre_completo as nombrearea,usuarios.esactivo as activo " +
+        "from usuarios " +
+        "inner join cat_direccion_area on usuarios.clave_area=cast(cat_direccion_area.clave as integer) " +
+        "where centro_trabajo=" + centro_trabajo
+    );
+
     res.status(200).json(response.rows);
+};
+
+
+const getTodosUsuarios = async(req, res) => {
+
+    const resultadoUsuarios = await pool.query(`
+        select
+            id_usuario,
+            numempleado,
+            usuario,
+            nombre,
+            clave_area,
+            nombre_completo as nombrearea,
+            usuarios.esactivo as activo
+        from usuarios
+        inner join cat_direccion_area
+            on usuarios.clave_area = cast(cat_direccion_area.clave as integer)
+        order by id_usuario
+    `);
+
+    res.status(200).json(resultadoUsuarios.rows);
 };
 
 // const getAreaEmite = async(req, res) => {
@@ -1228,6 +1255,7 @@ module.exports = {
     getSeguimientos,
     traerNombreArchivo,
     getUsuarios,
+    getTodosUsuarios,
     getDocPorContestar,
     // getAreaEmite,
     traerNombreArchivoRespuesta,
