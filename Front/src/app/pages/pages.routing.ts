@@ -42,7 +42,7 @@ const routes: Routes = [
             {path: 'lista-usuarios', component: ListaUsuariosComponent, canActivate: [AuthGuard, AdminGuard]},
             {path: 'por-contestar', component:PorContestarComponent,canActivate:[AuthGuard]},
             {path: 'estadistico-general', component:EstadisticoGeneralComponent,canActivate:[AuthGuard]},
-            {path: 'cambio-password', component: CambioPasswordComponent, canActivate: [AuthGuard, AdminGuard]},
+            {path: 'cambio-password', component: CambioPasswordComponent, canActivate: [AuthGuard]},
             {path: 'existencias',component:ExistenciasComponent,canActivate:[AuthGuard]},
             {path:'generar-requisicion',component:GeneraRequisicionComponent,canActivate:[AuthGuard]},
             {path:'requisiciones-pendientes',component:RequisicionesPendientesComponent,canActivate:[AuthGuard]},
