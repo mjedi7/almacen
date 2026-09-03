@@ -44,6 +44,9 @@ export class CargarExistenciasComponent implements OnInit {
   cargandoArticulos: boolean = false;
 
   isSaving: boolean = false;
+  
+  // Buscar articulo
+  articuloBuscado: string = '';
 
 
   constructor(
@@ -229,6 +232,8 @@ export class CargarExistenciasComponent implements OnInit {
     this.cantidadInput = null;
 
     this.articulos = [];
+    
+    this.articuloBuscado = '';
 
 
     if (!this.partidaSeleccionadaId) {
@@ -443,9 +448,10 @@ export class CargarExistenciasComponent implements OnInit {
      * el usuario pueda cargar muchos artículos
      * de la misma partida rápidamente.
      */
-    this.articuloSeleccionadoId = null;
-
-    this.cantidadInput = null;
+	
+	this.articuloSeleccionadoId = null;
+	this.articuloBuscado = '';
+	this.cantidadInput = null;
 
 
     /*
@@ -732,6 +738,20 @@ export class CargarExistenciasComponent implements OnInit {
       });
 
   }
+  
+ onArticuloInput(): void {
+
+  const texto = this.articuloBuscado?.trim();
+
+  const seleccionado = this.articulos.find(
+    (art: any) =>
+      `${art.clave} - ${art.descripcion}` === texto
+  );
+
+  this.articuloSeleccionadoId =
+    seleccionado ? seleccionado.id : null;
+
+} 
 
 
   // ============================================================

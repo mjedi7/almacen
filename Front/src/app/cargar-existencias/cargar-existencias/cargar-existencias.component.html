@@ -1,6 +1,5 @@
 <div class="container">
 
-  <!-- TÍTULO -->
   <div
     class="titulo"
     style="
@@ -12,7 +11,7 @@
 
     <h3>
       <b>
-        Cargar Existencias de Inventario
+        Cargar Existencias de Inventario a DG
       </b>
     </h3>
 
@@ -26,7 +25,6 @@
   </div>
 
 
-  <!-- FORMULARIO -->
   <form
     #f="ngForm"
     (ngSubmit)="agregarALista(f)"
@@ -34,7 +32,7 @@
   >
 
 
-    <!-- PARTIDA -->
+    <!-- Cargar partidas -->
     <div class="form-group mb-3">
 
       <label
@@ -62,7 +60,7 @@
           {{
             cargandoPartidas
               ? 'Cargando partidas...'
-              : 'Selecciona una partida...'
+              : 'Seleccione una partida...'
           }}
         </option>
 
@@ -81,103 +79,90 @@
     </div>
 
 
+<!-- ARTÍCULO Y CANTIDAD EN LA MISMA FILA -->
+<div class="row mb-4">
 
-    <!-- ARTÍCULO -->
-    <div class="form-group mb-3">
+  <!-- ARTÍCULO -->
+  <div class="form-group col-md-9">
 
-      <label
-        for="id_articulo"
-        class="form-label"
+    <label
+      for="id_articulo"
+      class="form-label"
+    >
+      <b>Artículo</b>
+    </label>
+
+    <input
+      type="text"
+      id="id_articulo"
+      name="id_articulo"
+      class="form-control"
+      [(ngModel)]="articuloBuscado"
+      (input)="onArticuloInput()"
+      [disabled]="
+        !partidaSeleccionadaId ||
+        cargandoArticulos
+      "
+      list="listaArticulos"
+      autocomplete="off"
+      placeholder="Escriba clave o descripción del artículo..."
+      required
+    >
+
+    <datalist id="listaArticulos">
+
+      <option
+        *ngFor="let art of articulos"
+        [value]="art.clave + ' - ' + art.descripcion"
       >
-        <b>Artículo</b>
-      </label>
+      </option>
+
+    </datalist>
 
 
-      <select
-        id="id_articulo"
-        name="id_articulo"
-        class="form-select"
-        [(ngModel)]="articuloSeleccionadoId"
-        [disabled]="
-          !partidaSeleccionadaId ||
-          cargandoArticulos
-        "
-        required
-      >
+    <small
+      class="text-muted"
+      *ngIf="
+        partidaSeleccionadaId &&
+        !cargandoArticulos &&
+        articulos.length === 0
+      "
+    >
+      No se encontraron artículos activos para esta partida.
+    </small>
 
-        <option
-          [ngValue]="null"
-          disabled
-        >
-
-          {{
-            cargandoArticulos
-              ? 'Cargando artículos...'
-              : 'Selecciona un artículo...'
-          }}
-
-        </option>
+  </div>
 
 
-        <option
-          *ngFor="let art of articulos"
-          [ngValue]="art.id"
-        >
+  <!-- CANTIDAD -->
+  <div class="form-group col-md-3">
 
-          {{ art.clave }} - {{ art.descripcion }}
+    <label
+      for="cantidad"
+      class="form-label"
+    >
+      <b>Cantidad</b>
+    </label>
 
-        </option>
+    <input
+      type="number"
+      id="cantidad"
+      name="cantidad"
+      class="form-control"
+      [(ngModel)]="cantidadInput"
+      [disabled]="!articuloSeleccionadoId"
+      min="1"
+      step="1"
+      required
+      placeholder="Cantidad"
+    >
 
-      </select>
+  </div>
 
-
-      <small
-        class="text-muted"
-        *ngIf="
-          partidaSeleccionadaId &&
-          !cargandoArticulos &&
-          articulos.length === 0
-        "
-      >
-
-        No se encontraron artículos activos
-        para esta partida.
-
-      </small>
-
-    </div>
+</div>
 
 
 
-    <!-- CANTIDAD -->
-    <div class="form-group mb-4">
-
-      <label
-        for="cantidad"
-        class="form-label"
-      >
-        <b>Cantidad</b>
-      </label>
-
-
-      <input
-        type="number"
-        id="cantidad"
-        name="cantidad"
-        class="form-control"
-        [(ngModel)]="cantidadInput"
-        [disabled]="!articuloSeleccionadoId"
-        min="1"
-        step="1"
-        required
-        placeholder="Capture la cantidad"
-      >
-
-    </div>
-
-
-
-    <!-- BOTÓN AGREGAR -->
     <div class="text-center">
 
       <button
