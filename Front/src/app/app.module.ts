@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { NopagefoundComponent } from './nopagefound/nopagefound.component';
+import { ListarArticulosPartidaComponent } from './listar-articulos-partida/listar-articulos-partida.component';
 
 //tablas
 import { DataTablesModule } from "angular-datatables";
@@ -52,7 +53,8 @@ import { CargarExistenciasComponent } from './cargar-existencias/cargar-existenc
     AltaArticuloComponent,
     ListaMovimientosComponent,
     UsarArticuloComponent,
-    CargarExistenciasComponent
+    CargarExistenciasComponent,
+    ListarArticulosPartidaComponent
   ],
   imports: [
     BrowserModule,

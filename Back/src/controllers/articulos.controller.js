@@ -409,6 +409,71 @@ const relacionarArticuloProveedor = async (req, res) => {
   }
 };
 
+// Agregado para Modulo de Mostrar Articulos por Partida
+// GET /articulos/por-partida/:idPartida
+const listarArticulosPorPartida = async (req, res) => {
+
+  try {
+
+    const idPartida = Number(req.params.idPartida);
+
+    if (!Number.isInteger(idPartida) || idPartida <= 0) {
+
+      return res.status(400).json({
+        ok: false,
+        msg: 'La partida seleccionada no es válida'
+      });
+
+    }
+
+
+    const query = `
+      SELECT
+        a.id,
+        a.clave,
+        a.descripcion,
+        a.id_partidas,
+        a.unidad_medida_id,
+        u.nombre_medida
+      FROM cat_articulos a
+      LEFT JOIN unidad_medida u
+        ON u.id = a.unidad_medida_id
+      WHERE a.id_partidas = $1
+        AND a.esactivo = true
+      ORDER BY a.clave ASC
+    `;
+
+
+    const { rows } = await pool.query(
+      query,
+      [idPartida]
+    );
+
+
+    return res.status(200).json({
+      ok: true,
+      articulos: rows
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      'listarArticulosPorPartida error:',
+      error
+    );
+
+
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error al consultar los artículos',
+      error: error.message
+    });
+
+  }
+
+};
+
 module.exports = {
   crearArticulo,
   listarArticulos,
@@ -419,5 +484,6 @@ module.exports = {
   listarArticulosGeneral,
   traerProductosPorPartida,
   obtenerSiguienteClave,
-  relacionarArticuloProveedor // Exportada correctamente
+  relacionarArticuloProveedor, // Exportada correctamente
+  listarArticulosPorPartida // Modulo Listar articulos por partida
 };

@@ -24,6 +24,7 @@ import { AltaArticuloComponent } from '../app/alta-articulo/alta-articulo.compon
 import { ListaMovimientosComponent } from '../app/lista-movimientos/lista-movimientos.component';
 import { UsarArticuloComponent } from '../app/usar-articulo/usar-articulo.component';
 import { CargarExistenciasComponent } from '../cargar-existencias/cargar-existencias/cargar-existencias.component';
+import { ListarArticulosPartidaComponent } from '../listar-articulos-partida/listar-articulos-partida.component';
 
 
 
@@ -56,8 +57,7 @@ const routes: Routes = [
             { path: 'reporte-compras', component: ReporteComprasComponent, canActivate: [AuthGuard] },
             { path: 'reporte-existencia-x-partida', component: ReporteExistenciaXPartidaComponent, canActivate: [AuthGuard] },
             { path: 'reporte-movimiento-x-partida', component: ReporteMovimientosXPartidaComponent, canActivate: [AuthGuard] },
-
-
+            { path: 'listar-articulos-partida', component: ListarArticulosPartidaComponent, canActivate: [AuthGuard] },
 
 
         ]
