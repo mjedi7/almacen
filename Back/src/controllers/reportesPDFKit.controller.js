@@ -248,32 +248,27 @@ const pruebaReporte = async (req, res) => {
         doc.font('Helvetica-Bold').text('Total Salidas:', 370, boxTotalesY + 14, { width: 120, align: 'right' });
         doc.font('Helvetica').text(totalSalidas.toFixed(2), 495, boxTotalesY + 14, { width: 85, align: 'right' });
 
-        // --- 5. FIRMAS INSTITUCIONALES (Y = 590) ---
-        const firmasY = 590;
-        const firmasHeight = 65;
-        const firmaBoxWidth = totalWidth / 4;
+        // --- NUMERACIÓN DINÁMICA DE PÁGINAS (Página X de Y) ---
+        const range = doc.bufferedPageRange(); // { start: 0, count: N }
 
-        const firmas = [
-            { titulo: 'RECIBIÓ', nombre: '', cargo: 'DIRECTOR/JEFE\nDEPTO/AUXILIAR' },
-            { titulo: 'ENTREGÓ', nombre: '', cargo: 'ENCARGADO DE ALMACEN' },
-            { titulo: 'REVISÓ', nombre: 'LIC. ISRAEL SOBERANIZ MORALES', cargo: 'JEFE DEL DEPARTAMENTO DE\nRECURSOS MATERIALES Y\nSERVICIOS GENERALES' },
-            { titulo: 'AUTORIZÓ', nombre: 'M.A. ADRIANA P. HERNANDEZ HERNANDEZ', cargo: 'ENCARGADA DE DESPACHO DE LA\nDIRECCIÓN ADMINISTRATIVA' }
-        ];
+        for (let i = 0; i < range.count; i++) {
+            doc.switchToPage(i);
 
-        firmas.forEach((f, idx) => {
-            const xPos = 30 + (idx * firmaBoxWidth);
-            doc.rect(xPos, firmasY, firmaBoxWidth, firmasHeight).stroke('#333333');
+            // Se coloca en la parte inferior (Y = 700 para no encimarse con el membrete inferior)
+            doc.font('Helvetica')
+               .fontSize(7.5)
+               .fillColor('#555555')
+               .text(
+                   `Página ${i + 1} de ${range.count}`,
+                   30,
+                   700, 
+                   { width: totalWidth, align: 'right' }
+               );
+        }
 
-            doc.font('Helvetica-Bold').fontSize(6.5)
-                .text(f.titulo, xPos + 2, firmasY + 4, { width: firmaBoxWidth - 4, align: 'center' });
+       
 
-            if (f.nombre) {
-                doc.fontSize(5.8).font('Helvetica-Bold')
-                    .text(f.nombre, xPos + 2, firmasY + 28, { width: firmaBoxWidth - 4, align: 'center' });
-            }
-            doc.fontSize(5.2).font('Helvetica')
-                .text(f.cargo, xPos + 2, firmasY + 38, { width: firmaBoxWidth - 4, align: 'center' });
-        });
+        
 
         doc.end();
 
