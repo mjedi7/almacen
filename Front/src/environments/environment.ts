@@ -2,11 +2,7 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-<<<<<<< HEAD
 //import { url } from "inspector";
-=======
-
->>>>>>> 210993727f335aee401910a2a20d987f4388b5d4
 
 // export const environment = {
 //   production: false
@@ -23,13 +19,8 @@ export const environment = {
     appId: "1:707598495946:web:1708c22c2aa5aa904c4433",
     measurementId: "G-X89XNXH6TT"
   },
-<<<<<<< HEAD
-    uri_api: 'http://172.16.0.100:3000'
+    uri_api: 'http://172.16.0.148:3000'
    //uri_api:   'http://172.16.0.148:3000'
-=======
-    url_api: 'http://172.16.0.100:4200',
-   uri_api:   'http://172.16.0.148:3000'
->>>>>>> 210993727f335aee401910a2a20d987f4388b5d4
    //uri_api:   'http://localhost:3000'
   // uri_api: 'http://172.16.0.4:3001'
 
