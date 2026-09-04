@@ -14,7 +14,6 @@ import { PermisosModulosComponent } from './permisos-modulos/permisos-modulos.co
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CmAngularDualListboxModule } from 'cm-angular-dual-listbox';
 import { AngularDualListBoxModule } from 'angular-dual-listbox';
-import { ArticulosRegistradosComponent } from './articulos-registrados/articulos-registrados.component';
 
 
 
@@ -24,8 +23,6 @@ import { ArticulosRegistradosComponent } from './articulos-registrados/articulos
     DashboardComponent,
     PagesComponent,
     PermisosModulosComponent,
-    ArticulosRegistradosComponent,
-
   ],
 
   providers:[
