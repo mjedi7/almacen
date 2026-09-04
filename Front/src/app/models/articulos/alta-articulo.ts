@@ -3,6 +3,7 @@ export interface articulo {
     clave: string;
     id_partidas?: number | null;
     unidad_medida_id?: number | null;
+    precio_unitario?: number | null;
     descripcion: string;
     esActivo: boolean;
     esBasico: boolean;

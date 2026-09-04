@@ -18,6 +18,7 @@ export class AltaArticuloComponent implements OnInit {
     id_partidas: null, // <-- Inicializado explícitamente
     descripcion: '',
     unidad_medida_id: null,
+    precio_unitario: null,
     esActivo: true,
     esBasico: true
   };
@@ -100,6 +101,7 @@ export class AltaArticuloComponent implements OnInit {
       <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; margin-top: 10px;">
         <p><strong>Partida:</strong> ${textoPartida}</p>
         <p><strong>Clave:</strong> ${this.articulo.clave}</p>
+        <p><strong>Costo Unitario:</strong> $${this.articulo.precio_unitario ?? 0}</p>
         <p><strong>Descripción:</strong> ${descripcionLimpia}</p>
         <p><strong>Unidad de Medida:</strong> ${textoUnidad}</p>
       </div>
@@ -121,6 +123,7 @@ export class AltaArticuloComponent implements OnInit {
           id_partidas: this.articulo.id_partidas,
           unidad_medida_id: this.articulo.unidad_medida_id || null,
           descripcion: this.articulo.descripcion,
+          precio_unitario: this.articulo.precio_unitario ? Number(this.articulo.precio_unitario) : 0,
           esActivo: this.articulo.esActivo ?? true,
           esBasico: this.articulo.esBasico ?? true
         };
@@ -140,7 +143,13 @@ export class AltaArticuloComponent implements OnInit {
               });
 
               // Resetear formulario
-              f.resetForm({ esActivo: true, esBasico: true, id_partidas: null, unidad_medida_id: null });
+             f.resetForm({ 
+                esActivo: true, 
+                esBasico: true, 
+                id_partidas: null, 
+                unidad_medida_id: null,
+                precio_unitario: null 
+              });
               this.articulo.clave = '';
             } else {
               Swal.fire({

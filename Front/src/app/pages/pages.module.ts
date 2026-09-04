@@ -23,7 +23,6 @@ import { AngularDualListBoxModule } from 'angular-dual-listbox';
     DashboardComponent,
     PagesComponent,
     PermisosModulosComponent,
-
   ],
 
   providers:[

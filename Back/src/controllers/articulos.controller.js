@@ -28,6 +28,7 @@ const listarPartidas = async (req, res) => {
 };
 
 // POST /articulos
+// POST /articulos
 const crearArticulo = async (req, res) => {
   try {
     let {
@@ -35,6 +36,7 @@ const crearArticulo = async (req, res) => {
       id_partidas,
       descripcion,
       unidad_medida_id,
+      precio_unitario,
       esActivo = true,
       esBasico = true,
       limite_max_a = 0,
@@ -46,7 +48,11 @@ const crearArticulo = async (req, res) => {
       return res.status(400).json({ ok: false, msg: 'Faltan datos obligatorios' });
     }
 
-    const query = `
+    // 1. Iniciar transacción con pool
+    await pool.query('BEGIN');
+
+    // 2. Insertar en cat_articulos
+    const queryArticulo = `
       INSERT INTO cat_articulos (
         clave,
         id_partidas,
@@ -62,7 +68,7 @@ const crearArticulo = async (req, res) => {
       RETURNING *
     `;
 
-    const values = [
+    const valuesArticulo = [
       String(clave).trim(),
       Number(id_partidas),
       String(descripcion).toUpperCase().trim(),
@@ -74,11 +80,52 @@ const crearArticulo = async (req, res) => {
       limite_max_c
     ];
 
-    const { rows } = await pool.query(query, values);
-    return res.status(201).json({ ok: true, articulo: rows[0] });
+    const { rows: articulosCreados } = await pool.query(queryArticulo, valuesArticulo);
+    const nuevoArticulo = articulosCreados[0];
+
+    // 3. Preparar datos para la tabla costos
+    const costoUnit = parseFloat(precio_unitario) || 0.00;
+    const porcentajeIva = 16;
+    const precioTot = costoUnit * (1 + (porcentajeIva / 100));
+    const proveedorDefault = 2; // ID de un proveedor existente
+
+    // 4. Insertar en costos con el id_articulo generado
+    const queryCosto = `
+      INSERT INTO costos (
+        id_articulo,
+        id_proveedor,
+        precio_unitario,
+        iva,
+        precio_total,
+        fecha_inicio,
+        esactivo
+      )
+      VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, true)
+      RETURNING *
+    `;
+
+    const valuesCosto = [
+      nuevoArticulo.id,
+      proveedorDefault,
+      costoUnit,
+      porcentajeIva,
+      precioTot
+    ];
+
+    const { rows: costosCreados } = await pool.query(queryCosto, valuesCosto);
+
+    // 5. Confirmar transacción
+    await pool.query('COMMIT');
+
+    return res.status(201).json({
+      ok: true,
+      articulo: nuevoArticulo,
+      costo: costosCreados[0]
+    });
 
   } catch (e) {
-    console.error('Error al crear articulo:', e);
+    await pool.query('ROLLBACK');
+    console.error('Error al crear articulo y costo:', e);
     return res.status(500).json({ ok: false, msg: 'Error al crear artículo', error: e.message });
   }
 };
@@ -409,71 +456,6 @@ const relacionarArticuloProveedor = async (req, res) => {
   }
 };
 
-// Agregado para Modulo de Mostrar Articulos por Partida
-// GET /articulos/por-partida/:idPartida
-const listarArticulosPorPartida = async (req, res) => {
-
-  try {
-
-    const idPartida = Number(req.params.idPartida);
-
-    if (!Number.isInteger(idPartida) || idPartida <= 0) {
-
-      return res.status(400).json({
-        ok: false,
-        msg: 'La partida seleccionada no es válida'
-      });
-
-    }
-
-
-    const query = `
-      SELECT
-        a.id,
-        a.clave,
-        a.descripcion,
-        a.id_partidas,
-        a.unidad_medida_id,
-        u.nombre_medida
-      FROM cat_articulos a
-      LEFT JOIN unidad_medida u
-        ON u.id = a.unidad_medida_id
-      WHERE a.id_partidas = $1
-        AND a.esactivo = true
-      ORDER BY a.clave ASC
-    `;
-
-
-    const { rows } = await pool.query(
-      query,
-      [idPartida]
-    );
-
-
-    return res.status(200).json({
-      ok: true,
-      articulos: rows
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      'listarArticulosPorPartida error:',
-      error
-    );
-
-
-    return res.status(500).json({
-      ok: false,
-      msg: 'Error al consultar los artículos',
-      error: error.message
-    });
-
-  }
-
-};
-
 module.exports = {
   crearArticulo,
   listarArticulos,
@@ -484,6 +466,5 @@ module.exports = {
   listarArticulosGeneral,
   traerProductosPorPartida,
   obtenerSiguienteClave,
-  relacionarArticuloProveedor, // Exportada correctamente
-  listarArticulosPorPartida // Modulo Listar articulos por partida
+  relacionarArticuloProveedor // Exportada correctamente
 };

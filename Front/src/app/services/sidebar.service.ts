@@ -69,25 +69,15 @@ export class SidebarService {
         },
   ];
 
-	menu55: any[] = [
-	  {
-		titulo: 'Artículos',
-		icono: 'mdi mdi-gauge',
-		submenu: [
-		  {
-			titulo: 'Agregar artículo',
-			url: 'agregar-articulo',
-			mostrar: true
-		  },
-
-		  {
-			titulo: 'Listar artículos por Partida',
-			url: 'listar-articulos-partida',
-			mostrar: false
-		  }
-		]
-	  },
-	];
+     menu55: any[] = [
+    {
+          titulo: 'Artículos',
+          icono: 'mdi mdi-gauge',
+          submenu: [
+             { titulo: 'Agregar artículo', url: 'agregar-articulo',mostrar:true },
+          ]
+        },
+  ];
 
 
   /*menu44: any[] = [
