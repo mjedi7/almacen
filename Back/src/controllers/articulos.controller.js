@@ -159,7 +159,7 @@ const traerProductosPorPartida = async (req, res) => {
 
     const query = `
       SELECT id, descripcion, clave 
-      FROM cat_articulos_general 
+      FROM cat_articulos
       WHERE id_partidas = $1
       ORDER BY descripcion ASC
     `;

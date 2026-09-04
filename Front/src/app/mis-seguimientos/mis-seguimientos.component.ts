@@ -24,7 +24,7 @@ export class MisSeguimientosComponent implements OnInit {
   partidas: any = [];
   productos: any = [];
   proveedores: any = [];
-  catalogoProveedores: any = []; // Lista completa para cuando toque dar de alta relación
+  catalogoProveedores: any = [];
   datosproveedor: any = [];
 
   tipo: string;
@@ -76,10 +76,9 @@ export class MisSeguimientosComponent implements OnInit {
     this.fecha_registrox = `${this.day}-${this.month}-${anio}`;
 
     this.traerPartidas();
-    this.traerProveedoresCatalogo(); // Cargamos todos los proveedores para tenerlos listos
+    this.traerProveedoresCatalogo();
   }
 
-  // Traer catálogo general de proveedores
   traerProveedoresCatalogo() {
     this.traer.http.get(`${this.API_URL}/traerProveedores`).subscribe({
       next: (res: any) => {
@@ -89,39 +88,83 @@ export class MisSeguimientosComponent implements OnInit {
     });
   }
 
-  opcionSeleccionadaX() {
-    this.articuloValido = false;
-    this.terminoBusqueda = '';
-    this.Recargastock.producto = null;
-    this.productos = [];
-    this.productosFiltrados = [];
-    this.direccionSeleccionada = null;
-    this.proveedores = [];
+  // Agrega esta propiedad arriba junto a las demás
+mostrarDropdown: boolean = false;
 
-    if (!this.Recargastock.partida) return;
+// 1. Al cambiar de partida, resetea y llena la lista
+opcionSeleccionadaX() {
+  this.articuloValido = false;
+  this.terminoBusqueda = '';
+  this.Recargastock.producto = null;
+  this.productos = [];
+  this.productosFiltrados = [];
+  this.direccionSeleccionada = null;
+  this.proveedores = [];
+  this.mostrarDropdown = false;
 
-    this.traer.http.get(`${this.API_URL}/articulos/traerProductos/${this.Recargastock.partida}`)
-      .subscribe({
-        next: (res: any) => {
-          this.productos = res;
-          this.productosFiltrados = res;
-        },
-        error: (err) => console.error('Error al traer productos por partida:', err)
-      });
-  }
+  if (!this.Recargastock.partida) return;
 
-  buscarProducto() {
+  this.traer.http.get(`${this.API_URL}/articulos/traerProductos/${this.Recargastock.partida}`)
+    .subscribe({
+      next: (res: any) => {
+        this.productos = res || [];
+        this.productosFiltrados = [...this.productos];
+      },
+      error: (err) => console.error('Error al traer productos por partida:', err)
+    });
+}
+
+// 2. Control de visibilidad del desplegable
+abrirDropdown() {
+  if (this.Recargastock.partida) {
+    this.mostrarDropdown = true;
     if (!this.terminoBusqueda) {
-      this.productosFiltrados = this.productos;
-      return;
+      this.productosFiltrados = [...this.productos];
     }
-
-    const busqueda = this.terminoBusqueda.toLowerCase();
-    this.productosFiltrados = this.productos.filter(p =>
-      p.descripcion?.toLowerCase().includes(busqueda) ||
-      p.idproducto?.toString().toLowerCase().includes(busqueda)
-    );
   }
+}
+
+alternarDropdown() {
+  if (!this.Recargastock.partida) return;
+  this.mostrarDropdown = !this.mostrarDropdown;
+  if (this.mostrarDropdown && !this.terminoBusqueda) {
+    this.productosFiltrados = [...this.productos];
+  }
+}
+
+// 3. Filtro en caliente conforme escribe
+filtrarProductos() {
+  this.mostrarDropdown = true;
+  this.Recargastock.producto = null; // Invalida hasta que elija uno oficial de la lista
+  this.articuloValido = false;
+  this.proveedores = [];
+  this.direccionSeleccionada = null;
+
+  const busqueda = (this.terminoBusqueda || '').toLowerCase().trim();
+  if (!busqueda) {
+    this.productosFiltrados = [...this.productos];
+    return;
+  }
+
+  this.productosFiltrados = this.productos.filter(p =>
+    (p.descripcion && p.descripcion.toLowerCase().includes(busqueda)) ||
+    (p.clave && p.clave.toLowerCase().includes(busqueda)) ||
+    (p.idproducto && p.idproducto.toString().includes(busqueda)) ||
+    (p.id && p.id.toString().includes(busqueda))
+  );
+}
+
+// 4. Click en el producto de la lista (asigna el ID real directo)
+seleccionarProducto(prod: any) {
+  const idReal = prod.id || prod.idproducto;
+  this.Recargastock.producto = idReal;
+  this.terminoBusqueda = prod.clave ? `${prod.clave} - ${prod.descripcion}` : prod.descripcion;
+  this.mostrarDropdown = false;
+
+  this.direccionSeleccionada = null;
+  this.articuloValido = false;
+  this.cargarProveedoresPorProducto(+idReal);
+}
 
   buscarYSeleccionar() {
     const match = this.productos.find(p => p.descripcion === this.terminoBusqueda);
@@ -146,11 +189,9 @@ export class MisSeguimientosComponent implements OnInit {
           this.proveedores = res || [];
 
           if (this.proveedores.length === 1) {
-            // 💡 1 PROVEEDOR: Se autoselecciona y valida
             this.direccionSeleccionada = this.proveedores[0].id;
             this.CapturarValor();
           } else if (this.proveedores.length > 1) {
-            // 💡 MÁS DE 1 PROVEEDOR: El usuario escoge
             Swal.fire({
               title: 'Múltiples proveedores',
               text: 'Seleccione el proveedor correspondiente para este producto.',
@@ -159,7 +200,6 @@ export class MisSeguimientosComponent implements OnInit {
               showConfirmButton: false
             });
           } else {
-            // SIN PROVEEDOR ASIGNADO: Ofrecer vincularlo en caliente
             this.ofrecerVincularProveedor(idArticulo);
           }
         },
@@ -167,11 +207,7 @@ export class MisSeguimientosComponent implements OnInit {
       });
   }
 
-  // ==========================================================
-  // VINCULACIÓN EN CALIENTE CON SWEETALERT2
-  // ==========================================================
   ofrecerVincularProveedor(idArticulo: number) {
-    // Armamos las opciones del select dinámicamente con el catálogo
     const opciones: any = {};
     this.catalogoProveedores.forEach((prov: any) => {
       opciones[prov.id] = prov.nombre || prov.razon_social || `Proveedor #${prov.id}`;
@@ -205,41 +241,22 @@ export class MisSeguimientosComponent implements OnInit {
   }
 
   relacionarArticuloProveedor(idArticulo: number, idProveedor: number) {
-    // Payload según lo que reciba tu endpoint de vinculación
     const payload = {
       articulo_id: idArticulo,
       proveedor_id: idProveedor
     };
 
-    // Usas tu endpoint de vinculación (ej. /relacionarArticuloProveedor o en proveedoresService)
     this.traer.http.post(`${this.API_URL}/articulos/relacionarProveedor`, payload)
       .subscribe({
         next: (resp: any) => {
           Swal.fire('¡Relacionado!', 'El artículo fue vinculado al proveedor con éxito', 'success');
-
-          // Volvemos a recargar los proveedores del producto para que se autoseleccione
+          this.direccionSeleccionada = idProveedor;
           this.cargarProveedoresPorProducto(idArticulo);
         },
         error: (err) => {
           console.error('Error al vincular proveedor:', err);
           Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
         }
-      });
-
-      this.direccionSeleccionada = idProveedor;
-      this.proveedoresService.traerProveedoresPorArticulo(idArticulo).subscribe({
-
-        next: (res: any) =>{
-          this.proveedores = res || [];
-
-          this.CapturarValor();
-        },
-
-        error: (err) => {
-          console.error('Error al vincular proveedor:', err);
-          Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
-        }
-        
       });
   }
 
@@ -322,7 +339,7 @@ export class MisSeguimientosComponent implements OnInit {
           this.Recargastock
         ).subscribe({
           next: (res: any) => {
-            if (res === 'reload') {
+            if (res === 'Save' || res === 'reload' || res?.ok) {
               Swal.fire('¡Guardado!', '¡Los datos fueron agregados al stock!', 'success');
 
               this.articuloValido = false;
@@ -344,13 +361,15 @@ export class MisSeguimientosComponent implements OnInit {
               };
 
               form.resetForm();
+            } else if (res === 'SinRegistro') {
+              Swal.fire('Atención', 'El artículo no cuenta con un costo o registro asignado con este proveedor en el almacén.', 'warning');
             } else {
               Swal.fire('Error', 'Contacte a soporte', 'error');
             }
           },
           error: (err) => {
             console.error('Error al recargar stock:', err);
-            Swal.fire('Error', 'Ocurrió un problema en el servidor', 'error');
+            Swal.fire('Error', 'Ocurrió un problema en el servidor al procesar la compra', 'error');
           }
         });
       }

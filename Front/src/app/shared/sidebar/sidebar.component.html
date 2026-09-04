@@ -235,32 +235,37 @@
 
                 <!-- usuarios -->
 
+<ng-container *ngIf="muestraUsuarios">
 
-                <li *ngFor="let item5 of menuItems5">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration:none; background-color: brown">
-                        <i class="mdi mdi-account-multiple" style="color: #FFF; background-color: brown"></i>
-                        <!-- <i class="mdi mdi-cash-usd" style="color: #FFF; background-color: brown"></i> -->
-                        <span class="hide-menu" style="color: #FFF; background-color: brown"
-                            onmouseover="this.style.cssText='color:orange'"
-                            onmouseout="this.style.cssText='color:white'">
-                            {{ item5.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
-                                {{ item5.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
+    <li *ngFor="let item5 of menuItems5">
+        <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+            style="text-decoration:none; background-color: brown">
+            <i class="mdi mdi-account-multiple" style="color: #FFF; background-color: brown"></i>
 
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown">
-                        <li *ngFor="let subMenuItem of item5.submenu">
-                            <a [routerLink]="subMenuItem.url"
-                                style="text-decoration:none;color: #FFF; background-color: brown"
-                                onmouseover="this.style.cssText='color:orange'"
-                                onmouseout="this.style.cssText='color:white'"> * {{ subMenuItem.titulo }} </a>
-                        </li>
-                    </ul>
-                </li>
+            <span class="hide-menu" style="color: #FFF; background-color: brown"
+                onmouseover="this.style.cssText='color:Orange'"
+                onmouseout="this.style.cssText='color:white'">
+                {{ item5.titulo }}
+                <span class="label label-rouded label-themecolor pull-right"
+                    style="background-color: rgb(103, 101, 101)">
+                    {{ item5.submenu.length }}
+                </span>
+            </span>
+        </a>
+
+        <ul aria-expanded="false" class="collapse" style="background-color: brown">
+            <li *ngFor="let subMenuItem of item5.submenu">
+                <a [routerLink]="subMenuItem.url"
+                    style="text-decoration:none;color: #FFF; background-color: brown"
+                    onmouseover="this.style.cssText='color:orange'"
+                    onmouseout="this.style.cssText='color:white'">
+                    * {{ subMenuItem.titulo }}
+                </a>
+            </li>
+        </ul>
+    </li>
+
+</ng-container>
 
                 <!-- <li *ngFor="let item6 of menuItems6">
                     <a *ngIf="Preinscripcion" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false" style="text-decoration:none; background-color: brown">
