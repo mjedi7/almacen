@@ -18,13 +18,13 @@ const pruebaReporte = async (req, res) => {
         const idParamInt = parseInt(idParamRaw, 10) || 0;
         const partidaInt = parseInt(clavePartidaRaw, 10) || 0;
 
-        // 1. Consulta del Encabezado
+        // 1. Consulta del Encabezado (LEFT JOIN a unidad_medida)
         const queryEncabezado = `
             SELECT 
                 par.clave AS clave_partida,
                 art.id AS id_articulo,
                 art.clave AS clave_articulo,
-                art.unidad_medida,
+                COALESCE(um.nombre_medida, um.nombre_medida, art.unidad_medida, 'N/A') AS unidad_medida,
                 art.descripcion AS nom_articulo,
                 (
                     SELECT m.fecha 
@@ -46,6 +46,7 @@ const pruebaReporte = async (req, res) => {
                 ) AS total_entradas_compras
             FROM cat_articulos art
                 INNER JOIN cat_partidas par ON par.id = art.id_partidas
+                LEFT JOIN unidad_medida um ON um.id = art.unidad_medida_id
             WHERE (par.clave = $1 OR par.id = $4)
               AND (
                   art.id = $2 
@@ -54,7 +55,6 @@ const pruebaReporte = async (req, res) => {
               )
             LIMIT 1
         `;
-
         // 2. Consulta del Detalle
         const queryDetalle = `
             SELECT 
@@ -158,7 +158,7 @@ const pruebaReporte = async (req, res) => {
         doc.fontSize(12).font('Helvetica-Bold')
             .text('KÁRDEX', 30, yTitulo + 26, { width: totalWidth, align: 'center' });
 
-        // --- 2. METADATOS DEL ARTÍCULO ---
+    // --- 2. METADATOS DEL ARTÍCULO ---
         const metaY = yTitulo + 44; // Y = 139
         const claveCompleta = `${headerData.clave_partida || clavePartidaRaw}-${headerData.clave_articulo || idParamRaw}`;
 
@@ -177,15 +177,15 @@ const pruebaReporte = async (req, res) => {
         // Fila 2
         const row2Y = row1Y + 13;
         doc.font('Helvetica-Bold').text('Unidad de Entrada:', 30, row2Y);
-        doc.font('Helvetica').text(headerData.unidad_medida || 'N/A', 120, row2Y);
+        doc.font('Helvetica').text(headerData.unidad_medida, 120, row2Y);
 
         doc.font('Helvetica-Bold').text('Tipo de Costeo:', 320, row2Y);
-        doc.font('Helvetica').text('P.E.P.S.', 415, row2Y);
+        doc.font('Helvetica-Bold').text('P.E.P.S.', 415, row2Y); // <-- AQUÍ EN NEGRITAS
 
         // Fila 3
         const row3Y = row2Y + 13;
         doc.font('Helvetica-Bold').text('Unidad de Salida:', 30, row3Y);
-        doc.font('Helvetica').text(headerData.unidad_medida || 'N/A', 120, row3Y);
+        doc.font('Helvetica').text(headerData.unidad_medida, 120, row3Y);
 
         doc.font('Helvetica-Bold').text('Costo Promedio:', 320, row3Y);
         doc.font('Helvetica').text(`$ ${costoPromedio.toFixed(4)}`, 415, row3Y);
