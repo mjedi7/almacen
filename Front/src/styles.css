@@ -1,0 +1,78 @@
+.fast {
+    -webkit-animation-duration: 0.3s;
+    animation-duration: 0.3s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both
+}
+
+#themecolors .selector {
+    cursor: pointer;
+}
+
+
+/* //////////////////////////Tablas//////////////////////////// */
+
+.table-striped {
+    border-radius: 10px;
+    margin: 0 auto;
+    font-size: 1em;
+    width: 80%;
+    font-family: sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.table-striped thead tr {
+    background-color: #b40f0f;
+    color: #ffff;
+    text-align: left;
+}
+
+.table-striped th,
+.table-striped td {
+    padding: 12px 15px;
+}
+
+.table-striped tbody tr {
+    border-bottom: 1px solid #dad9d9;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #ffffff;
+}
+
+.table-striped tbody tr:last-of-type {
+    border-bottom: 2px solid #dddddd;
+}
+
+.table-striped tbody tr.active-row {
+    font-weight: bold;
+    color: #b40f0f;
+}
+
+.hr-color {
+    background-color: #b40f0f;
+    width: 90%;
+}
+
+.hr-titulos {
+    background-color: #b40f0f;
+    width: 100%;
+}
+
+.hr-titulosreins {
+    background-color: #b40f0f;
+    width: 100%;
+}
+
+.hr-cambiocontrasena {
+    background-color: #b40f0f;
+    width: 100%;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal {
+    z-index: 1050 !important;
+}

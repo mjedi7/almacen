@@ -1,0 +1,240 @@
+
+<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
+    <h3><b>Recargar Stock</b></h3>
+    <hr>
+</div>
+
+<div class="formulario" style="margin: 0 auto; float:none ;">
+
+<form (ngSubmit)="RecargarStock(f)" #f="ngForm" style="width: 100%;" >
+
+    <div class="form-row mt-5" style="margin: 0 auto; width: 100%;">
+   
+      <div class="form-group col-md-4">
+        <label>Partida</label>
+        <select [(ngModel)]="Recargastock.partida" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required #Partida="ngModel">       
+          <option *ngFor="let stock of partidas" [value]="stock.id">
+            {{stock.clave}} -- {{stock.descripcion}}
+          </option>
+        </select>
+        <small *ngIf="Partida.invalid && Partida.touched" class="text-danger">Campo Obligatorio</small>
+      </div>
+
+     <div class="form-group col-md-4 position-relative">
+  <label>Producto</label>
+
+  <!-- Control Único: Escribes para filtrar o haces clic para abrir la lista -->
+  <div class="input-group">
+    <input type="text"
+           class="form-control"
+           placeholder="-- Seleccione o busque un producto --"
+           [(ngModel)]="terminoBusqueda"
+           name="BusquedaProducto"
+           (focus)="abrirDropdown()"
+           (input)="filtrarProductos()"
+           [disabled]="!Recargastock.partida"
+           autocomplete="off"
+           required>
+    
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" 
+              type="button" 
+              (click)="alternarDropdown()"
+              [disabled]="!Recargastock.partida">
+        ▼
+      </button>
+    </div>
+  </div>
+
+  <!-- Menú flotante con scroll -->
+  <div *ngIf="mostrarDropdown && productosFiltrados.length > 0" 
+       class="dropdown-menu show w-100 shadow" 
+       style="max-height: 250px; overflow-y: auto; z-index: 1050; display: block;">
+    <button type="button" 
+            class="dropdown-item text-wrap py-2" 
+            *ngFor="let prod of productosFiltrados"
+            (click)="seleccionarProducto(prod)">
+      <strong *ngIf="prod.clave">{{ prod.clave }} - </strong> {{ prod.descripcion }}
+    </button>
+  </div>
+
+  <div *ngIf="mostrarDropdown && productosFiltrados.length === 0" 
+       class="dropdown-menu show w-100 p-2 text-muted" 
+       style="display: block;">
+    <small>No se encontraron productos coincidentes</small>
+  </div>
+
+  <!-- Validación visual si no hay producto amarrado -->
+  <small *ngIf="!Recargastock.producto && terminoBusqueda && !mostrarDropdown" class="text-danger">
+    Debe seleccionar una opción de la lista
+  </small>
+</div>
+
+    <div class="form-group col-md-4">
+        <label>Proveedor</label>
+        <select [(ngModel)]="direccionSeleccionada" class="form-control" name="Proveedor" (change)="CapturarValor()" required #Proveedor="ngModel" 
+              [disabled]="!terminoBusqueda"> <option *ngFor="let proveedor of proveedores" [value]="proveedor.id">
+                {{proveedor.razon_social}}
+            </option>
+        </select>
+        <small *ngIf="Proveedor.invalid && Proveedor.touched" class="text-danger">Campo Obligatorio</small>
+    </div>     
+</div>
+
+    <div class="form-row">
+
+          <div class="form-group col-md-2">
+            <label>Folio factura</label>
+            <input [(ngModel)]="Recargastock.folio" type="text" class="form-control" name="Folio" 
+                   [attr.disabled]="articuloValido === false ? '' : null" required>
+          </div>
+
+           <div class="form-group col-md-2">
+            <label>Costo unitario</label>
+            <input type="text" class="form-control" name="CostoUnitario" [value]="costo_unitario | currency" 
+                   readonly [attr.disabled]="articuloValido === false ? '' : null">
+          </div>
+
+       <div class="form-group col-md-2">
+            <label>Cantidad adquirida</label>
+            <input [(ngModel)]="Recargastock.cantidad" type="number" class="form-control" name="Cantidad" 
+            min="1"
+                   (input)="CalcularImporteyTotal()" [attr.disabled]="articuloValido === false ? '' : null" required>
+        </div>
+
+         <div class="form-group col-md-2">
+            <label>Importe</label>
+            <input type="text" [value]="monedaFormateada" class="form-control" readonly>
+        </div>
+
+         <div class="form-group col-md-2">
+            <label>Total de compra</label>
+            <input type="text" [value]="monedaFormateada2" class="form-control" readonly>
+        </div>
+    
+          <div class="form-group col-md-2">
+            <label>Fecha de adquisición</label>
+            <input [(ngModel)]="Recargastock.fechaAd" type="date" class="form-control" name="FechaAdqui" 
+                   required [attr.disabled]="articuloValido === false ? '' : null">
+          </div>
+
+    </div>
+
+    <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
+        <button type="submit" class="btn btn-primary" [disabled]="f.invalid || articuloValido === false">
+           <span class="mdi mdi-content-save"></span> Guardar
+        </button>
+    </div>
+  
+</form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
+
+    <h3><b>Recargar Stock</b></h3>
+<hr>
+</div>
+
+
+<div class="formulario" style="margin: 0 auto; float:none ;">
+
+<form (ngSubmit)="RecargarStock(f)" #f="ngForm" style="width: 100%;" >
+
+    <div class="form-row mt-5" style="margin: 0 auto; width: 100%;">
+   
+      
+      <div class="form-group col-md-4">
+        <label for="inputPassword4">Partida</label>
+        <select [(ngModel)]="Recargastock.partida" id="areaEmite" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required required ngModel #Partida="ngModel">       
+          <ng-container *ngFor="let stock of  partidas" >
+                <option [value]="stock.id">{{stock.clave}} -- {{stock.descripcion}}</option>
+          </ng-container>
+          </select>
+          <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+
+      <div class="form-group col-md-4">
+        <label for="inputPassword4">Producto</label>
+        <select [(ngModel)]="Recargastock.producto" id="areaEmite" class="form-control" name="Producto" required ngModel #Producto="ngModel">       
+          <ng-container *ngFor="let producto of productos" >
+                <option [value]="producto.id">{{producto.descripcion}}</option>
+          </ng-container>
+          </select>
+          <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+            <div class="form-group col-md-4">
+        <label for="inputPassword4">Proveedor</label>
+        <select [(ngModel)]="Recargastock.proveedor" id="areaEmite" class="form-control" name="Proveedor" [(ngModel)]="direccionSeleccionada" (change)="CapturarValor()"  required ngModel #Proveedor="ngModel">       
+          <ng-container *ngFor="let proveedor of proveedores">
+                <option [value]="proveedor.id">{{proveedor.razon_social}}</option>
+          </ng-container>
+          </select>
+          <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>     
+</div>
+
+
+    <div class="form-row">
+
+          <div class="form-group col-md-2">
+            <label for="inputAddress">Folio factura</label>
+            <input [(ngModel)]="Recargastock.folio" type="text" class="form-control" name="Folio" id="inputAddress" placeholder="">
+          </div>
+
+           <div class="form-group col-md-2">
+            <label for="inputAddress">Costo unitario</label>
+            <input type="text" class="form-control" name="CostoUnitario" id="inputAddress" value="{{costo_unitario | currency}}" placeholder="" readonly>
+          </div>
+
+       <div class="form-group col-md-2">
+            <label for="inputAddress">Cantidad adquirida</label>
+            <input [(ngModel)]="Recargastock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress" (change)="CalcularImporteyTotal()" placeholder="" required #Cantidad="ngModel">
+            <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+        </div>
+
+         <div class="form-group col-md-2">
+            <label for="inputAddress">Importe</label>
+            <input type="text"  [value]="monedaFormateada" class="form-control" name="Importe" id="inputAddress" placeholder="" readonly>
+        </div>
+
+         <div class="form-group col-md-2">
+            <label for="inputAddress">Total de compra</label>
+            <input type="text" [value]="monedaFormateada2" class="form-control" name="TotalCompra" id="inputAddress" placeholder="" readonly>
+        </div>
+    
+      
+          <div class="form-group col-md-2">
+            <label for="inputAddress">Fecha de adquisición</label>
+            <input [(ngModel)]="Recargastock.fechaAd" type="date" class="form-control" name="FechaAdqui" id="inputAddress" placeholder="" required #FechaAdqui="ngModel">
+            <small *ngIf="FechaAdqui.invalid && FechaAdqui.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+          </div>
+
+    </div>
+
+  
+    <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
+        <button style="padding:10px;margin-right: 10px;"type="submit" class="btn btn-primary">Guardar</button>
+        <button style="padding:10px;" routerLink="/dashboard" type="submit" class="btn btn-danger">Cancelar/Regresar</button> -->
+    <!-- </div>
+  
+</form>
+
+</div> --> 

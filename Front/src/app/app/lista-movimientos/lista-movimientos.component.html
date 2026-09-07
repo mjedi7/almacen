@@ -1,0 +1,57 @@
+<div class="formulario">
+
+  <div class="Titulo" style="text-align: center;"> <h3>Lista de salidas</h3></div>
+  <hr>
+
+  <div class="form-row mt-5">
+
+    <div class="form-group col-md-3" style="padding-left:120px;">
+        <label for="inputPassword4">Plantel</label>
+        <select [(ngModel)]="opcionSeleccionado" id="areaEmite" class="form-control" name="Plantel" (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel">       
+          <ng-container *ngFor="let plantel of planteles" >
+                <option [value]="plantel.id">{{plantel.descripcion}}</option>
+          </ng-container>
+          </select>
+          <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+    </div>
+
+
+  </div>
+
+</div>
+
+<!-- TABLA -->
+
+<div class="mt-2" style="width: 85%;margin: 0 auto;" >
+
+    <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
+        <thead>
+            <tr style="color:#000">
+                <th style="text-align:left;width:20px">Folio </th>
+                <th style="text-align:left;width:80px">Fecha</th>
+                <!-- <th style="text-align:center;width:350px">Artículo</th> -->
+                <th style="text-align:center;width:300px">Solicitó</th> 
+                <th style="text-align:center;width:300px">Autorizó</th>
+                <th style="text-align:center;width:300px">Subir Formato</th>
+                  
+            </tr>
+        </thead>
+        <tbody style="font-size: 15px;">
+            <tr *ngFor="let salida of salidas">
+                <td style="text-align:left;">{{salida.folio_solicitud}}</td>
+                <td>{{salida.fecha | date:'dd/MM/yyyy'}}</td>
+                <!-- <td style="text-align:center;text-transform:lowercase;">{{salida.descripcion}}</td>      -->
+                  <td style="text-transform:capitalize">{{salida.nombre_solicita}}</td>
+                <td style="text-align:center;">{{salida.nombre_autoriza}}</td>    
+                <td style="text-align:center;">
+
+                     <input id="file" type="file" style="width: 110px;" (change)="upload($event)" class=" btn btn-primary form-control" multiple="multiple" accept=".pdf" required>
+                     <button class="btn btn-warning" style="margin:4px;" (click)="subirPDF(salida.id)"><i class="mdi mdi-cloud-upload"></i></button>
+                     <button class="btn btn-light" style="margin:4px;" (click)="abrirPDF(salida.ruta)"><i class="mdi mdi-file-pdf fa-1x" style="color: rgb(223, 21, 21);"></i></button>
+                
+                </td>                               
+            </tr>
+        </tbody>
+    </table>
+   
+</div>

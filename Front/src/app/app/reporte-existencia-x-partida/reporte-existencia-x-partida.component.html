@@ -1,0 +1,47 @@
+
+<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
+
+    <h3><b>Reporte de existencias por partida</b></h3>
+<hr>
+</div>
+
+<div class="contendor d-flex justify-content-center align-items-center" style="width: 90%;">
+
+<form (ngSubmit)="GeneraReporte(f)" #f="ngForm" style="width: 80%;" >
+
+    <div class="form-row mt-5">
+       <div class="form-group col-md-6">
+        <label for="inputPassword4" style="font-weight: 600;">Partida:</label>
+        <select [(ngModel)]="reporte.partida" id="areaEmite" class="form-control" name="Partida" required ngModel #Partida="ngModel">       
+          <ng-container *ngFor="let partida of partidas" >
+                <option [value]="partida.clave">{{partida.clave}} -- {{partida.descripcion}}</option>
+          </ng-container>
+        </select>
+          <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+
+      <div class="form-group col-md-3">
+        <label for="inputPassword4" style="font-weight: 600;">Fecha para reporte:</label>
+            <input [(ngModel)]="reporte.fecha" class="form-control" type="date" name="FechaReporte" required ngModel #FechaReporte="ngModel">
+          <small *ngIf="FechaReporte.invalid && FechaReporte.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+
+       <div class="form-group col-md-2">
+
+           <div class="boton" style="margin: 0 auto;text-align: center;margin-top: 17px;">
+             <button type="submit" class="btn btn-light" title="Generar Reporte" style="font-size: 30px;"><i class="mdi mdi-file-pdf-box" style="color: #ac0808;font-size: 50x;"></i> </button>
+           </div>
+   
+       </div>
+    
+  </div>
+  
+</form>
+
+
+
+</div>
+
+
