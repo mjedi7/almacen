@@ -84,11 +84,19 @@ export class SidebarComponent implements OnInit {
         this.menuItems4[0].submenu[1].mostrar = true;
       }
 
-      // Articulos
-      this.verArticulos = true;
-      if (this.menuItems55?.[0]?.submenu?.[0]) {
-        this.menuItems55[0].submenu[0].mostrar = true;
-      }
+		// Artículos
+
+		this.verArticulos = true;
+		if (this.menuItems55?.[0]?.submenu?.[0]) {
+		  this.menuItems55[0]
+			.submenu[0]
+			.mostrar = true;
+		}
+		if (this.menuItems55?.[0]?.submenu?.[1]) {
+		  this.menuItems55[0]
+			.submenu[1]
+			.mostrar = true;
+		}
 
       // Movimientos
       this.movimientos = false;

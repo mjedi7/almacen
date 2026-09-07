@@ -30,6 +30,7 @@ import { AltaArticuloComponent } from './app/alta-articulo/alta-articulo.compone
 import { ListaMovimientosComponent } from './app/lista-movimientos/lista-movimientos.component';
 import { UsarArticuloComponent } from './app/usar-articulo/usar-articulo.component';
 import { CargarExistenciasComponent } from './cargar-existencias/cargar-existencias/cargar-existencias.component';
+import { ListarArticulosPartidaComponent } from './listar-articulos-partida/listar-articulos-partida.component';
 
 
 
@@ -52,7 +53,8 @@ import { CargarExistenciasComponent } from './cargar-existencias/cargar-existenc
     AltaArticuloComponent,
     ListaMovimientosComponent,
     UsarArticuloComponent,
-    CargarExistenciasComponent
+    CargarExistenciasComponent,
+    ListarArticulosPartidaComponent
   ],
   imports: [
     BrowserModule,

@@ -76,11 +76,23 @@ export class SidebarService {
           icono: 'mdi mdi-gauge',
           submenu: [
              { titulo: 'Agregar artículo', url: 'agregar-articulo',mostrar:true },
-             {titulo: 'Artículos bajo stock', url: 'bajo-stock', mostrar: true}
+             {titulo: 'Artículos bajo stock', url: 'bajo-stock', mostrar: true},
+
+		  {
+
+			titulo: 'Listar artículos por Partida',
+
+			url: '/dashboard/listar-articulos-partida',
+
+			mostrar: false
+
+		  }
+
           ]
         },
   ];
-
+	  
+	
 
   /*menu44: any[] = [
     {

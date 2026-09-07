@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+
+.table-responsive {
+  width: 100%;
+}
+
+
+table.dataTable {
+  width: 100% !important;
+}
+
+
+table.dataTable td,
+table.dataTable th {
+  vertical-align: middle;
+}
+
+
+/*
+ * Permitir que las descripciones largas
+ * utilicen varias líneas.
+ */
+table.dataTable td:nth-child(2) {
+  white-space: normal;
+  word-break: normal;
+}

@@ -25,6 +25,7 @@ import { ListaMovimientosComponent } from '../app/lista-movimientos/lista-movimi
 import { UsarArticuloComponent } from '../app/usar-articulo/usar-articulo.component';
 import { CargarExistenciasComponent } from '../cargar-existencias/cargar-existencias/cargar-existencias.component';
 import { InicioComponent } from './inicio/inicio.component';
+import { ListarArticulosPartidaComponent } from '../listar-articulos-partida/listar-articulos-partida.component';
 
 
 
@@ -60,6 +61,7 @@ const routes: Routes = [
             { path: 'bajo-stock', component: DashboardComponent, canActivate: [AuthGuard] },
 
 
+			{ path: 'listar-articulos-partida', component: ListarArticulosPartidaComponent, canActivate: [AuthGuard] },
 
 
         ]
