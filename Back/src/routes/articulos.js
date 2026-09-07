@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const router = Router();
-
 const { 
   listarArticulos, 
   obtenerArticuloPorId, 
@@ -9,25 +8,29 @@ const {
   guardarExistenciasIniciales,
   listarPartidas,
   listarArticulosGeneral,
-  traerProductosPorPartida,
-  relacionarArticuloProveedor // Se agrega para evitar ReferenceError en router.post('/relacionarProveedor')
+  traerProductosPorPartida, // <--- Nombre corregido aquí
+  obtenerSiguienteClave,
+  relacionarArticuloProveedor,
 } = require('../controllers/articulos.controller');
 
-const { validarJWT } = require('../middlewares/validar-jwt');
-
-// 1. Rutas específicas (antes de :id)
+// Rutas específicas PRIMERO (antes de /:id)
 router.get('/', listarArticulos);
 router.get('/partidas', listarPartidas);
 router.get('/general', listarArticulosGeneral);
 router.get('/traerProductos/:idPartida', traerProductosPorPartida);
 
-// 2. Rutas POST
-router.post('/guardarExistenciasIniciales', validarJWT, guardarExistenciasIniciales);
-router.post('/relacionarProveedor', relacionarArticuloProveedor);
-router.post('/', crearArticulo);
+const { validarJWT } = require('../middlewares/validar-jwt');
 
-// 3. Rutas con parámetro dinámico AL FINAL
+router.post(
+  '/guardarExistenciasIniciales',
+  validarJWT,
+  guardarExistenciasIniciales
+);
+router.post('/relacionarProveedor', relacionarArticuloProveedor);
+
+// Rutas con parámetro dinámico AL FINAL
 router.get('/:id', obtenerArticuloPorId);
 router.put('/:id', actualizarArticulo);
+router.post('/', crearArticulo);
 
 module.exports = router;

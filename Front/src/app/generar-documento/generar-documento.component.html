@@ -105,15 +105,16 @@
       <select [(ngModel)]="stock.id_unidad_medida" id="id_unidad_medida" class="form-control" name="id_unidad_medida"
         required #unidad="ngModel">
         <option [ngValue]="null" disabled selected>Selecciona una opción</option>
-        <option *ngFor="let item of (unidadesMedida || [])" [value]="item.id">
-          {{ item.nombre_medida }}
+        <option *ngFor="let item of (unidadesMedida || [])"
+          [ngValue]="item.id_unidad_medida || item.id || item.id_unidad">
+          {{ item.nombre_medida || item.unidad_medida || item.nombre }}
         </option>
       </select>
 
       <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">
         Campo Obligatorio
       </small>
-    </div>
+    </div>>
 
   </div>
 
