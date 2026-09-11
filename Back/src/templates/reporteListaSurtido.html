@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter portrait;
+            margin: 10mm 12mm 15mm 12mm;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8pt;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-banner {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .header-banner img {
+            width: 100%;
+            max-height: 70px;
+            object-fit: contain;
+        }
+
+        .institucion {
+            text-align: center;
+            font-size: 10pt;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+
+        .remision-box {
+            text-align: center;
+            font-size: 8.5pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .meta-table th,
+        .meta-table td {
+            border: 0.5pt solid #000;
+            padding: 4px;
+            font-size: 7.5pt;
+            text-align: center;
+        }
+
+        .meta-table th {
+            background-color: #F0F8FF;
+            font-weight: bold;
+        }
+
+        .articulos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+
+        .articulos-table th,
+        .articulos-table td {
+            border: 0.5pt solid #000;
+            padding: 4px;
+            font-size: 7.5pt;
+        }
+
+        .articulos-table th {
+            background-color: #F0F8FF;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .totales-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 4px;
+            page-break-inside: avoid;
+        }
+
+        .totales-table {
+            width: 230px;
+            border-collapse: collapse;
+            margin-left: auto;
+        }
+
+        .totales-table td {
+            padding: 3px 6px;
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+
+        .firmas-section {
+            width: 100%;
+            margin-top: 25px;
+            display: table;
+            table-layout: fixed;
+            page-break-inside: avoid;
+        }
+
+        .firma-col {
+            display: table-cell;
+            text-align: center;
+            vertical-align: top;
+            padding: 0 4px;
+            font-size: 7pt;
+        }
+
+        .linea-firma {
+            margin-top: 30px;
+            border-top: 0.5pt solid #000;
+            padding-top: 3px;
+            font-weight: bold;
+        }
+
+        .cargo {
+            font-size: 6.5pt;
+            color: #333;
+            margin-top: 2px;
+        }
+
+        .footer-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .footer-banner img {
+            width: 100%;
+            max-height: 45px;
+            object-fit: contain;
+        }
+
+        /* Ancho por defecto (para cuando NO hay montos) */
+        .col-descripcion {
+            width: 62%;
+        }
+
+        /* Ancho cuando SÍ hay montos */
+        body.con-montos .col-descripcion {
+            width: 38%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BANNER SUPERIOR -->
+    {{#if bannerBase64}}
+    <div class="header-banner">
+        <img src="{{bannerBase64}}" alt="Banner Institucional">
+    </div>
+    {{/if}}
+
+    <div class="institucion">
+        COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+    </div>
+
+    <div class="remision-box">
+        <span>R.F.C. : CEC941104AN5</span> &nbsp;&nbsp;&nbsp;&nbsp;
+        <span>REMISIÓN No: <strong>{{folioFormateado}}</strong></span><br>
+        DIRECCIÓN ADMINISTRATIVA<br>
+        DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    </div>
+
+    <!-- TABLA METADATOS -->
+    <table class="meta-table">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Entregado a:</th>
+                <th style="width: 45%;">Nombre del solicitante:</th>
+                <th style="width: 25%;">Fecha de atención</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{meta.plantel}}</td>
+                <td>{{meta.administrativo}}</td>
+                <td>{{meta.fecha}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- TABLA ARTÍCULOS -->
+    <table class="articulos-table">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Cantidad</th>
+                <th style="width: 18%;">Clave</th>
+                <th style="width: 10%;">Costeo</th>
+                {{#if conMontos}}
+                <th style="width: 38%;">Descripción</th>
+                {{else}}
+                <th style="width: 62%;">Descripción</th>
+                {{/if}}
+                {{#if conMontos}}
+                <th style="width: 12%;">P/U</th>
+                <th style="width: 12%;">Importe</th>
+                {{/if}}
+            </tr>
+        </thead>
+        <tbody>
+            {{#each articulos}}
+            <tr>
+                <td class="text-center">{{this.cantidad}}</td>
+                <td class="text-center">{{this.clave}}</td>
+                <td class="text-center">PEPS</td>
+                <td class="text-left">{{this.descripcion}}</td>
+                {{#if ../conMontos}}
+                <td class="text-right">{{this.precio_unitario}}</td>
+                <td class="text-right">{{this.importe_total}}</td>
+                {{/if}}
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <!-- TOTALES (Solo si conMontos === true) -->
+    {{#if conMontos}}
+    <div class="totales-wrapper">
+        <table class="totales-table">
+            <tr>
+                <td class="text-left">Subtotal:</td>
+                <td class="text-right">${{totales.subtotal}}</td>
+            </tr>
+            <tr>
+                <td class="text-left">I.V.A (16%):</td>
+                <td class="text-right">${{totales.iva}}</td>
+            </tr>
+            <tr style="border-top: 1pt solid #000;">
+                <td class="text-left">Total:</td>
+                <td class="text-right">${{totales.total}}</td>
+            </tr>
+        </table>
+    </div>
+    {{/if}}
+
+    <!-- SECCIÓN DE FIRMAS -->
+    <div class="firmas-section">
+        <div class="firma-col">
+            RECIBIÓ
+            <div class="linea-firma">{{meta.director}}</div>
+            <div class="cargo">DIRECTOR / JEFE DEPTO / AUXILIAR</div>
+        </div>
+        <div class="firma-col">
+            ENTREGÓ
+            <div class="linea-firma">&nbsp;</div>
+            <div class="cargo">ENCARGADO DE ALMACÉN</div>
+        </div>
+        <div class="firma-col">
+            REVISÓ
+            <div class="linea-firma">LIC. ISRAEL SOBERANIZ MORALES</div>
+            <div class="cargo">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
+        </div>
+        <div class="firma-col">
+            AUTORIZÓ
+            <div class="linea-firma">M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ</div>
+            <div class="cargo">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
+        </div>
+    </div>
+
+    <!-- BANNER INFERIOR -->
+    {{#if pieBase64}}
+    <div class="footer-banner">
+        <img src="{{pieBase64}}" alt="Pie Institucional">
+    </div>
+    {{/if}}
+
+</body>
+
+</html>
