@@ -141,26 +141,16 @@ export class SidebarService {
 
   // ARTÍCULOS
 
-  menu55: any[] = [
+menu55: any[] = [
     {
       titulo: 'Artículos',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Agregar artículo',
-          url: 'agregar-articulo',
-          mostrar: true
-        },
-
-        {
-          titulo: 'Listar artículos por Partida',
-          url: '/dashboard/listar-articulos-partida',
-          mostrar: true
-        }
-
+        { titulo: 'Agregar artículo', url: 'agregar-articulo', mostrar: true },
+        { titulo: 'Artículos bajo stock', url: 'bajo-stock', mostrar: true },
+        { titulo: 'Listar artículos por Partida', url: 'listar-articulos-partida', mostrar: true }
       ]
-    }
+    },
   ];
 
 
