@@ -9,7 +9,6 @@ const {
   subirDocumento, 
   generarDocumentoMultipleEnvio, 
   generarDocumentoMultipleEnvioDirecciones, 
-  ReporteGeneralPorPlantel, 
   FormatoRequisicion, 
   FormatoArticulosSurtido, 
   reporte_movimiento_x_partida, 
@@ -24,11 +23,15 @@ const {
   FormatoRequisicionPlantel 
 } = require('../controllers/generarDocumento.controller');
 
-// Nuevo controlador modular migrado a Puppeteer
+// Controladores modulares migrados a Puppeteer
 const { 
   ListaArticulosSurtidos, 
   ListaArticulosSurtidosSinMontos 
 } = require('../controllers/reporteListaSurtido.controller');
+
+const { 
+  ReporteGeneralPorPlantel 
+} = require('../controllers/reporteGeneralPorPlantel.controller');
 
 const { validarJWT } = require('../middlewares/validar-jwt');
 
@@ -61,7 +64,10 @@ router.post('/generarDocumentoMultiplesDirecciones/:numidentificador/:fecha_regi
 router.post('/agregarArchivo/:numidentificador/:areaDocumento', upload.array("files"), subirDocumento);
 
 // REPORTES
+
+// Reporte general por plantel migrado a Puppeteer
 router.get('/reporteGeneral/:idPlantel', ReporteGeneralPorPlantel);
+
 router.get('/formatoRequisicion/:idPlantel/:folio', FormatoRequisicion);             // Genera formato de requisicion de Plantel
 router.get('/formatoRequisicionDG/:idPlantel/:folio', FormatoRequisicionDG);         // Genera formato de requisicion de DG
 router.get('/formatoRequisicionPlantel/:idPlantel/:folio', FormatoRequisicionPlantel); // Genera formato de requisicion en Plantel
