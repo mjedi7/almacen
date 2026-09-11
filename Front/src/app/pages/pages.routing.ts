@@ -60,7 +60,6 @@ const routes: Routes = [
             { path: 'reporte-movimiento-x-partida', component: ReporteMovimientosXPartidaComponent, canActivate: [AuthGuard] },
             { path: 'bajo-stock', component: DashboardComponent, canActivate: [AuthGuard] },
 
-
 			{ path: 'listar-articulos-partida', component: ListarArticulosPartidaComponent, canActivate: [AuthGuard] },
 
 
