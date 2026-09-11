@@ -84,7 +84,7 @@ export class SidebarService {
 
 			url: '/dashboard/listar-articulos-partida',
 
-			mostrar: false
+			mostrar: true
 
 		  }
 
