@@ -54,7 +54,7 @@ import { ListarArticulosPartidaComponent } from './listar-articulos-partida/list
     ListaMovimientosComponent,
     UsarArticuloComponent,
     CargarExistenciasComponent,
-    ListarArticulosPartidaComponent
+    ListarArticulosPartidaComponent    
   ],
   imports: [
     BrowserModule,
