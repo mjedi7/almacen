@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    @page {
+      size: letter landscape;
+      margin: 12mm 10mm 17mm 10mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      color: #222;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9pt;
+    }
+
+    .banner-container {
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    .banner-img {
+      width: 520pt;
+      max-width: 100%;
+      max-height: 55pt;
+      object-fit: contain;
+    }
+
+    .encabezado {
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .institucion {
+      margin: 0;
+      font-size: 9pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .titulo {
+      margin: 5px 0 0;
+      font-size: 14pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .subtitulo {
+      margin: 3px 0 0;
+      font-size: 10pt;
+      font-weight: bold;
+    }
+
+    .datos-reporte {
+      width: 100%;
+      margin-bottom: 10px;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    .datos-reporte td {
+      padding: 2px 4px;
+      vertical-align: top;
+    }
+
+    .datos-reporte .etiqueta {
+      width: 13%;
+      font-weight: bold;
+    }
+
+    .datos-reporte .valor {
+      width: 37%;
+    }
+
+    .tabla-registros {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .tabla-registros thead {
+      display: table-header-group;
+    }
+
+    .tabla-registros tr {
+      page-break-inside: avoid;
+    }
+
+    .tabla-registros th {
+      padding: 5px 4px;
+      border: 1px solid #333;
+      background-color: #e9ecef;
+      color: #000;
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .tabla-registros td {
+      padding: 4px;
+      border: 1px solid #b7b7b7;
+      font-size: 8pt;
+      vertical-align: middle;
+    }
+
+    .col-folio {
+      width: 14%;
+    }
+
+    .col-proveedor {
+      width: 34%;
+    }
+
+    .col-fecha {
+      width: 12%;
+    }
+
+    .col-importe,
+    .col-impuesto,
+    .col-total {
+      width: 13.33%;
+    }
+
+    .centrado {
+      text-align: center;
+    }
+
+    .numero {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .sin-registros {
+      padding: 20px !important;
+      color: #666;
+      font-style: italic;
+      text-align: center;
+    }
+
+    .resumen {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      page-break-inside: avoid;
+    }
+
+    .cantidad-registros {
+      padding-top: 4px;
+      font-size: 8.5pt;
+    }
+
+    .tabla-totales {
+      width: 270px;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    .tabla-totales td {
+      padding: 4px 7px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .tabla-totales .etiqueta-total {
+      width: 50%;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .tabla-totales .valor-total {
+      width: 50%;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .tabla-totales .total-general td {
+      border-top: 1px solid #333;
+      border-bottom: 2px solid #333;
+      font-weight: bold;
+    }
+
+    .pie-reporte {
+      position: fixed;
+      right: 0;
+      bottom: -12mm;
+      left: 0;
+      font-size: 7.5pt;
+    }
+
+    .pie-contenido {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .fecha-reporte {
+      text-align: right;
+    }
+
+    .pie-institucional {
+      position: fixed;
+      right: -10mm;
+      bottom: -17mm;
+      left: -10mm;
+      z-index: -1;
+      text-align: center;
+    }
+
+    .pie-img {
+      width: 100%;
+      max-height: 38pt;
+      object-fit: cover;
+    }
+  </style>
+</head>
+
+<body>
+
+  {{#if bannerBase64}}
+    <div class="banner-container">
+      <img
+        src="{{bannerBase64}}"
+        class="banner-img"
+        alt="Banner institucional">
+    </div>
+  {{/if}}
+
+  <div class="encabezado">
+    <p class="institucion">
+      Colegio de Estudios Científicos y Tecnológicos
+      del Estado de Veracruz
+    </p>
+
+    <h1 class="titulo">{{titulo}}</h1>
+    <p class="subtitulo">{{tipoReporte}}</p>
+  </div>
+
+  <table class="datos-reporte">
+    <tr>
+      <td class="etiqueta">Partida:</td>
+
+      <td class="valor">
+        {{partida.clave}} — {{partida.descripcion}}
+      </td>
+
+      <td class="etiqueta">Proveedores:</td>
+      <td class="valor">Todos</td>
+    </tr>
+
+    <tr>
+      <td class="etiqueta">Período:</td>
+
+      <td class="valor" colspan="3">
+        Del {{fechaInicio}} al {{fechaFin}}
+      </td>
+    </tr>
+  </table>
+
+  <table class="tabla-registros">
+    <thead>
+      <tr>
+        <th class="col-folio">Folio Factura</th>
+        <th class="col-proveedor">Proveedor</th>
+        <th class="col-fecha">Fecha</th>
+        <th class="col-importe">Importe</th>
+        <th class="col-impuesto">Impuesto</th>
+        <th class="col-total">Total</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#if hayRegistros}}
+
+        {{#each registros}}
+          <tr>
+            <td class="centrado">
+              {{this.folioFactura}}
+            </td>
+
+            <td>
+              {{this.proveedor}}
+            </td>
+
+            <td class="centrado">
+              {{this.fechaCompra}}
+            </td>
+
+            <td class="numero">
+              {{this.importe}}
+            </td>
+
+            <td class="numero">
+              {{this.impuesto}}
+            </td>
+
+            <td class="numero">
+              {{this.total}}
+            </td>
+          </tr>
+        {{/each}}
+
+      {{else}}
+
+        <tr>
+          <td colspan="6" class="sin-registros">
+            No se encontraron compras para la partida y el
+            período seleccionados.
+          </td>
+        </tr>
+
+      {{/if}}
+    </tbody>
+  </table>
+
+  <div class="resumen">
+    <div class="cantidad-registros">
+      Registros encontrados: <strong>{{totalRegistros}}</strong>
+    </div>
+
+    <table class="tabla-totales">
+      <tr>
+        <td class="etiqueta-total">Subtotal:</td>
+        <td class="valor-total">{{totales.subtotal}}</td>
+      </tr>
+
+      <tr>
+        <td class="etiqueta-total">I.V.A.:</td>
+        <td class="valor-total">{{totales.iva}}</td>
+      </tr>
+
+      <tr class="total-general">
+        <td class="etiqueta-total">Total:</td>
+        <td class="valor-total">{{totales.total}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="pie-reporte">
+    <div class="pie-contenido">
+      <div>
+        Partida: {{partida.clave}}
+      </div>
+
+      <div class="fecha-reporte">
+        Fecha del reporte: {{fechaReporte}}
+      </div>
+    </div>
+  </div>
+
+  {{#if pieBase64}}
+    <div class="pie-institucional">
+      <img
+        src="{{pieBase64}}"
+        class="pie-img"
+        alt="Pie institucional">
+    </div>
+  {{/if}}
+
+</body>
+</html>
