@@ -28,17 +28,4 @@ router.get('/gettodosusuarios', getTodosUsuarios);
 router.get('/traerCostoArticulo/:idProveedor/:idProducto',datosCostosArticulo);
 
 
-
-
-
-
-
-
-
-
-  
-
-
-
-
 module.exports = router;

@@ -3,7 +3,6 @@ const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
 
-// Helper interno para convertir imágenes locales a Base64
 const imgToBase64 = (filePath) => {
   if (fs.existsSync(filePath)) {
     const ext = path.extname(filePath).replace('.', '');
@@ -13,16 +12,9 @@ const imgToBase64 = (filePath) => {
   return null;
 };
 
-// Rutas a los membretes oficiales
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
-/**
- * Compila una plantilla HTML con datos y retorna el Buffer del PDF
- * @param {string} templateName - Nombre del archivo en src/templates (ej. 'reporteKardex.html')
- * @param {object} data - Datos dinámicos para inyectar en Handlebars
- * @param {object} pdfOptions - Opciones adicionales para page.pdf (landscape, márgenes, etc.)
- */
 async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
   try {
@@ -34,7 +26,6 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
     const compiledTemplate = handlebars.compile(templateHtml);
 
-    // Inyectamos automáticamente los banners base64 a cualquier reporte
     const htmlFinal = compiledTemplate({
       ...data,
       bannerBase64: imgToBase64(bannerPath),
@@ -42,26 +33,32 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     });
 
     browser = await puppeteer.launch({
-      headless: true, // Compatible con Node 14.21 y Node 16
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
+    const usuarioPie = data.usuario || 'ADMINISTRADOR';
+    const fechaPie = data.fechaImpresion || '17/09/2026';
+
     const defaultOptions = {
       format: 'Letter',
+      landscape: false,
       printBackground: true,
       displayHeaderFooter: true,
-      headerTemplate: `
-        <div style="width: 100%; font-size: 8pt; font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: #333; text-align: right; padding-right: 12mm; padding-top: 5mm;">
-          Página <span class="pageNumber"></span> de <span class="totalPages"></span>
+      headerTemplate: '<div></div>',
+      footerTemplate: `
+        <div style="width: 100%; font-size: 8pt; font-family: Helvetica, Arial, sans-serif; color: #000; display: flex; justify-content: space-between; align-items: center; padding-left: 14mm; padding-right: 14mm; box-sizing: border-box;">
+          <div><b>Usuario:</b> ${usuarioPie}</div>
+          <div><b>Fecha:</b> ${fechaPie}</div>
+          <div>Pág. <span class="pageNumber"></span> de <span class="totalPages"></span></div>
         </div>
       `,
-      footerTemplate: '<div></div>',
       margin: {
         top: '12mm',
-        bottom: '15mm',
+        bottom: '18mm',
         left: '12mm',
         right: '12mm'
       },

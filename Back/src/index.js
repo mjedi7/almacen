@@ -3,7 +3,10 @@ const cors = require('cors');
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const{ Pool } = require('pg');
+const { Pool } = require('pg');
+
+// IMPORTACIÓN DEL CONTROLADOR DE SALIDAS
+const { generarReporteSalidasXPartida } = require('./controllers/reporteSalidasPartida.controller');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -60,6 +63,14 @@ app.get('/articulos/siguiente-clave/:idPartida', async (req, res) => {
   }
 });
 
+// ==========================================
+// RUTA DIRECTA DEL REPORTE DE SALIDAS
+// ==========================================
+app.post('/pdfkit/reporte-salidas-partida', (req, res) => {
+  console.log('>>> [OK] PETICIÓN LLEGÓ AL ENDPOINT EN INDEX.JS');
+  return generarReporteSalidasXPartida(req, res);
+});
+
 // 1. RUTAS CON PREFIJO ESPECÍFICO (PRIORIDAD ALTA)
 app.use('/articulos', require('./routes/articulos'));
 app.use('/partidas', require('./routes/partidas'));
@@ -73,8 +84,8 @@ app.use(require('./routes/generarDocumento'));
 app.use(require('./routes/generarDocumentoRespuesta'));
 app.use(require('./routes/requisiciones'));
 app.use(require('./routes/subirDocumentos'));
-app.use(require('./routes/index')); // index siempre al final de las rutas
 app.use(require('./routes/reportesPDFKit')); 
+app.use(require('./routes/index')); // index siempre al final de las rutas
 
 app.listen(port, '0.0.0.0', () => {
   console.log('Server on port ' + port);
