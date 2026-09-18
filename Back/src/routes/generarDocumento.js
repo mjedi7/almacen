@@ -16,12 +16,13 @@ const {
   FormatoRequisicionDG, 
   reporte_existencias_x_partida_todas, 
   reporte_movimiento_x_partida_todos, 
-  reporte_de_compras_todas, 
-  reporte_de_compras_x_partida, 
-  reporte_de_compras_x_proveedor, 
+  // reporte_de_compras_todas, 
+  // reporte_de_compras_x_partida, 
+  // reporte_de_compras_x_proveedor, 
   descargarzip, 
   FormatoRequisicionPlantel 
 } = require('../controllers/generarDocumento.controller');
+
 
 // Controladores modulares migrados a Puppeteer
 const { 
@@ -32,6 +33,22 @@ const {
 const { 
   ReporteGeneralPorPlantel 
 } = require('../controllers/reporteGeneralPorPlantel.controller');
+
+
+// Reporte nuevos Oscar
+
+const {
+  generarReporteEntradasTodas
+} = require('../controllers/reporteEntradasTodas.controller');
+
+
+const {
+  generarReporteEntradasPartida
+} = require('../controllers/reporteEntradasPartida.controller');
+
+const {
+  generarReporteEntradasProveedor
+} = require('../controllers/reporteEntradasProveedor.controller');
 
 const { validarJWT } = require('../middlewares/validar-jwt');
 
@@ -82,9 +99,16 @@ router.post('/reporte_existencias_x_partida', reporte_existencias_x_partida);
 router.post('/reporte_existencias_x_partida_todas', reporte_existencias_x_partida_todas);
 
 // Reporte de Compras
-router.post('/reporte_de_compras_todas', reporte_de_compras_todas);
-router.post('/reporte_de_compras_x_partida', reporte_de_compras_x_partida);
-router.post('/reporte_de_compras_x_proveedor', reporte_de_compras_x_proveedor);
+
+// Reporte de entradas: todas las partidas, migrado a Puppeteer
+router.post( '/reporte_de_compras_todas', generarReporteEntradasTodas);
+
+//router.post('/reporte_de_compras_x_partida', reporte_de_compras_x_partida);
+
+router.post( '/reporte_de_compras_x_partida', generarReporteEntradasPartida);
+
+//router.post('/reporte_de_compras_x_proveedor', reporte_de_compras_x_proveedor);
+router.post( '/reporte_de_compras_x_proveedor', generarReporteEntradasProveedor);
 
 router.post('/descargarzip', descargarzip);
 
