@@ -156,7 +156,7 @@ const generarReporteEntradasTodas = async (req, res) => {
       datosPlantilla,
       {
         format: 'Letter',
-        landscape: true,
+        landscape: false,
         printBackground: true,
         margin: {
           top: '12mm',

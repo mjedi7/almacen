@@ -9,7 +9,7 @@ export const environment = {
     appId: "1:707598495946:web:1708c22c2aa5aa904c4433",
     measurementId: "G-X89XNXH6TT"
   },
-  uri_api: 'http://172.16.0.100:3000'
+  uri_api: 'http://172.16.0.3:3000'
 // uri_api: 'http://sige.cecytev.edu.mx/api'
 //  uri_api: 'http://172.16.0.154:3000'
 //uri_api: 'http://172.16.0.148:3000'

@@ -1,232 +1,246 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <style>
-    @page {
-      size: letter portrait;
-      margin: 10mm 12mm 15mm 12mm;
-    }
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 8.5pt;
-      color: #222;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Banners institucionales */
-    .banner-container {
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .banner-img {
-      width: 440pt;
-      max-height: 55pt;
-      object-fit: contain;
-    }
-
-    /* Títulos */
-    .header-titulos {
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .header-titulos .inst-sub {
-      font-size: 8pt;
-      font-weight: bold;
-      color: #333;
-      margin: 1px 0;
-      text-transform: uppercase;
-    }
-    .header-titulos .doc-title {
-      font-size: 12pt;
-      font-weight: bold;
-      color: #111;
-      margin: 4px 0 0 0;
-      letter-spacing: 0.5px;
-    }
-
-    /* Caja de Metadatos */
-    .meta-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 12px;
-      font-size: 8.5pt;
-    }
-    .meta-table td {
-      padding: 2px 4px;
-      vertical-align: top;
-    }
-    .meta-table .lbl {
-      font-weight: bold;
-      color: #000;
-      width: 18%;
-    }
-    .meta-table .val {
-      color: #222;
-      width: 32%;
-    }
-
-    /* Tabla de Movimientos */
-    table.movimientos {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    table.movimientos thead {
-      display: table-header-group; /* Repite cabecera al saltar hoja */
-    }
-    table.movimientos tr {
-      page-break-inside: avoid;
-    }
-    table.movimientos th {
-      background-color: #e9ecef;
-      color: #000;
-      font-size: 7.5pt;
-      font-weight: bold;
-      border: 1px solid #333;
-      padding: 4px 3px;
-    }
-    table.movimientos td {
-      border: 1px solid #ddd;
-      padding: 3.5px 3px;
-      font-size: 7.5pt;
-    }
-    .num { text-align: right; }
-    .cen { text-align: center; }
-
-    /* Totales */
-    .totales-wrapper {
-      margin-top: 15px;
-      page-break-inside: avoid;
-      display: flex;
-      justify-content: flex-end;
-    }
-    .totales-table {
-      width: 250px;
-      border-collapse: collapse;
-      font-size: 8.5pt;
-    }
-    .totales-table td {
-      padding: 3px 6px;
-    }
-    .totales-table .lbl-total {
-      text-align: right;
-      font-weight: bold;
-      width: 60%;
-    }
-    .totales-table .val-total {
-      text-align: right;
-      width: 40%;
-    }
-
-    /* Pie de página institucional */
-    .pie-container {
-      position: fixed;
-      bottom: -10mm;
-      left: -12mm;
-      right: -12mm;
-      text-align: center;
-      z-index: -1;
-    }
-    .pie-img {
-      width: 100%;
-      max-height: 50pt;
-      object-fit: cover;
-    }
-  </style>
 </head>
-<body>
+
+<body class="report report--dense">
 
   {{#if bannerBase64}}
-  <div class="banner-container">
-    <img src="{{bannerBase64}}" class="banner-img" alt="Banner Institucional">
+  <div class="report-banner report-banner--compact">
+    <img
+      src="{{bannerBase64}}"
+      alt="Banner Institucional"
+    >
   </div>
   {{/if}}
 
-  <div class="header-titulos">
-    <div class="inst-sub">DIRECCIÓN ADMINISTRATIVA</div>
-    <div class="inst-sub">DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES</div>
-    <div class="doc-title">KÁRDEX</div>
-  </div>
+  <header class="report-heading">
 
-  <table class="meta-table">
-    <tr>
-      <td class="lbl">Descripción:</td>
-      <td class="val" colspan="3" style="width: 82%;">{{header.nom_articulo}}</td>
-    </tr>
-    <tr>
-      <td class="lbl">Clave del artículo:</td>
-      <td class="val">{{header.clave_completa}}</td>
-      <td class="lbl">Fecha últ. compra:</td>
-      <td class="val">{{header.fecha_ult_compra}}</td>
-    </tr>
-    <tr>
-      <td class="lbl">Unidad de Entrada:</td>
-      <td class="val">{{header.unidad_medida}}</td>
-      <td class="lbl">Tipo de Costeo:</td>
-      <td class="val"><strong>P.E.P.S.</strong></td>
-    </tr>
-    <tr>
-      <td class="lbl">Unidad de Salida:</td>
-      <td class="val">{{header.unidad_medida}}</td>
-      <td class="lbl">Costo Promedio:</td>
-      <td class="val">$ {{header.costo_promedio}}</td>
-    </tr>
+    <p class="report-heading__institution">
+      DIRECCIÓN ADMINISTRATIVA
+    </p>
+
+    <p class="report-heading__institution">
+      DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    </p>
+
+    <h1 class="report-heading__title">
+      KÁRDEX
+    </h1>
+
+  </header>
+
+  <!-- Información del artículo -->
+  <table class="report-meta">
+
+    <colgroup>
+      <col class="w-18">
+      <col class="w-32">
+      <col class="w-18">
+      <col class="w-32">
+    </colgroup>
+
+    <tbody>
+      <tr>
+        <td class="report-meta__label">
+          Descripción:
+        </td>
+
+        <td colspan="3">
+          {{header.nom_articulo}}
+        </td>
+      </tr>
+
+      <tr>
+        <td class="report-meta__label">
+          Clave del artículo:
+        </td>
+
+        <td>
+          {{header.clave_completa}}
+        </td>
+
+        <td class="report-meta__label">
+          Fecha últ. compra:
+        </td>
+
+        <td>
+          {{header.fecha_ult_compra}}
+        </td>
+      </tr>
+
+      <tr>
+        <td class="report-meta__label">
+          Unidad de Entrada:
+        </td>
+
+        <td>
+          {{header.unidad_medida}}
+        </td>
+
+        <td class="report-meta__label">
+          Tipo de Costeo:
+        </td>
+
+        <td>
+          <strong>P.E.P.S.</strong>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="report-meta__label">
+          Unidad de Salida:
+        </td>
+
+        <td>
+          {{header.unidad_medida}}
+        </td>
+
+        <td class="report-meta__label">
+          Costo Promedio:
+        </td>
+
+        <td>
+          $ {{header.costo_promedio}}
+        </td>
+      </tr>
+    </tbody>
+
   </table>
 
-  <table class="movimientos">
+  <!-- Movimientos -->
+  <table class="report-table report-table--soft report-table--dense">
+
+    <colgroup>
+      <col class="w-9">
+      <col class="w-27">
+      <col class="w-11">
+      <col class="w-11">
+      <col class="w-13">
+      <col class="w-11">
+      <col class="w-18">
+    </colgroup>
+
     <thead>
       <tr>
-        <th style="width: 9%;" class="cen">Doc/Folio</th>
-        <th style="width: 27%;">Plantel/Destino</th>
-        <th style="width: 11%;" class="num">Exist. Inicial</th>
-        <th style="width: 11%;" class="num">Ventas Acum.</th>
-        <th style="width: 13%;" class="num">Importe Total</th>
-        <th style="width: 11%;" class="num">Existencia</th>
-        <th style="width: 18%;" class="cen">Fecha</th>
+        <th>Doc/Folio</th>
+
+        <th class="text-left">
+          Plantel/Destino
+        </th>
+
+        <th class="text-right">
+          Exist. Inicial
+        </th>
+
+        <th class="text-right">
+          Ventas Acum.
+        </th>
+
+        <th class="text-right">
+          Importe Total
+        </th>
+
+        <th class="text-right">
+          Existencia
+        </th>
+
+        <th>
+          Fecha
+        </th>
       </tr>
     </thead>
+
     <tbody>
+
       {{#if movimientos.length}}
+
         {{#each movimientos}}
         <tr>
-          <td class="cen">{{this.folio}}</td>
-          <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
-          <td class="num">{{this.existencia_inicial}}</td>
-          <td class="num">{{this.ventas_acumuladas}}</td>
-          <td class="num">$ {{this.importe_total}}</td>
-          <td class="num">{{this.existencia}}</td>
-          <td class="cen">{{this.fecha}}</td>
+          <td class="text-center">
+            {{this.folio}}
+          </td>
+
+          <td class="text-left text-uppercase">
+            {{this.plantel_destino}}
+          </td>
+
+          <td class="text-right">
+            {{this.existencia_inicial}}
+          </td>
+
+          <td class="text-right">
+            {{this.ventas_acumuladas}}
+          </td>
+
+          <td class="text-right nowrap">
+            $ {{this.importe_total}}
+          </td>
+
+          <td class="text-right">
+            {{this.existencia}}
+          </td>
+
+          <td class="text-center">
+            {{this.fecha}}
+          </td>
         </tr>
         {{/each}}
+
       {{else}}
+
         <tr>
-          <td colspan="7" class="cen" style="padding: 10px; color: #666;">
+          <td colspan="7" class="empty-state">
             No hay movimientos registrados para este criterio.
           </td>
         </tr>
+
       {{/if}}
+
     </tbody>
+
   </table>
 
-  <div class="totales-wrapper">
-    <table class="totales-table">
-      <tr>
-        <td class="lbl-total">Total Entradas:</td>
-        <td class="val-total">{{totales.entradas}}</td>
-      </tr>
-      <tr>
-        <td class="lbl-total">Total Salidas:</td>
-        <td class="val-total">{{totales.salidas}}</td>
-      </tr>
+  <!-- Totales -->
+  <div class="report-results justify-end">
+
+    <table class="totals-table">
+      <tbody>
+        <tr>
+          <td class="w-60 text-right font-bold">
+            Total Entradas:
+          </td>
+
+          <td class="text-right">
+            {{totales.entradas}}
+          </td>
+        </tr>
+
+        <tr>
+          <td class="text-right font-bold">
+            Total Salidas:
+          </td>
+
+          <td class="text-right">
+            {{totales.salidas}}
+          </td>
+        </tr>
+      </tbody>
     </table>
+
   </div>
 
   {{#if pieBase64}}
-  <div class="pie-container">
-    <img src="{{pieBase64}}" class="pie-img" alt="Pie Institucional">
+  <div class="institutional-footer">
+    <img
+      src="{{pieBase64}}"
+      alt="Pie Institucional"
+    >
   </div>
   {{/if}}
 
 </body>
+
 </html>

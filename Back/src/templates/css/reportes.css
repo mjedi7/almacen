@@ -1,0 +1,553 @@
+/*
+ * Sistema global de estilos para reportes PDF
+ * Este archivo se utiliza en todas las plantillas.
+ */
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+@page {
+  size: letter portrait;
+  margin: 10mm 12mm 16mm;
+}
+
+/* =========================================================
+   VARIABLES Y CONFIGURACIÓN GENERAL
+   ========================================================= */
+
+body.report {
+  --font-body: 9pt;
+  --font-header: 9pt;
+  --font-info: 9.5pt;
+  --font-title: 11pt;
+  --cell-padding: 4px 5px;
+
+  margin: 0;
+  padding: 0;
+  color: #000;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.report,
+.report * {
+  box-sizing: border-box;
+}
+
+/* Tamaños reutilizables */
+
+body.report--compact {
+  --font-body: 8.5pt;
+  --font-header: 9pt;
+  --font-info: 9.5pt;
+  --cell-padding: 3.5px 5px;
+}
+
+body.report--normal {
+  --font-body: 10pt;
+  --font-header: 10pt;
+  --font-info: 10pt;
+  --cell-padding: 4px 6px;
+}
+
+/* =========================================================
+   ENCABEZADO INSTITUCIONAL
+   ========================================================= */
+
+.report-header {
+  width: 100%;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.report-banner {
+  width: 100%;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.report-banner img {
+  max-width: 100%;
+  height: 105px;
+  object-fit: contain;
+}
+
+.report-institution,
+.report-name {
+  margin-bottom: 2px;
+  color: #000;
+  font-size: 10pt;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.report-period {
+  margin-bottom: 4px;
+  color: #333;
+  font-size: 9pt;
+  font-weight: bold;
+  text-align: center;
+}
+
+.report-title {
+  margin-bottom: 8px;
+  color: #000;
+  font-size: var(--font-title);
+  font-weight: bold;
+  text-align: center;
+}
+
+/* =========================================================
+   TABLA ENVOLVENTE
+   ========================================================= */
+
+.report-shell {
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+}
+
+.report-shell > thead {
+  display: table-header-group;
+}
+
+.report-shell > tbody {
+  display: table-row-group;
+}
+
+.report-shell > thead > tr > td,
+.report-shell > tbody > tr > td {
+  padding: 0;
+  border: none;
+}
+
+/* =========================================================
+   TABLAS GENERALES
+   ========================================================= */
+
+.report-table {
+  width: 100%;
+  border: 1.5px solid #000;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.report-table thead {
+  display: table-header-group;
+}
+
+.report-table tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.report-table th {
+  padding: 4px;
+  border: 1px solid #000;
+  background: #f7faff;
+  font-size: var(--font-header);
+  font-weight: bold;
+  text-align: center;
+}
+
+.report-table td {
+  padding: var(--cell-padding);
+  border: 1px solid #000;
+  font-size: var(--font-body);
+}
+
+/* Tabla pequeña de información */
+
+.report-table--info {
+  margin-bottom: 8px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.report-table--info th,
+.report-table--info td {
+  padding: 4px 6px;
+  font-size: var(--font-info);
+  text-align: center;
+}
+
+/* =========================================================
+   BLOQUES, SUBTOTALES Y RESÚMENES
+   ========================================================= */
+
+.report-section {
+  margin-bottom: 15px;
+}
+
+.row-subtotal {
+  background: #fafafa;
+  font-weight: bold;
+}
+
+.report-summary {
+  width: 100%;
+  margin-top: 14px;
+  border: none;
+  border-collapse: collapse;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-size: var(--font-info);
+}
+
+.report-summary td {
+  padding: 4px 5px;
+  border: none;
+  vertical-align: top;
+}
+
+.report .empty-state {
+  padding: 10px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+}
+
+/* =========================================================
+   SALTOS DE PÁGINA
+   ========================================================= */
+
+.page-row {
+  page-break-after: always;
+  break-after: page;
+}
+
+.page-row--last {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+.no-break {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* =========================================================
+   ALINEACIÓN Y TEXTO
+   ========================================================= */
+
+.report .text-left {
+  text-align: left;
+}
+
+.report .text-center {
+  text-align: center;
+}
+
+.report .text-right {
+  text-align: right;
+}
+
+.report .font-bold {
+  font-weight: bold;
+}
+
+.report .text-uppercase {
+  text-transform: uppercase;
+}
+
+.report .text-capitalize {
+  text-transform: capitalize;
+}
+
+.report .indent {
+  padding-left: 8px;
+}
+
+
+.report .pr-10 {
+  padding-right: 10px;
+}
+
+.report .mt-4 {
+  margin-top: 4px;
+}
+
+/* =========================================================
+   ANCHOS REUTILIZABLES
+   ========================================================= */
+
+.w-9  { width:  9%; }
+.w-10 { width: 10%; }
+.w-11 { width: 11%; }
+.w-12 { width: 12%; }
+.w-13 { width: 13%; }
+.w-14 { width: 14%; }
+.w-15 { width: 15%; }
+.w-16 { width: 16%; }
+.w-18 { width: 18%; }
+.w-20 { width: 20%; }
+.w-25 { width: 25%; }
+.w-27 { width: 27%; }
+.w-28 { width: 28%; }
+.w-30 { width: 30%; }
+.w-32 { width: 32%; }
+.w-38 { width: 38%; }
+.w-44 { width: 44%; }
+.w-45 { width: 45%; }
+.w-50 { width: 50%; }
+.w-56 { width: 56%; }
+.w-60 { width: 60%; }
+.w-62 { width: 62%; }
+.w-80 { width: 80%; }
+.w-82 { width: 82%; }
+.w-100 { width: 100%; }
+
+
+
+/* reporteEntradasTodas.html */
+
+/* =========================================================
+   ENCABEZADO COMPACTO
+   Reutilizable en reportes tabulares
+   ========================================================= */
+
+.report-banner--compact img {
+  width: 520pt;
+  max-width: 100%;
+  height: auto;
+  max-height: 55pt;
+}
+
+.report-heading {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.report-heading__institution {
+  margin: 0;
+  font-size: 9pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.report-heading__title {
+  margin: 5px 0 0;
+  font-size: 14pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   INFORMACIÓN DEL REPORTE
+   ========================================================= */
+
+.report-meta {
+  width: 100%;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+  font-size: 9pt;
+}
+
+.report-meta td {
+  padding: 2px 4px;
+  vertical-align: top;
+}
+
+.report-meta__label {
+  font-weight: bold;
+}
+
+/* =========================================================
+   VARIANTES GENERALES DE TABLAS
+   ========================================================= */
+
+.report-table--fixed {
+  table-layout: fixed;
+}
+
+.report-table--soft th {
+  padding: 5px 4px;
+  border-color: #333;
+  background: #e9ecef;
+  font-size: 8.5pt;
+}
+
+.report-table--soft td {
+  padding: 4px;
+  border-color: #b7b7b7;
+  font-size: 8pt;
+  vertical-align: middle;
+}
+
+/* =========================================================
+   RESUMEN Y TOTALES
+   ========================================================= */
+
+.report-results {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.report-count {
+  padding-top: 4px;
+  font-size: 8.5pt;
+}
+
+.totals-table {
+  width: 270px;
+  border-collapse: collapse;
+  font-size: 9pt;
+}
+
+.totals-table td {
+  padding: 4px 7px;
+  border-bottom: 1px solid #ccc;
+}
+
+.totals-table__total td {
+  border-top: 1px solid #333;
+  border-bottom: 2px solid #333;
+  font-weight: bold;
+}
+
+/* =========================================================
+   PIE DENTRO DEL DOCUMENTO
+   ========================================================= */
+
+.document-footer {
+  position: fixed;
+  right: 0;
+  bottom: -12mm;
+  left: 0;
+  font-size: 7.5pt;
+}
+
+.document-footer__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.institutional-footer {
+  position: fixed;
+  right: -10mm;
+  bottom: -17mm;
+  left: -10mm;
+  z-index: -1;
+  text-align: center;
+}
+
+.institutional-footer img {
+  width: 100%;
+  max-height: 38pt;
+  object-fit: cover;
+}
+
+/* =========================================================
+   UTILIDADES ADICIONALES
+   ========================================================= */
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.report .p-20 {
+  padding: 20px;
+}
+
+.w-34 {
+  width: 34%;
+}
+
+.w-third {
+  width: 13.33%;
+}
+
+
+/* reporteKardex.html */
+
+/* Reportes con mucha información */
+
+body.report--dense {
+  --font-body: 7.5pt;
+  --font-header: 7.5pt;
+  --font-info: 8.5pt;
+  --cell-padding: 3.5px 3px;
+}
+
+.report-table--dense th {
+  padding: 4px 3px;
+  font-size: var(--font-header);
+}
+
+.report-table--dense td {
+  padding: var(--cell-padding);
+  font-size: var(--font-body);
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+
+/*  reporteListaSurtido.html  */
+
+/* =========================================================
+   REFERENCIA O IDENTIFICACIÓN DEL DOCUMENTO
+   ========================================================= */
+
+.document-reference {
+  margin-bottom: 8px;
+  font-size: 8.5pt;
+  font-weight: bold;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* =========================================================
+   FIRMAS
+   ========================================================= */
+
+.signature-grid {
+  display: table;
+  width: 100%;
+  margin-top: 25px;
+  table-layout: fixed;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.signature {
+  display: table-cell;
+  padding: 0 4px;
+  font-size: 7pt;
+  text-align: center;
+  vertical-align: top;
+}
+
+.signature__line {
+  margin-top: 30px;
+  padding-top: 3px;
+  border-top: 0.5pt solid #000;
+  font-weight: bold;
+}
+
+.signature__role {
+  margin-top: 2px;
+  color: #333;
+  font-size: 6.5pt;
+}
+
+/* Pie contenido dentro de los márgenes de la hoja */
+
+.institutional-footer--contained {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: auto;
+}
+
+.institutional-footer--contained img {
+  max-height: 45px;
+  object-fit: contain;
+}

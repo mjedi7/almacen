@@ -15,6 +15,9 @@ const imgToBase64 = (filePath) => {
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
+// Archivo de estilos para reportes
+const estilosPath = path.join( __dirname, '../templates/css/reportes.css');
+
 async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
   try {
@@ -39,6 +42,13 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
+    
+	// En caso de que no se encuentre el CSS
+	if (!fs.existsSync(estilosPath)) {
+	  throw new Error(`No se encontró el archivo de estilos en: ${estilosPath}`);
+	}
+
+	await page.addStyleTag({ path: estilosPath });    
 
     const usuarioPie = data.usuario || 'ADMINISTRADOR';
     const fechaPie = data.fechaImpresion || '17/09/2026';

@@ -2,295 +2,253 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <style>
-        @page {
-            size: letter portrait;
-            margin: 10mm 12mm 15mm 12mm;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 8pt;
-            color: #222;
-            margin: 0;
-            padding: 0;
-        }
-
-        .header-banner {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .header-banner img {
-            width: 100%;
-            max-height: 70px;
-            object-fit: contain;
-        }
-
-        .institucion {
-            text-align: center;
-            font-size: 10pt;
-            font-weight: bold;
-            margin: 4px 0;
-        }
-
-        .remision-box {
-            text-align: center;
-            font-size: 8.5pt;
-            font-weight: bold;
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
-
-        .meta-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-        }
-
-        .meta-table th,
-        .meta-table td {
-            border: 0.5pt solid #000;
-            padding: 4px;
-            font-size: 7.5pt;
-            text-align: center;
-        }
-
-        .meta-table th {
-            background-color: #F0F8FF;
-            font-weight: bold;
-        }
-
-        .articulos-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 8px;
-        }
-
-        .articulos-table th,
-        .articulos-table td {
-            border: 0.5pt solid #000;
-            padding: 4px;
-            font-size: 7.5pt;
-        }
-
-        .articulos-table th {
-            background-color: #F0F8FF;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-left {
-            text-align: left;
-        }
-
-        .totales-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 4px;
-            page-break-inside: avoid;
-        }
-
-        .totales-table {
-            width: 230px;
-            border-collapse: collapse;
-            margin-left: auto;
-        }
-
-        .totales-table td {
-            padding: 3px 6px;
-            font-size: 8.5pt;
-            font-weight: bold;
-        }
-
-        .firmas-section {
-            width: 100%;
-            margin-top: 25px;
-            display: table;
-            table-layout: fixed;
-            page-break-inside: avoid;
-        }
-
-        .firma-col {
-            display: table-cell;
-            text-align: center;
-            vertical-align: top;
-            padding: 0 4px;
-            font-size: 7pt;
-        }
-
-        .linea-firma {
-            margin-top: 30px;
-            border-top: 0.5pt solid #000;
-            padding-top: 3px;
-            font-weight: bold;
-        }
-
-        .cargo {
-            font-size: 6.5pt;
-            color: #333;
-            margin-top: 2px;
-        }
-
-        .footer-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .footer-banner img {
-            width: 100%;
-            max-height: 45px;
-            object-fit: contain;
-        }
-
-        /* Ancho por defecto (para cuando NO hay montos) */
-        .col-descripcion {
-            width: 62%;
-        }
-
-        /* Ancho cuando SÍ hay montos */
-        body.con-montos .col-descripcion {
-            width: 38%;
-        }
-    </style>
+  <meta charset="UTF-8">
 </head>
 
-<body>
+<body class="report report--dense">
 
-    <!-- BANNER SUPERIOR -->
-    {{#if bannerBase64}}
-    <div class="header-banner">
-        <img src="{{bannerBase64}}" alt="Banner Institucional">
-    </div>
-    {{/if}}
+  <!-- Banner superior -->
+  {{#if bannerBase64}}
+  <div class="report-banner report-banner--compact">
+    <img
+      src="{{bannerBase64}}"
+      alt="Banner Institucional"
+    >
+  </div>
+  {{/if}}
 
-    <div class="institucion">
-        COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
-    </div>
+  <div class="report-institution">
+    COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+  </div>
 
-    <div class="remision-box">
-        <span>R.F.C. : CEC941104AN5</span> &nbsp;&nbsp;&nbsp;&nbsp;
-        <span>REMISIÓN No: <strong>{{folioFormateado}}</strong></span><br>
-        DIRECCIÓN ADMINISTRATIVA<br>
-        DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
-    </div>
+  <!-- Identificación de la remisión -->
+  <div class="document-reference">
+    <span>R.F.C.: CEC941104AN5</span>
+    &nbsp;&nbsp;&nbsp;&nbsp;
 
-    <!-- TABLA METADATOS -->
-    <table class="meta-table">
-        <thead>
-            <tr>
-                <th style="width: 30%;">Entregado a:</th>
-                <th style="width: 45%;">Nombre del solicitante:</th>
-                <th style="width: 25%;">Fecha de atención</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{meta.plantel}}</td>
-                <td>{{meta.administrativo}}</td>
-                <td>{{meta.fecha}}</td>
-            </tr>
-        </tbody>
-    </table>
+    <span>
+      REMISIÓN No:
+      <strong>{{folioFormateado}}</strong>
+    </span>
 
-    <!-- TABLA ARTÍCULOS -->
-    <table class="articulos-table">
-        <thead>
-            <tr>
-                <th style="width: 10%;">Cantidad</th>
-                <th style="width: 18%;">Clave</th>
-                <th style="width: 10%;">Costeo</th>
-                {{#if conMontos}}
-                <th style="width: 38%;">Descripción</th>
-                {{else}}
-                <th style="width: 62%;">Descripción</th>
-                {{/if}}
-                {{#if conMontos}}
-                <th style="width: 12%;">P/U</th>
-                <th style="width: 12%;">Importe</th>
-                {{/if}}
-            </tr>
-        </thead>
-        <tbody>
-            {{#each articulos}}
-            <tr>
-                <td class="text-center">{{this.cantidad}}</td>
-                <td class="text-center">{{this.clave}}</td>
-                <td class="text-center">PEPS</td>
-                <td class="text-left">{{this.descripcion}}</td>
-                {{#if ../conMontos}}
-                <td class="text-right">{{this.precio_unitario}}</td>
-                <td class="text-right">{{this.importe_total}}</td>
-                {{/if}}
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
+    <br>
 
-    <!-- TOTALES (Solo si conMontos === true) -->
+    DIRECCIÓN ADMINISTRATIVA
+
+    <br>
+
+    DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+  </div>
+
+  <!-- Información de entrega -->
+  <table class="report-table report-table--dense report-table--info">
+
+    <colgroup>
+      <col class="w-30">
+      <col class="w-45">
+      <col class="w-25">
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th>Entregado a:</th>
+        <th>Nombre del solicitante:</th>
+        <th>Fecha de atención</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td class="text-center">
+          {{meta.plantel}}
+        </td>
+
+        <td class="text-center">
+          {{meta.administrativo}}
+        </td>
+
+        <td class="text-center">
+          {{meta.fecha}}
+        </td>
+      </tr>
+    </tbody>
+
+  </table>
+
+  <!-- Artículos -->
+  <table class="report-table report-table--dense">
+
     {{#if conMontos}}
-    <div class="totales-wrapper">
-        <table class="totales-table">
-            <tr>
-                <td class="text-left">Subtotal:</td>
-                <td class="text-right">${{totales.subtotal}}</td>
-            </tr>
-            <tr>
-                <td class="text-left">I.V.A (16%):</td>
-                <td class="text-right">${{totales.iva}}</td>
-            </tr>
-            <tr style="border-top: 1pt solid #000;">
-                <td class="text-left">Total:</td>
-                <td class="text-right">${{totales.total}}</td>
-            </tr>
-        </table>
-    </div>
+    <colgroup>
+      <col class="w-10">
+      <col class="w-18">
+      <col class="w-10">
+      <col class="w-38">
+      <col class="w-12">
+      <col class="w-12">
+    </colgroup>
+    {{else}}
+    <colgroup>
+      <col class="w-10">
+      <col class="w-18">
+      <col class="w-10">
+      <col class="w-62">
+    </colgroup>
     {{/if}}
 
-    <!-- SECCIÓN DE FIRMAS -->
-    <div class="firmas-section">
-        <div class="firma-col">
-            RECIBIÓ
-            <div class="linea-firma">{{meta.director}}</div>
-            <div class="cargo">DIRECTOR / JEFE DEPTO / AUXILIAR</div>
-        </div>
-        <div class="firma-col">
-            ENTREGÓ
-            <div class="linea-firma">&nbsp;</div>
-            <div class="cargo">ENCARGADO DE ALMACÉN</div>
-        </div>
-        <div class="firma-col">
-            REVISÓ
-            <div class="linea-firma">LIC. ISRAEL SOBERANIZ MORALES</div>
-            <div class="cargo">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
-        </div>
-        <div class="firma-col">
-            AUTORIZÓ
-            <div class="linea-firma">M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ</div>
-            <div class="cargo">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
-        </div>
+    <thead>
+      <tr>
+        <th>Cantidad</th>
+        <th>Clave</th>
+        <th>Costeo</th>
+        <th>Descripción</th>
+
+        {{#if conMontos}}
+        <th>P/U</th>
+        <th>Importe</th>
+        {{/if}}
+      </tr>
+    </thead>
+
+    <tbody>
+
+      {{#each articulos}}
+      <tr>
+        <td class="text-center">
+          {{this.cantidad}}
+        </td>
+
+        <td class="text-center">
+          {{this.clave}}
+        </td>
+
+        <td class="text-center">
+          PEPS
+        </td>
+
+        <td class="text-left">
+          {{this.descripcion}}
+        </td>
+
+        {{#if ../conMontos}}
+        <td class="text-right nowrap">
+          {{this.precio_unitario}}
+        </td>
+
+        <td class="text-right nowrap">
+          {{this.importe_total}}
+        </td>
+        {{/if}}
+      </tr>
+      {{/each}}
+
+    </tbody>
+
+  </table>
+
+  <!-- Totales -->
+  {{#if conMontos}}
+  <div class="report-results justify-end">
+
+    <table class="totals-table">
+      <tbody>
+        <tr>
+          <td class="text-left font-bold">
+            Subtotal:
+          </td>
+
+          <td class="text-right nowrap font-bold">
+            ${{totales.subtotal}}
+          </td>
+        </tr>
+
+        <tr>
+          <td class="text-left font-bold">
+            I.V.A. (16%):
+          </td>
+
+          <td class="text-right nowrap font-bold">
+            ${{totales.iva}}
+          </td>
+        </tr>
+
+        <tr class="totals-table__total">
+          <td class="text-left font-bold">
+            Total:
+          </td>
+
+          <td class="text-right nowrap font-bold">
+            ${{totales.total}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+  {{/if}}
+
+  <!-- Firmas -->
+  <section class="signature-grid">
+
+    <div class="signature">
+      RECIBIÓ
+
+      <div class="signature__line">
+        {{meta.director}}
+      </div>
+
+      <div class="signature__role">
+        DIRECTOR / JEFE DEPTO / AUXILIAR
+      </div>
     </div>
 
-    <!-- BANNER INFERIOR -->
-    {{#if pieBase64}}
-    <div class="footer-banner">
-        <img src="{{pieBase64}}" alt="Pie Institucional">
+    <div class="signature">
+      ENTREGÓ
+
+      <div class="signature__line">
+        &nbsp;
+      </div>
+
+      <div class="signature__role">
+        ENCARGADO DE ALMACÉN
+      </div>
     </div>
-    {{/if}}
+
+    <div class="signature">
+      REVISÓ
+
+      <div class="signature__line">
+        LIC. ISRAEL SOBERANIZ MORALES
+      </div>
+
+      <div class="signature__role">
+        JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES
+      </div>
+    </div>
+
+    <div class="signature">
+      AUTORIZÓ
+
+      <div class="signature__line">
+        M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ
+      </div>
+
+      <div class="signature__role">
+        ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Banner inferior -->
+  {{#if pieBase64}}
+  <div class="institutional-footer institutional-footer--contained">
+    <img
+      src="{{pieBase64}}"
+      alt="Pie Institucional"
+    >
+  </div>
+  {{/if}}
 
 </body>
 

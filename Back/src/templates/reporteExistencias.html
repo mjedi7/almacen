@@ -2,324 +2,213 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <style>
-        @page {
-            size: letter portrait;
-            margin: 10mm 12mm 16mm 12mm;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #000;
-            background: #fff;
-        }
-
-        /* Tabla envolvente principal que fuerza la repetición de encabezado en cada página */
-        .main-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: none;
-        }
-
-        .main-table>thead {
-            display: table-header-group; /* Repite el membrete institucional en cada hoja */
-        }
-
-        .main-table>tbody {
-            display: table-row-group;
-        }
-
-        .main-table>tbody>tr>td {
-            border: none;
-            padding: 0;
-        }
-
-        /* Fuerza el salto de página en cada fila de partida */
-tr.fila-partida {
-  page-break-after: always !important;
-  break-after: page !important;
-}
-
-/* La última partida no debe saltar para no dejar hoja blanca antes del total */
-tr.fila-partida:last-of-type {
-  page-break-after: auto !important;
-  break-after: auto !important;
-}
-
-        /* Estilos del Membrete y Títulos Institucionales */
-        .header-container {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .header-banner {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-
-        .header-banner img {
-            max-width: 100%;
-            height: 105px;
-            object-fit: contain;
-        }
-
-        .sub-header-title {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #000;
-            margin-bottom: 2px;
-            letter-spacing: 0.3px;
-            text-align: center;
-        }
-
-        .report-name {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #000;
-            margin-bottom: 4px;
-            letter-spacing: 0.3px;
-            text-align: center;
-        }
-
-        .main-title {
-            font-size: 11pt;
-            font-weight: bold;
-            color: #000;
-            margin-bottom: 6px;
-            text-align: center;
-        }
-
-        /* Cada partida empieza en su propia hoja */
-        .bloque-partida {
-            /*page-break-after: always !important;
-            /* Fuerza salto al terminar la partida 
-            break-after: page !important;
-            clear: both;*/
-            margin-bottom: 15px;
-        }
-
-        /* La última partida no fuerza salto para no dejar una hoja en blanco innecesaria */
-        .bloque-partida:last-child {
-            page-break-after: auto !important;
-            break-after: auto !important;
-        }
-
-        /* El bloque de totales finales se coloca ordenado al final de la última partida */
-        .tabla-totales-pie,
-        .resumen-totales {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            margin-top: 18px;
-        }
-
-        .table-header {
-            width: 100%;
-            border-collapse: collapse !important;
-            border: 1.5px solid #000;
-            margin-bottom: 9px !important;
-            page-break-inside: avoid;
-        }
-
-        .table-header th {
-            background-color: #f7faff;
-            border: 1px solid #000;
-            padding: 4px 6px;
-            font-size: 10pt;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .table-header td {
-            border: 1px solid #000;
-            padding: 4px 6px;
-            font-size: 10pt;
-            text-align: center;
-        }
-
-        .table-detalle {
-            width: 100%;
-            border-collapse: collapse !important;
-            border-spacing: 0 !important;
-            border: 1.5px solid #000;
-            /*border-top: none;*/
-        }
-
-        .table-detalle thead {
-            display: table-header-group;
-        }
-
-        .table-detalle tr {
-            page-break-inside: avoid;
-        }
-
-        .table-detalle th {
-            background-color: #f7faff;
-            border: 1px solid #000;
-            padding: 4px;
-            font-size: 10pt;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .table-detalle td {
-            border: 1px solid #000;
-            padding: 3.5px 5px;
-            font-size: 10pt;
-        }
-
-        .col-clave {
-            width: 16%;
-            text-align: center;
-        }
-
-        .col-articulo {
-            width: 44%;
-            text-align: left;
-            text-transform: capitalize;
-        }
-
-        .col-costo {
-            width: 13%;
-            text-align: right;
-        }
-
-        .col-existencia {
-            width: 11%;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .col-total {
-            width: 16%;
-            text-align: right;
-        }
-
-        /* Totales finales */
-        .tabla-totales-pie {
-            width: 100%;
-            border-collapse: collapse;
-            border: none;
-            margin-top: 14px;
-            page-break-inside: avoid;
-            font-size: 10pt;
-        }
-
-        .tabla-totales-pie td {
-            border: none;
-            padding: 4px 5px;
-            vertical-align: top;
-        }
-    </style>
+  <meta charset="UTF-8">
 </head>
 
-<body>
+<body class="report report--normal">
 
-    <table class="main-table">
-        <!-- Encabezado repetible en cada página -->
-        <thead>
-            <tr>
+  <table class="report-shell">
+
+    <!-- Encabezado repetible -->
+    <thead>
+      <tr>
+        <td>
+          <header class="report-header">
+
+            {{#if bannerBase64}}
+            <div class="report-banner">
+              <img
+                src="{{bannerBase64}}"
+                alt="Banner Institucional"
+              >
+            </div>
+            {{/if}}
+
+            <div class="report-institution">
+              COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+            </div>
+
+            <div class="report-name">
+              EXISTENCIAS Y COSTOS ACTUALES
+            </div>
+
+            <div class="report-title">
+              {{tituloAlmacen}}
+            </div>
+
+          </header>
+        </td>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      {{#each gruposPartidas}}
+      <tr class="page-row {{#if @last}}page-row--last{{/if}}">
+        <td>
+
+          <section class="report-section">
+
+            <!-- Información de la partida -->
+            <table class="report-table report-table--info">
+
+              <colgroup>
+                <col class="w-14">
+                <col class="w-56">
+                <col class="w-15">
+                <col class="w-15">
+              </colgroup>
+
+              <thead>
+                <tr>
+                  <th>Partida</th>
+                  <th>Nombre Partida</th>
+                  <th>Productos</th>
+                  <th>Proveedores</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td class="text-center">
+                    {{this.clave}}
+                  </td>
+
+                  <td class="text-left indent">
+                    {{this.descripcion}}
+                  </td>
+
+                  <td class="text-center">
+                    Todos
+                  </td>
+
+                  <td class="text-center">
+                    Todos
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
+
+            <!-- Artículos de la partida -->
+            <table class="report-table">
+
+              <colgroup>
+                <col class="w-16">
+                <col class="w-44">
+                <col class="w-13">
+                <col class="w-11">
+                <col class="w-16">
+              </colgroup>
+
+              <thead>
+                <tr>
+                  <th>Clave</th>
+
+                  <th class="text-left">
+                    Artículo
+                  </th>
+
+                  <th class="text-right">
+                    Costo
+                  </th>
+
+                  <th>
+                    Existencia
+                  </th>
+
+                  <th class="text-right">
+                    Costo total
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {{#each this.articulos}}
+                <tr>
+                  <td class="text-center">
+                    {{this.clave}}
+                  </td>
+
+                  <td class="text-left text-capitalize">
+                    {{this.articulo}}
+                  </td>
+
+                  <td class="text-right">
+                    $ {{this.costo}}
+                  </td>
+
+                  <td class="text-center font-bold">
+                    {{this.existencia}}
+                  </td>
+
+                  <td class="text-right">
+                    $ {{this.costo_total}}
+                  </td>
+                </tr>
+                {{/each}}
+
+              </tbody>
+
+            </table>
+
+          </section>
+
+        </td>
+      </tr>
+      {{/each}}
+
+      <!-- Totales finales -->
+      <tr class="no-break">
+        <td>
+
+          <table class="report-summary">
+
+            <colgroup>
+              <col class="w-16">
+              <col class="w-44">
+              <col class="w-13">
+              <col class="w-11">
+              <col class="w-16">
+            </colgroup>
+
+            <tbody>
+              <tr>
+                <td></td>
+
                 <td>
-                    <div class="header-container">
-                        {{#if bannerBase64}}
-                        <div class="header-banner">
-                            <img src="{{bannerBase64}}" alt="Banner Institucional">
-                        </div>
-                        {{/if}}
-                        <div class="sub-header-title">COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE
-                            VERACRUZ</div>
-                        <div class="report-name">EXISTENCIAS Y COSTOS ACTUALES</div>
-                        <div class="main-title">{{tituloAlmacen}}</div>
-                    </div>
+                  <div>
+                    <b>Existencias totales de artículos:</b>
+                    &nbsp; {{existenciasTotales}}
+                  </div>
+
+                  <div class="mt-4">
+                    <b>Total de registros impresos:</b>
+                    &nbsp; {{totalRegistrosImpresos}}
+                  </div>
                 </td>
-            </tr>
-        </thead>
 
-        <!-- Contenido continuo del reporte -->
-        <tbody>
-            {{#each gruposPartidas}}
-            <tr class="fila-partida">
-                <td style="border: none; padding: 0;">
+                <td></td>
 
-                    <div class="bloque-partida">
-
-                        <!-- Cuadro superior de la partida -->
-                        <table class="table-header">
-                            <thead>
-                                <tr>
-                                    <th style="width: 14%;">Partida</th>
-                                    <th style="width: 56%;">Nombre Partida</th>
-                                    <th style="width: 15%;">Productos</th>
-                                    <th style="width: 15%;">Proveedores</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{{this.clave}}</td>
-                                    <td style="text-align: left; padding-left: 8px;">{{this.descripcion}}</td>
-                                    <td>Todos</td>
-                                    <td>Todos</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <!-- Cuadro inferior de artículos -->
-                        <table class="table-detalle" cellspacing="0" cellpadding="0">
-                            <thead>
-                                <tr>
-                                    <th class="col-clave">Clave</th>
-                                    <th class="col-articulo">Artículo</th>
-                                    <th class="col-costo">Costo</th>
-                                    <th class="col-existencia">Existencia</th>
-                                    <th class="col-total">Costo total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each this.articulos}}
-                                <tr>
-                                    <td class="col-clave">{{this.clave}}</td>
-                                    <td class="col-articulo">{{this.articulo}}</td>
-                                    <td class="col-costo">$ {{this.costo}}</td>
-                                    <td class="col-existencia">{{this.existencia}}</td>
-                                    <td class="col-total">$ {{this.costo_total}}</td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
-
-                    </div>
-
+                <td class="text-right font-bold">
+                  Total
                 </td>
-            </tr>
-            {{/each}}
 
-            <!-- Fila independiente para los totales finales -->
-            <tr style="page-break-inside: avoid; break-inside: avoid;">
-                <td style="border: none; padding: 0;">
-                    <table class="tabla-totales-pie">
-                        <tr>
-                            <td style="width: 16%;"></td>
-                            <td style="width: 44%;">
-                                <div><b>Existencias totales de artículos:</b> &nbsp; {{existenciasTotales}}</div>
-                                <div style="margin-top: 4px;"><b>Total de registros impresos:</b> &nbsp; {{totalRegistrosImpresos}}</div>
-                            </td>
-                            <td style="width: 13%;"></td>
-                            <td style="width: 11%; text-align: right; font-weight: bold; font-size: 9pt;">Total</td>
-                            <td style="width: 16%; text-align: right; font-weight: bold; font-size: 9pt;">$ {{granTotal}}</td>
-                        </tr>
-                    </table>
+                <td class="text-right font-bold">
+                  $ {{granTotal}}
                 </td>
-            </tr>
-        </tbody>
-    </table>
+              </tr>
+            </tbody>
+
+          </table>
+
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
 
 </body>
 
