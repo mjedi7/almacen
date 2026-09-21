@@ -1,232 +1,287 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <style>
     @page {
       size: letter portrait;
-      margin: 10mm 12mm 15mm 12mm;
+      margin: 10mm 12mm 16mm 12mm;
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 8.5pt;
-      color: #222;
       margin: 0;
+      padding: 0;
+      color: #000;
+      background: #fff;
+    }
+
+    /* Tabla envolvente principal que repite encabezado en cada página */
+    .main-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+    }
+
+    .main-table > thead {
+      display: table-header-group;
+    }
+
+    .main-table > tbody {
+      display: table-row-group;
+    }
+
+    .main-table > tbody > tr > td {
+      border: none;
       padding: 0;
     }
 
-    /* Banners institucionales */
-    .banner-container {
+    /* Membrete y Títulos Institucionales */
+    .header-container {
+      width: 100%;
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
-    .banner-img {
-      width: 440pt;
-      max-height: 55pt;
+
+    .header-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .header-banner img {
+      max-width: 100%;
+      height: 105px;
       object-fit: contain;
     }
 
-    /* Títulos */
-    .header-titulos {
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .header-titulos .inst-sub {
-      font-size: 8pt;
-      font-weight: bold;
-      color: #333;
-      margin: 1px 0;
-      text-transform: uppercase;
-    }
-    .header-titulos .doc-title {
-      font-size: 12pt;
-      font-weight: bold;
-      color: #111;
-      margin: 4px 0 0 0;
-      letter-spacing: 0.5px;
-    }
-
-    /* Caja de Metadatos */
-    .meta-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 12px;
-      font-size: 8.5pt;
-    }
-    .meta-table td {
-      padding: 2px 4px;
-      vertical-align: top;
-    }
-    .meta-table .lbl {
+    .sub-header-title {
+      font-size: 10pt;
       font-weight: bold;
       color: #000;
+      margin-bottom: 2px;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+
+    .report-name {
+      font-size: 10pt;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+
+    .main-title {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    /* Cuadro de Metadatos del Artículo (estilo table-header) */
+    .table-header {
+      width: 100%;
+      border-collapse: collapse !important;
+      border: 1.5px solid #000;
+      margin-bottom: 10px !important;
+      page-break-inside: avoid;
+    }
+
+    .table-header th {
+      background-color: #f7faff;
+      border: 1px solid #000;
+      padding: 4px 6px;
+      font-size: 10pt;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .table-header td {
+      border: 1px solid #000;
+      padding: 4px 6px;
+      font-size: 10pt;
+    }
+
+    .table-header .lbl {
+      background-color: #f7faff;
+      font-weight: bold;
       width: 18%;
     }
-    .meta-table .val {
-      color: #222;
+
+    .table-header .val {
+      background-color: #fff;
       width: 32%;
     }
 
-    /* Tabla de Movimientos */
-    table.movimientos {
+    /* Tabla Detalle de Movimientos */
+    .table-detalle {
       width: 100%;
-      border-collapse: collapse;
-    }
-    table.movimientos thead {
-      display: table-header-group; /* Repite cabecera al saltar hoja */
-    }
-    table.movimientos tr {
-      page-break-inside: avoid;
-    }
-    table.movimientos th {
-      background-color: #e9ecef;
-      color: #000;
-      font-size: 7.5pt;
-      font-weight: bold;
-      border: 1px solid #333;
-      padding: 4px 3px;
-    }
-    table.movimientos td {
-      border: 1px solid #ddd;
-      padding: 3.5px 3px;
-      font-size: 7.5pt;
-    }
-    .num { text-align: right; }
-    .cen { text-align: center; }
-
-    /* Totales */
-    .totales-wrapper {
-      margin-top: 15px;
-      page-break-inside: avoid;
-      display: flex;
-      justify-content: flex-end;
-    }
-    .totales-table {
-      width: 250px;
-      border-collapse: collapse;
-      font-size: 8.5pt;
-    }
-    .totales-table td {
-      padding: 3px 6px;
-    }
-    .totales-table .lbl-total {
-      text-align: right;
-      font-weight: bold;
-      width: 60%;
-    }
-    .totales-table .val-total {
-      text-align: right;
-      width: 40%;
+      border-collapse: collapse !important;
+      border-spacing: 0 !important;
+      border: 1.5px solid #000;
     }
 
-    /* Pie de página institucional */
-    .pie-container {
-      position: fixed;
-      bottom: -10mm;
-      left: -12mm;
-      right: -12mm;
+    .table-detalle thead {
+      display: table-header-group;
+    }
+
+    .table-detalle tr {
+      page-break-inside: avoid;
+    }
+
+    .table-detalle th {
+      background-color: #f7faff;
+      border: 1px solid #000;
+      padding: 4px;
+      font-size: 10pt;
+      font-weight: bold;
       text-align: center;
-      z-index: -1;
     }
-    .pie-img {
+
+    .table-detalle td {
+      border: 1px solid #000;
+      padding: 3.5px 5px;
+      font-size: 10pt;
+    }
+
+    .cen { text-align: center; }
+    .num { text-align: right; }
+
+    /* Totales finales */
+    .tabla-totales-pie {
       width: 100%;
-      max-height: 50pt;
-      object-fit: cover;
+      border-collapse: collapse;
+      border: none;
+      margin-top: 14px;
+      page-break-inside: avoid;
+      font-size: 10pt;
+    }
+
+    .tabla-totales-pie td {
+      border: none;
+      padding: 4px 5px;
+      vertical-align: top;
     }
   </style>
 </head>
+
 <body>
 
-  {{#if bannerBase64}}
-  <div class="banner-container">
-    <img src="{{bannerBase64}}" class="banner-img" alt="Banner Institucional">
-  </div>
-  {{/if}}
-
-  <div class="header-titulos">
-    <div class="inst-sub">DIRECCIÓN ADMINISTRATIVA</div>
-    <div class="inst-sub">DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES</div>
-    <div class="doc-title">KÁRDEX</div>
-  </div>
-
-  <table class="meta-table">
-    <tr>
-      <td class="lbl">Descripción:</td>
-      <td class="val" colspan="3" style="width: 82%;">{{header.nom_articulo}}</td>
-    </tr>
-    <tr>
-      <td class="lbl">Clave del artículo:</td>
-      <td class="val">{{header.clave_completa}}</td>
-      <td class="lbl">Fecha últ. compra:</td>
-      <td class="val">{{header.fecha_ult_compra}}</td>
-    </tr>
-    <tr>
-      <td class="lbl">Unidad de Entrada:</td>
-      <td class="val">{{header.unidad_medida}}</td>
-      <td class="lbl">Tipo de Costeo:</td>
-      <td class="val"><strong>P.E.P.S.</strong></td>
-    </tr>
-    <tr>
-      <td class="lbl">Unidad de Salida:</td>
-      <td class="val">{{header.unidad_medida}}</td>
-      <td class="lbl">Costo Promedio:</td>
-      <td class="val">$ {{header.costo_promedio}}</td>
-    </tr>
-  </table>
-
-  <table class="movimientos">
+  <table class="main-table">
+    <!-- Encabezado repetible institucional -->
     <thead>
       <tr>
-        <th style="width: 9%;" class="cen">Doc/Folio</th>
-        <th style="width: 27%;">Plantel/Destino</th>
-        <th style="width: 11%;" class="num">Exist. Inicial</th>
-        <th style="width: 11%;" class="num">Ventas Acum.</th>
-        <th style="width: 13%;" class="num">Importe Total</th>
-        <th style="width: 11%;" class="num">Existencia</th>
-        <th style="width: 18%;" class="cen">Fecha</th>
+        <td>
+          <div class="header-container">
+            {{#if bannerBase64}}
+            <div class="header-banner">
+              <img src="{{bannerBase64}}" alt="Banner Institucional">
+            </div>
+            {{/if}}
+            <div class="sub-header-title">COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ</div>
+            <div class="report-name">DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES</div>
+            <div class="main-title">KÁRDEX DE ALMACÉN</div>
+          </div>
+        </td>
       </tr>
     </thead>
+
+    <!-- Contenido del Kárdex -->
     <tbody>
-      {{#if movimientos.length}}
-        {{#each movimientos}}
-        <tr>
-          <td class="cen">{{this.folio}}</td>
-          <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
-          <td class="num">{{this.existencia_inicial}}</td>
-          <td class="num">{{this.ventas_acumuladas}}</td>
-          <td class="num">$ {{this.importe_total}}</td>
-          <td class="num">{{this.existencia}}</td>
-          <td class="cen">{{this.fecha}}</td>
-        </tr>
-        {{/each}}
-      {{else}}
-        <tr>
-          <td colspan="7" class="cen" style="padding: 10px; color: #666;">
-            No hay movimientos registrados para este criterio.
-          </td>
-        </tr>
-      {{/if}}
+      <tr>
+        <td>
+
+          <!-- Cuadro de datos del artículo -->
+          <table class="table-header">
+            <tbody>
+              <tr>
+                <td class="lbl">Descripción:</td>
+                <td class="val" colspan="3">{{header.nom_articulo}}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Clave artículo:</td>
+                <td class="val">{{header.clave_completa}}</td>
+                <td class="lbl">Fecha últ. compra:</td>
+                <td class="val">{{header.fecha_ult_compra}}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Unidad entrada:</td>
+                <td class="val">{{header.unidad_medida}}</td>
+                <td class="lbl">Tipo costeo:</td>
+                <td class="val"><strong>P.E.P.S.</strong></td>
+              </tr>
+              <tr>
+                <td class="lbl">Unidad salida:</td>
+                <td class="val">{{header.unidad_medida}}</td>
+                <td class="lbl">Costo promedio:</td>
+                <td class="val">$ {{header.costo_promedio}}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Tabla de movimientos (Kárdex) -->
+          <table class="table-detalle" cellspacing="0" cellpadding="0">
+            <thead>
+              <tr>
+                <th style="width: 10%;" class="cen">Doc/Folio</th>
+                <th style="width: 27%;">Plantel / Destino</th>
+                <th style="width: 11%;" class="num">Exist. Inicial</th>
+                <th style="width: 11%;" class="num">Ventas Acum.</th>
+                <th style="width: 13%;" class="num">Importe Total</th>
+                <th style="width: 11%;" class="num">Existencia</th>
+                <th style="width: 17%;" class="cen">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#if movimientos.length}}
+                {{#each movimientos}}
+                <tr>
+                  <td class="cen">{{this.folio}}</td>
+                  <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
+                  <td class="num">{{this.existencia_inicial}}</td>
+                  <td class="num">{{this.ventas_acumuladas}}</td>
+                  <td class="num">$ {{this.importe_total}}</td>
+                  <td class="num">{{this.existencia}}</td>
+                  <td class="cen">{{this.fecha}}</td>
+                </tr>
+                {{/each}}
+              {{else}}
+                <tr>
+                  <td colspan="7" class="cen" style="padding: 12px; color: #555;">
+                    No hay movimientos registrados para este criterio.
+                  </td>
+                </tr>
+              {{/if}}
+            </tbody>
+          </table>
+
+          <!-- Totales al pie alineados al estilo de reporteExistencias -->
+          <table class="tabla-totales-pie">
+            <tr>
+              <td style="width: 10%;"></td>
+              <td style="width: 27%;"></td>
+              <td style="width: 22%;">
+                <div><b>Total Entradas:</b> &nbsp; {{totales.entradas}}</div>
+                <div style="margin-top: 4px;"><b>Total Salidas:</b> &nbsp; {{totales.salidas}}</div>
+              </td>
+              <td style="width: 13%;"></td>
+              <td style="width: 28%;"></td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
     </tbody>
   </table>
 
-  <div class="totales-wrapper">
-    <table class="totales-table">
-      <tr>
-        <td class="lbl-total">Total Entradas:</td>
-        <td class="val-total">{{totales.entradas}}</td>
-      </tr>
-      <tr>
-        <td class="lbl-total">Total Salidas:</td>
-        <td class="val-total">{{totales.salidas}}</td>
-      </tr>
-    </table>
-  </div>
-
-  {{#if pieBase64}}
-  <div class="pie-container">
-    <img src="{{pieBase64}}" class="pie-img" alt="Pie Institucional">
-  </div>
-  {{/if}}
-
 </body>
+
 </html>

@@ -1,10 +1,5 @@
-const puppeteer = require('puppeteer');
-const handlebars = require('handlebars');
-const path = require('path');
-const fs = require('fs');
 const { Pool } = require('pg');
-
-
+const { generarPDF } = require('../services/pdfGenerator');
 
 const pool = new Pool({
   host: process.env.HOST_BD,
@@ -14,19 +9,8 @@ const pool = new Pool({
   port: process.env.PORT_BD
 });
 
-// Helper para convertir las imágenes de disco a data-uri Base64
-const imgToBase64 = (filePath) => {
-  if (fs.existsSync(filePath)) {
-    const ext = path.extname(filePath).replace('.', '');
-    const bitmap = fs.readFileSync(filePath);
-    return `data:image/${ext === 'svg' ? 'svg+xml' : ext};base64,${bitmap.toString('base64')}`;
-  }
-  return null;
-};
-
 // REPORTE: KÁRDEX
 const pruebaReporte = async (req, res) => {
-  let browser = null;
   try {
     const clavePartidaRaw = (req.params.clavePartida || req.query.clavePartida || '21101').toString().trim();
     const idParamRaw = (req.params.idCostos || req.query.idCostos || req.params.idArticulo || req.query.idArticulo || '48').toString().trim();
@@ -105,7 +89,7 @@ const pruebaReporte = async (req, res) => {
     const headerData = resEncabezado.rows[0] || {};
     const movimientosDb = resDetalle.rows;
 
-    // 2. Procesar cálculos y formatear números
+    // 2. Cálculos y formateo
     const totalSalidas = movimientosDb.reduce((acc, curr) => acc + Number(curr.ventas_acumuladas || 0), 0);
 
     let totalEntradas = Number(headerData.total_entradas_compras || 0);
@@ -139,12 +123,7 @@ const pruebaReporte = async (req, res) => {
       };
     });
 
-    const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
-    const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
-
     const templateData = {
-      bannerBase64: imgToBase64(bannerPath),
-      pieBase64: imgToBase64(piePath),
       header: {
         nom_articulo: headerData.nom_articulo || 'Sin descripción',
         clave_completa: `${headerData.clave_partida || clavePartidaRaw}-${headerData.clave_articulo || idParamRaw}`,
@@ -159,53 +138,16 @@ const pruebaReporte = async (req, res) => {
       }
     };
 
-    // 3. Compilar plantilla Handlebars
-    const templatePath = path.join(__dirname, '../templates/reporteKardex.html');
-    const templateHtml = fs.readFileSync(templatePath, 'utf8');
-    const compiledTemplate = handlebars.compile(templateHtml);
-    const htmlFinal = compiledTemplate(templateData);
+    // 3. Generación del buffer vertical vía pdfGenerator service
+    const pdfBuffer = await generarPDF('reporteKardex.html', templateData, { landscape: false });
 
-    // 4. Puppeteer
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
-
-    // 5. Generar PDF
-    // 5. Generar PDF
-    const pdfBuffer = await page.pdf({
-      format: 'Letter',
-      landscape: false, // <-- Asegura la orientación vertical
-      printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: `
-        <div style="width: 100%; font-size: 8pt; font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: #333; text-align: right; padding-right: 12mm; padding-top: 5mm;">
-          Página <span class="pageNumber"></span> de <span class="totalPages"></span>
-        </div>
-      `,
-      footerTemplate: '<div></div>',
-      margin: {
-        top: '12mm',
-        bottom: '15mm',
-        left: '12mm',
-        right: '12mm'
-      }
-    });
-
-    await browser.close();
-
-    // 6. Responder
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="kardex_${clavePartidaRaw}_${idParamRaw}.pdf"`);
     res.setHeader('Content-Length', pdfBuffer.length);
     res.send(pdfBuffer);
 
   } catch (error) {
-    if (browser) await browser.close();
-    console.error('Error al generar PDF de Kárdex con Puppeteer:', error);
+    console.error('Error al generar PDF de Kárdex:', error);
     res.status(500).json({ error: 'Error al consultar la base de datos o generar el documento' });
   }
 };

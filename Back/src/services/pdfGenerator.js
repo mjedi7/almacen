@@ -19,11 +19,16 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
   try {
     const templatePath = path.join(__dirname, `../templates/${templateName}`);
+
+    console.log('>>> [PDF RUTA DISCO]:', templatePath); // <-- Ver ruta real
+
     if (!fs.existsSync(templatePath)) {
       throw new Error(`No se encontró la plantilla en: ${templatePath}`);
     }
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
+    console.log('>>> [PDF CONTENIDO]:', templateHtml.includes('KÁRDEX - PRUEBA') ? 'SÍ TIENE EL CAMBIO' : 'NO TIENE EL CAMBIO'); // <-- Ver si tiene el cambio
+    
     const compiledTemplate = handlebars.compile(templateHtml);
 
     const htmlFinal = compiledTemplate({
