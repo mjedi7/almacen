@@ -61,10 +61,17 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
  */
 const generarReporteEntradasTodas = async (req, res) => {
   try {
+  
+      console.log(
+      'Authorization recibido:',
+      req.header('Authorization')
+    );
+  
     const {
       fechaIni,
       fechaFin,
-      fechaReporte
+      fechaReporte,
+      usuario
     } = req.body;
 
     const errorValidacion = validarFechas(
@@ -78,6 +85,7 @@ const generarReporteEntradasTodas = async (req, res) => {
         error: errorValidacion
       });
     }
+
 
     const consulta = `
       SELECT
@@ -135,6 +143,7 @@ const generarReporteEntradasTodas = async (req, res) => {
     }));
 
     const datosPlantilla = {
+      usuario: usuario || 'USUARIO NO IDENTIFICADO',
       titulo: 'RESUMEN DE COMPRAS',
       documentos: 'Todos',
       proveedores: 'Todos',
@@ -156,8 +165,8 @@ const generarReporteEntradasTodas = async (req, res) => {
       datosPlantilla,
       {
         format: 'Letter',
-        landscape: false,
         printBackground: true,
+        landscape: false,
         margin: {
           top: '12mm',
           bottom: '17mm',

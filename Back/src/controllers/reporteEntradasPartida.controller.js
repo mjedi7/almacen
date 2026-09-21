@@ -61,7 +61,8 @@ const generarReporteEntradasPartida = async (req, res) => {
       fechaIni,
       fechaFin,
       fechaReporte,
-      partida
+      partida,
+      usuario
     } = req.body;
 
     const errorValidacion = validarFechas(
@@ -164,6 +165,7 @@ const generarReporteEntradasPartida = async (req, res) => {
       datosPartida.descripcion || 'Sin descripción';
 
     const datosPlantilla = {
+      usuario: usuario || 'USUARIO NO IDENTIFICADO',
       titulo: 'RESUMEN DE COMPRAS',
       tipoReporte: 'Por partida',
       partida: {
@@ -189,7 +191,7 @@ const generarReporteEntradasPartida = async (req, res) => {
       datosPlantilla,
       {
         format: 'Letter',
-        landscape: true,
+        landscape: false,
         printBackground: true,
         margin: {
           top: '12mm',

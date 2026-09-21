@@ -61,7 +61,8 @@ const generarReporteEntradasProveedor = async (req, res) => {
       fechaIni,
       fechaFin,
       fechaReporte,
-      idproveedor
+      idproveedor,
+      usuario
     } = req.body;
 
     const errorValidacion = validarFechas(
@@ -168,6 +169,7 @@ const generarReporteEntradasProveedor = async (req, res) => {
     );
 
     const datosPlantilla = {
+      usuario: usuario || 'USUARIO NO IDENTIFICADO',
       titulo: 'RESUMEN DE COMPRAS',
       tipoReporte: 'Por proveedor',
       proveedor: {
@@ -192,7 +194,7 @@ const generarReporteEntradasProveedor = async (req, res) => {
       datosPlantilla,
       {
         format: 'Letter',
-        landscape: true,
+        landscape: false,
         printBackground: true,
         margin: {
           top: '12mm',

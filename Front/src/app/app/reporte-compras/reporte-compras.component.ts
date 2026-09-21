@@ -70,74 +70,132 @@ export class ReporteComprasComponent implements OnInit {
     }
   }
 
-  GeneraReporte(form: NgForm) {
-    if (form.valid) {
-      const httpOptions = {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-        responseType: 'blob' as 'arraybuffer'
-      };
+ GeneraReporte(form: NgForm) {
+  if (form.valid) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      responseType: 'blob' as 'arraybuffer'
+    };
 
-      if (this.reporte.partida === "0") {
-        this.traer.http.post(this.API_URL + `/reporte_de_compras_todas`, this.reporte, httpOptions)
-          .subscribe((res: any) => {
-            const file = new Blob([res], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(file);
-            const link = document.createElement('a');
-            link.href = fileURL;
-            link.download = 'Reporte_de_todas_las_compras.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(fileURL);
-          });
-      } else {
-        this.traer.http.post(this.API_URL + `/reporte_de_compras_x_partida`, this.reporte, httpOptions)
-          .subscribe((res: any) => {
-            const file = new Blob([res], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(file);
-            const link = document.createElement('a');
-            link.href = fileURL;
-            link.download = 'Reporte_compras_por_partida.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(fileURL);
-          });
-      }
-    } else {
-      Swal.fire({
-        title: "Complete todos los campos",
-        icon: "warning"
-      });
-    }
-  }
+    const usuarioSesion =
+      localStorage.getItem('nombre') ||
+      localStorage.getItem('usuario') ||
+      'USUARIO NO IDENTIFICADO';
 
-  GeneraReportePorProveedor(form: NgForm) {
-    if (form.valid) {
-      const httpOptions = {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-        responseType: 'blob' as 'arraybuffer'
-      };
+    const payload = {
+      ...this.reporte,
+      usuario: usuarioSesion
+    };
 
-      this.traer.http.post(this.API_URL + `/reporte_de_compras_x_proveedor`, this.reporte2, httpOptions)
+    if (this.reporte.partida === '0') {
+      this.traer.http.post(
+        this.API_URL + `/reporte_de_compras_todas`,
+        payload,
+        httpOptions
+      )
         .subscribe((res: any) => {
-          const file = new Blob([res], { type: 'application/pdf' });
+          const file = new Blob(
+            [res],
+            { type: 'application/pdf' }
+          );
+
           const fileURL = URL.createObjectURL(file);
           const link = document.createElement('a');
+
           link.href = fileURL;
-          link.download = 'Reporte_compras_x_proveedor.pdf';
+          link.download = 'Reporte_de_todas_las_compras.pdf';
+
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+
           URL.revokeObjectURL(fileURL);
         });
     } else {
-      Swal.fire({
-        title: "Complete todos los campos",
-        icon: "warning"
-      });
+      this.traer.http.post(
+        this.API_URL + `/reporte_de_compras_x_partida`,
+        payload,
+        httpOptions
+      )
+        .subscribe((res: any) => {
+          const file = new Blob(
+            [res],
+            { type: 'application/pdf' }
+          );
+
+          const fileURL = URL.createObjectURL(file);
+          const link = document.createElement('a');
+
+          link.href = fileURL;
+          link.download = 'Reporte_compras_por_partida.pdf';
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          URL.revokeObjectURL(fileURL);
+        });
     }
+  } else {
+    Swal.fire({
+      title: 'Complete todos los campos',
+      icon: 'warning'
+    });
   }
+}
+
+GeneraReportePorProveedor(form: NgForm) {
+  if (form.valid) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      responseType: 'blob' as 'arraybuffer'
+    };
+
+    const usuarioSesion =
+      localStorage.getItem('nombre') ||
+      localStorage.getItem('usuario') ||
+      'USUARIO NO IDENTIFICADO';
+
+    const payload = {
+      ...this.reporte2,
+      usuario: usuarioSesion
+    };
+
+    this.traer.http.post(
+      this.API_URL + `/reporte_de_compras_x_proveedor`,
+      payload,
+      httpOptions
+    )
+      .subscribe((res: any) => {
+        const file = new Blob(
+          [res],
+          { type: 'application/pdf' }
+        );
+
+        const fileURL = URL.createObjectURL(file);
+        const link = document.createElement('a');
+
+        link.href = fileURL;
+        link.download = 'Reporte_compras_x_proveedor.pdf';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(fileURL);
+      });
+  } else {
+    Swal.fire({
+      title: 'Complete todos los campos',
+      icon: 'warning'
+    });
+  }
+}
+
 
   GeneraReporteKardex(form: NgForm) {
     if (form.valid) {
