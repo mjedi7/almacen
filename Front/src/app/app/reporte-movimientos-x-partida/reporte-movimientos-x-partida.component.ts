@@ -13,115 +13,102 @@ import Swal from 'sweetalert2';
 })
 export class ReporteMovimientosXPartidaComponent implements OnInit {
 
-  reporte:reporte_x_partida={
+  reporte: reporte_x_partida = {
+    fechaIni: null,
+    fechaFin: null,
+    partida: '0'
+  };
 
-    fechaIni:null,
-    fechaFin:null,
-    partida:''
-
-  }
-
-   partidas:any=[];
+  partidas: any = [];
   API_URL = environment.uri_api;
 
-  constructor(private traer:TraerDatosService) { }
+  constructor(private traer: TraerDatosService) {}
 
   ngOnInit(): void {
     this.traerPartidas();
   }
 
-  GeneraReporte(form:NgForm){
-
-    if(form.valid==true){
-
-             if(this.reporte.partida=="0"){
-    
-         const httpOptions = {
-                        
-                            headers: new HttpHeaders({
-                              'Content-Type':  'application/json',        
-                            } ),responseType: 'blob' as 'arraybuffer'
-                        
-                          };      
-                  
-                         this.traer.http.post( this.API_URL+`/reporte_movimiento_x_partida_todos`,this.reporte,httpOptions)
-                        .subscribe((res:any)=>{
-                       
-                          var file=new Blob([res],{type:'application/pdf'});
-                          var fileURL=URL.createObjectURL(file); 
-                        
-
-                            const link = document.createElement('a');
-                            link.href = fileURL;
-                            link.download = 'Reporte_movimientos_por_partida_todos';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                                       
-                      });
-
+  GeneraReporte(form: NgForm) {
+    if (!form.valid) {
+      Swal.fire({
+        title: 'Complete todos los campos',
+        icon: 'warning'
+      });
+      return;
     }
 
-     else if(this.reporte.partida != "0"){
-
-
-           const httpOptions = {
-                          
-                              headers: new HttpHeaders({
-                                'Content-Type':  'application/json',        
-                              } ),responseType: 'blob' as 'arraybuffer'
-                          
-                            };      
-                    
-                           this.traer.http.post( this.API_URL+`/reporte_movimiento_x_partida`,this.reporte,httpOptions)
-                          .subscribe((res:any)=>{
-                         
-                            var file=new Blob([res],{type:'application/pdf'});
-                            var fileURL=URL.createObjectURL(file); 
-
-
-                             const link = document.createElement('a');
-                            link.href = fileURL;
-                            link.download = 'Reporte_movimientos_por_partida';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-
-                                         
-                        });
-
-     }
-
-    }
-    
-    
-    else{
-
-       Swal.fire({
-        title:"Complete todos los campos",
-        icon:"warning"
-       })
-
+    if (this.reporte.fechaIni > this.reporte.fechaFin) {
+      Swal.fire({
+        title: 'Rango de fechas no válido',
+        text: 'La Fecha Inicial no puede ser posterior a la Fecha Final.',
+        icon: 'warning'
+      });
+      return;
     }
 
- 
+    const formatearFecha = (f: any) => {
+      if (!f) return '';
+      const p = f.toString().split('T')[0].split('-');
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : f;
+    };
 
-  }
+    // Preparamos los parámetros requeridos por el backend
+    const payload = {
+      partida: this.reporte.partida || '0',
+      fecha_inicio: formatearFecha(this.reporte.fechaIni),
+      fecha_fin: formatearFecha(this.reporte.fechaFin),
+      fechaIni: this.reporte.fechaIni,
+      fechaFin: this.reporte.fechaFin,
+      usuario: localStorage.getItem('nombre') || 'ADMINISTRADOR'
+    };
 
-   traerPartidas(){
-  
-    this.traer.http.get( this.API_URL+`/traerPartidas`)
-    .subscribe((res:any)=>{
-      this.partidas=res;
+    // Usamos las rutas directas que ya existen en generarDocumento.js
+    const endpoint = (this.reporte.partida === '0')
+      ? `${this.API_URL}/reporte_movimiento_x_partida_todos`
+      : `${this.API_URL}/reporte_movimiento_x_partida`;
 
-       this.partidas.push({id:'',clave:'0',descripcion:'Todos'})
-        console.log(this.partidas);
+    const nombreDescarga = (this.reporte.partida === '0')
+      ? 'Reporte_movimientos_por_partida_todos.pdf'
+      : `Reporte_movimientos_partida_${this.reporte.partida}.pdf`;
 
-
-      console.log(this.partidas);
-      
+    Swal.fire({
+      title: 'Generando Reporte...',
+      text: 'Por favor espere un momento',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(null)
     });
-    
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      responseType: 'blob' as 'json'
+    };
+
+    this.traer.http.post(endpoint, payload, httpOptions)
+      .subscribe({
+        next: (res: any) => {
+          Swal.close();
+          const file = new Blob([res], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.download = nombreDescarga;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(fileURL);
+        },
+        error: (err) => {
+          console.error('Error al generar:', err);
+          Swal.fire('Error', 'No se pudo generar el reporte de salidas.', 'error');
+        }
+      });
   }
 
+  traerPartidas() {
+    this.traer.http.get(`${this.API_URL}/traerPartidas`)
+      .subscribe((res: any) => {
+        this.partidas = res || [];
+        this.partidas.unshift({ id: '', clave: '0', descripcion: 'TODAS LAS PARTIDAS' });
+      });
+  }
 }

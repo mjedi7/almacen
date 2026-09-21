@@ -1,0 +1,12 @@
+h3{
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 20px;
+}
+
+.card{
+    background-color: rgba(214, 223, 220, 0.226);
+}
+
+.banner{
+    background-color: aquamarine;
+}

@@ -1,54 +1,48 @@
 <div class="formulario" style="width: 75%; height: 500px; margin: 0 auto ;">
 
-  <div class="Titulo" style="text-align: center;"> <h3>Transferir Artículos</h3></div>
+    <div class="Titulo" style="text-align: center;">
+        <h3>Transferir Artículos</h3>
+    </div>
 
-  <form (ngSubmit)="agregarArticulo(f)" #f="ngForm" style="margin-top: 50px;" >
+    <form (ngSubmit)="agregarArticulo(f)" #f="ngForm" style="margin-top: 50px;">
 
-    <div class="form-row mt-5">
+        <div class="form-row mt-5">
 
-         <div class="form-group col-md-4">
-        <label for="inputPassword4">Plantel</label>
-        <select [(ngModel)]="transferencia.plantel" id="areaEmite" class="form-control" name="Plantel" (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel">       
-          <ng-container *ngFor="let plantel of planteles" >
-                <option [value]="plantel.id">{{plantel.descripcion}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
-   
-      
-   <div class="form-group col-md-4">
-        <label for="inputPassword4">Partida</label>
-        <select [(ngModel)]="transferencia.partida" id="areaEmite" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required #Partida="ngModel">      
-            <option [value]="null" disabled selected>Selecciona una partida...</option>
-            <ng-container *ngFor="let partida of partidas">
-                <option [value]="partida.id">{{partida.clave}} -- {{partida.descripcion}}</option>
-          </ng-container>
-        </select>
-        <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
+            <div class="form-group col-md-4">
+                <label for="inputPassword4">Plantel</label>
+                <select [(ngModel)]="transferencia.plantel" id="areaEmite" class="form-control" name="Plantel"
+                    (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel">
+                    <ng-container *ngFor="let plantel of planteles">
+                        <option [value]="plantel.id">{{plantel.descripcion}}</option>
+                    </ng-container>
+                </select>
+                <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo
+                    Obligatorio</small>
+            </div>
 
-        <div class="form-group col-md-4" style="position: relative;">
-            <label for="inputProducto">Producto</label>
-            <input
-                type="text"
-                class="form-control"
-                id="inputProducto"
-                name="Producto"
-                autocomplete="off"
-                [(ngModel)]="productoBuscado"
-                (input)="filtrarProductos()"
-                (click)="validarProducto()"            
-                [ngModelOptions]="{standalone: true}"
-                placeholder="Escribe el nombre del artículo"
-                required
-                ngModel #Producto="ngModel"
-            />
-             <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-            <ul
-                *ngIf="productosFiltrados.length > 0"
-            class="list-group mt-1"
-            style="
+
+            <div class="form-group col-md-4">
+                <label for="inputPassword4">Partida</label>
+                <select [(ngModel)]="transferencia.partida" id="areaEmite" class="form-control" name="Partida"
+                    (change)="opcionSeleccionadaX()" required #Partida="ngModel">
+                    <option [value]="null" disabled selected>Selecciona una partida...</option>
+                    <ng-container *ngFor="let partida of partidas">
+                        <option [value]="partida.id">{{partida.clave}} -- {{partida.descripcion}}</option>
+                    </ng-container>
+                </select>
+                <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo
+                    Obligatorio</small>
+            </div>
+
+            <div class="form-group col-md-4" style="position: relative;">
+                <label for="inputProducto">Producto</label>
+                <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
+                    [(ngModel)]="productoBuscado" (input)="filtrarProductos()" (click)="validarProducto()"
+                    [ngModelOptions]="{standalone: true}" placeholder="Escribe el nombre del artículo" required ngModel
+                    #Producto="ngModel" />
+                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
+                    Obligatorio</small>
+                <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
                 position: absolute;
                 z-index: 1000;
                 width: 100%;
@@ -57,72 +51,82 @@
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                 background-color: white;
                 border: 1px solid #ccc;
-            "
-            >
-                <li
-                class="list-group-item list-group-item-action"
-                *ngFor="let producto of productosFiltrados"
-                (click)="seleccionarProducto(producto)"
-                >
-                {{ producto.nombre_producto }}
-                </li>
-            </ul>
-        </div>
-     
-</div>
+            ">
+                    <li class="list-group-item list-group-item-action" *ngFor="let producto of productosFiltrados"
+                        (click)="seleccionarProducto(producto)">
+                        {{ producto.nombre_producto }}
+                    </li>
+                </ul>
+            </div>
 
-
-    <div class="form-row">
-
-          <div class="form-group col-md-3">
-            <label for="inputAddress">Fecha</label>
-            <input [(ngModel)]="transferencia.fecha" type="date" class="form-control" name="Fecha" id="inputAddress" placeholder="" required #Fecha="ngModel">
-            <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
-
-
-
-       <div class="form-group col-md-3">
-            <label for="inputAddress">Cantidad disponible</label>
-            <input [(ngModel)]="transferencia.cantidadEnStock" type="number" class="form-control" name="cantidadEnStock" id="inputAddress" placeholder="" style="text-align: center;" required readonly #cantidadEnStock="ngModel">
-            <small *ngIf="cantidadEnStock.invalid && cantidadEnStock.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>                
         </div>
 
 
-        <div class="form-group col-md-3">
-            <label for="inputAddress">Cantidad a transferir</label>
-            <input [(ngModel)]="transferencia.cantidadTransferir" type="number" class="form-control" name="cantidadTransferir" id="inputAddress" placeholder="" style="text-align: center;" required #cantidadTransferir="ngModel">
-            <small *ngIf="cantidadTransferir.invalid && cantidadTransferir.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+        <div class="form-row">
+
+            <div class="form-group col-md-3">
+                <label for="inputAddress">Fecha</label>
+                <input [(ngModel)]="transferencia.fecha" type="date" class="form-control" name="Fecha" id="inputAddress"
+                    placeholder="" required #Fecha="ngModel">
+                <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo
+                    Obligatorio</small>
+            </div>
+
+
+
+            <div class="form-group col-md-3">
+                <label for="inputAddress">Cantidad disponible</label>
+                <input [(ngModel)]="transferencia.cantidadEnStock" type="number" class="form-control"
+                    name="cantidadEnStock" id="inputAddress" placeholder="" style="text-align: center;" required
+                    readonly #cantidadEnStock="ngModel">
+                <small *ngIf="cantidadEnStock.invalid && cantidadEnStock.touched"
+                    class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+            </div>
+
+
+            <div class="form-group col-md-3">
+                <label for="inputAddress">Cantidad a transferir</label>
+                <input [(ngModel)]="transferencia.cantidadTransferir" type="number" class="form-control"
+                    name="cantidadTransferir" id="inputAddress" placeholder="" style="text-align: center;" required
+                    #cantidadTransferir="ngModel">
+                <small *ngIf="cantidadTransferir.invalid && cantidadTransferir.touched"
+                    class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+            </div>
+
+            <div class="form-group col-md-3">
+                <label for="inputAddress">Folio</label>
+                <input [(ngModel)]="transferencia.consecutivo" type="number" class="form-control"
+                    name="folioTransferencia" id="inputAddress" readonly placeholder="" style="text-align: center;"
+                    required #folioTransferencia="ngModel">
+                <small *ngIf="folioTransferencia.invalid && folioTransferencia.touched"
+                    class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+            </div>
+
+
+            <div class="boton mt-4" style="margin: 0 auto;text-align: center;">
+                <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-light"
+                    title="Agregar artículo"><i class="fas fa-cart-plus fa-2x"
+                        style="color: rgb(255, 166, 0);"></i></button>
+            </div>
+
         </div>
 
-         <div class="form-group col-md-3">
-            <label for="inputAddress">Folio</label>
-            <input [(ngModel)]="transferencia.consecutivo" type="number" class="form-control" name="folioTransferencia" id="inputAddress" readonly placeholder="" style="text-align: center;" required #folioTransferencia="ngModel">
-            <small *ngIf="folioTransferencia.invalid && folioTransferencia.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
-
- 
-        <div class="boton mt-4" style="margin: 0 auto;text-align: center;">
-            <button style="padding:10px;margin-right: 10px;"type="submit" class="btn btn-light" title="Agregar artículo"><i class="fas fa-cart-plus fa-2x" style="color: rgb(255, 166, 0);"></i></button>
-        </div>
-
-       </div> 
-  
-      </form>
+    </form>
 
 </div>
 
 
 <!-- lista de productos a surtir -->
 
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: -100px;width: 75%;" >
+<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: -100px;width: 75%;">
 
     <h5>Lista de artículos a transferir</h5>
-    <button *ngIf="mostrarBotonTransferir" class="btn btn-success" style="float: right;" title="Confirmar Transferencia" (click)="confirmarTranferencia()"><i class="fas fa-clipboard-check fa-2x"></i></button>
+    <button *ngIf="mostrarBotonTransferir" class="btn btn-success" style="float: right;" title="Confirmar Transferencia"
+        (click)="confirmarTranferencia()"><i class="fas fa-clipboard-check fa-2x"></i></button>
 
 </div>
 
-<div class="mt-2" style="width: 85%;margin: 0 auto;" >
+<div class="mt-2" style="width: 85%;margin: 0 auto;">
 
     <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
         <thead>
@@ -130,7 +134,7 @@
                 <th style="text-align:center;width:50px">Num.</th>
                 <th style="text-align:center;width:200px">Artículo</th>
                 <th style="text-align:center;width:80px">Cantidad</th>
-                <th style="text-align:center;width: 80px;">Fecha autorizada</th> 
+                <th style="text-align:center;width: 80px;">Fecha autorizada</th>
                 <th style="text-align:center;width: 50px;"></th>
             </tr>
         </thead>
@@ -139,15 +143,14 @@
                 <td style="text-align:center;"></td>
                 <td style="text-align:center;">{{articulo.nom_articulo}}</td>
                 <td style="text-align:center;">{{articulo.num_articulos_solicitados}}</td>
-                <td style="text-align:center;">{{articulo.fecha | date:'dd/MM/yyyy'}}</td> 
+                <td style="text-align:center;">{{articulo.fecha | date:'dd/MM/yyyy'}}</td>
                 <td style="text-align:center;">
 
-                    <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)"><i
+                            class="fas fa-trash"></i></button>
 
-                </td>                 
+                </td>
             </tr>
         </tbody>
     </table>
 </div>
-
-
