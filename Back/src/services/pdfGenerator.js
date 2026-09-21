@@ -209,10 +209,11 @@ async function generarPDF(
       preferCSSPageSize: false
     };
 
-		console.log(
+		/* console.log(
 		  'OPCIONES FINALES DEL PDF:',
 		  JSON.stringify(defaultOptions, null, 2)
-		);
+		); 
+		*/
 
 		const pdfBuffer = await page.pdf(defaultOptions);
 

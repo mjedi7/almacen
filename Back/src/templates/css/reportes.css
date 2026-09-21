@@ -3,18 +3,15 @@
  * Este archivo se utiliza en todas las plantillas.
  */
 
-/* =========================================================
-   PÁGINA
-   ========================================================= */
+/* CONFIGURACIÓN DE PÁGINA */
 
 @page {
   size: letter portrait;
   margin: 10mm 12mm 16mm 12mm;
 }
 
-/* =========================================================
-   VARIABLES Y CONFIGURACIÓN GENERAL
-   ========================================================= */
+
+/* CONFIGURACIÓN GENERAL */
 
 body.report {
   --font-body: 9pt;
@@ -52,9 +49,8 @@ body.report--normal {
   --cell-padding: 4px 6px;
 }
 
-/* =========================================================
-   ENCABEZADO INSTITUCIONAL
-   ========================================================= */
+
+/* ENCABEZADO INSTITUCIONAL */
 
 .report-header {
   width: 100%;
@@ -100,9 +96,8 @@ body.report--normal {
   text-align: center;
 }
 
-/* =========================================================
-   TABLA ENVOLVENTE
-   ========================================================= */
+
+/* TABLA ENVOLVENTE */
 
 .report-shell {
   width: 100%;
@@ -124,9 +119,8 @@ body.report--normal {
   border: none;
 }
 
-/* =========================================================
-   TABLAS GENERALES
-   ========================================================= */
+
+/* TABLAS GENERALES */
 
 .report-table {
   width: 100%;
@@ -159,6 +153,7 @@ body.report--normal {
   font-size: var(--font-body);
 }
 
+
 /* Tabla pequeña de información */
 
 .report-table--info {
@@ -174,9 +169,7 @@ body.report--normal {
   text-align: center;
 }
 
-/* =========================================================
-   BLOQUES, SUBTOTALES Y RESÚMENES
-   ========================================================= */
+/* BLOQUES, SUBTOTALES Y RESÚMENES */
 
 .report-section {
   margin-bottom: 15px;
@@ -210,9 +203,7 @@ body.report--normal {
   text-align: center;
 }
 
-/* =========================================================
-   SALTOS DE PÁGINA
-   ========================================================= */
+/* SALTOS DE PÁGINA */
 
 .page-row {
   page-break-after: always;
@@ -229,9 +220,7 @@ body.report--normal {
   break-inside: avoid;
 }
 
-/* =========================================================
-   ALINEACIÓN Y TEXTO
-   ========================================================= */
+/* ALINEACIÓN Y TEXTO */
 
 .report .text-left {
   text-align: left;
@@ -270,9 +259,8 @@ body.report--normal {
   margin-top: 4px;
 }
 
-/* =========================================================
-   ANCHOS REUTILIZABLES
-   ========================================================= */
+
+/* CATALOGO DE DIFERENTES ANCHOS */
 
 .w-9  { width:  9%; }
 .w-10 { width: 10%; }
@@ -302,12 +290,10 @@ body.report--normal {
 
 
 
-/* reporteEntradasTodas.html */
+/* ESPECIFICIO PARA reporteEntradasTodas.html */
 
-/* =========================================================
-   ENCABEZADO COMPACTO
-   Reutilizable en reportes tabulares
-   ========================================================= */
+/* ENCABEZADO COMPACTO
+   Reutilizable en reportes tabulares */
 
 .report-banner--compact img {
   width: 520pt;
@@ -335,9 +321,7 @@ body.report--normal {
   text-transform: uppercase;
 }
 
-/* =========================================================
-   INFORMACIÓN DEL REPORTE
-   ========================================================= */
+/* INFORMACIÓN DEL REPORTE */
 
 .report-meta {
   width: 100%;
@@ -355,9 +339,8 @@ body.report--normal {
   font-weight: bold;
 }
 
-/* =========================================================
-   VARIANTES GENERALES DE TABLAS
-   ========================================================= */
+
+/* VARIANTES GENERALES DE TABLAS */
 
 .report-table--fixed {
   table-layout: fixed;
@@ -377,9 +360,8 @@ body.report--normal {
   vertical-align: middle;
 }
 
-/* =========================================================
-   RESUMEN Y TOTALES
-   ========================================================= */
+
+/* RESUMEN Y TOTALES */
 
 .report-results {
   display: flex;
@@ -411,9 +393,8 @@ body.report--normal {
   font-weight: bold;
 }
 
-/* =========================================================
-   PIE DENTRO DEL DOCUMENTO
-   ========================================================= */
+
+/* PIE DENTRO DEL DOCUMENTO */
 
 .document-footer {
   position: fixed;
@@ -444,9 +425,8 @@ body.report--normal {
   object-fit: cover;
 }
 
-/* =========================================================
-   UTILIDADES ADICIONALES
-   ========================================================= */
+
+/* ADICIONALES */
 
 .nowrap {
   white-space: nowrap;
@@ -465,7 +445,7 @@ body.report--normal {
 }
 
 
-/* reporteKardex.html */
+/* ESPECIFICIO PARA reporteKardex.html */
 
 /* Reportes con mucha información */
 
@@ -491,11 +471,9 @@ body.report--dense {
 }
 
 
-/*  reporteListaSurtido.html  */
+/*  ESPECIFICIO PARA reporteListaSurtido.html  */
 
-/* =========================================================
-   REFERENCIA O IDENTIFICACIÓN DEL DOCUMENTO
-   ========================================================= */
+/* REFERENCIA O IDENTIFICACIÓN DEL DOCUMENTO */
 
 .document-reference {
   margin-bottom: 8px;
@@ -505,9 +483,7 @@ body.report--dense {
   text-align: center;
 }
 
-/* =========================================================
-   FIRMAS
-   ========================================================= */
+/* FIRMAS */
 
 .signature-grid {
   display: table;
@@ -538,6 +514,7 @@ body.report--dense {
   color: #333;
   font-size: 6.5pt;
 }
+
 
 /* Pie contenido dentro de los márgenes de la hoja */
 
