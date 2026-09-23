@@ -13,13 +13,14 @@ import Swal from 'sweetalert2';
 })
 export class ReporteMovimientosXPartidaComponent implements OnInit {
 
+  // Se inicializa con undefined para cumplir con la interfaz Date | undefined
   reporte: reporte_x_partida = {
-    fechaIni: null,
-    fechaFin: null,
+    fechaIni: undefined,
+    fechaFin: undefined,
     partida: '0'
   };
 
-  partidas: any = [];
+  partidas: any[] = [];
   API_URL = environment.uri_api;
 
   constructor(private traer: TraerDatosService) {}
@@ -29,7 +30,7 @@ export class ReporteMovimientosXPartidaComponent implements OnInit {
   }
 
   GeneraReporte(form: NgForm) {
-    if (!form.valid) {
+    if (!form.valid || !this.reporte.fechaIni || !this.reporte.fechaFin) {
       Swal.fire({
         title: 'Complete todos los campos',
         icon: 'warning'
@@ -37,7 +38,11 @@ export class ReporteMovimientosXPartidaComponent implements OnInit {
       return;
     }
 
-    if (this.reporte.fechaIni > this.reporte.fechaFin) {
+    // Conversión segura a Date para evitar error de posible undefined
+    const fechaInicioValida = new Date(this.reporte.fechaIni);
+    const fechaFinValida = new Date(this.reporte.fechaFin);
+
+    if (fechaInicioValida > fechaFinValida) {
       Swal.fire({
         title: 'Rango de fechas no válido',
         text: 'La Fecha Inicial no puede ser posterior a la Fecha Final.',
@@ -46,7 +51,7 @@ export class ReporteMovimientosXPartidaComponent implements OnInit {
       return;
     }
 
-    const formatearFecha = (f: any) => {
+    const formatearFecha = (f: any): string => {
       if (!f) return '';
       const p = f.toString().split('T')[0].split('-');
       return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : f;
