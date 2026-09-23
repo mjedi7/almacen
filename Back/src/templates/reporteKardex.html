@@ -4,21 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    @page {
-      size: letter portrait;
-      margin: 10mm 12mm 16mm 12mm;
-    }
-
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
-      font-family: Arial, Helvetica, sans-serif;
       margin: 0;
       padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
       color: #000;
-      background: #fff;
     }
 
     /* Tabla envolvente principal que repite encabezado en cada página */
@@ -56,7 +52,7 @@
 
     .header-banner img {
       max-width: 100%;
-      height: 105px;
+      height: 95px;
       object-fit: contain;
     }
 
@@ -152,8 +148,13 @@
       font-size: 10pt;
     }
 
-    .cen { text-align: center; }
-    .num { text-align: right; }
+    .cen {
+      text-align: center;
+    }
+
+    .num {
+      text-align: right;
+    }
 
     /* Totales finales */
     .tabla-totales-pie {
@@ -242,28 +243,28 @@
             </thead>
             <tbody>
               {{#if movimientos.length}}
-                {{#each movimientos}}
-                <tr>
-                  <td class="cen">{{this.folio}}</td>
-                  <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
-                  <td class="num">{{this.existencia_inicial}}</td>
-                  <td class="num">{{this.ventas_acumuladas}}</td>
-                  <td class="num">$ {{this.importe_total}}</td>
-                  <td class="num">{{this.existencia}}</td>
-                  <td class="cen">{{this.fecha}}</td>
-                </tr>
-                {{/each}}
+              {{#each movimientos}}
+              <tr>
+                <td class="cen">{{this.folio}}</td>
+                <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
+                <td class="num">{{this.existencia_inicial}}</td>
+                <td class="num">{{this.ventas_acumuladas}}</td>
+                <td class="num">$ {{this.importe_total}}</td>
+                <td class="num">{{this.existencia}}</td>
+                <td class="cen">{{this.fecha}}</td>
+              </tr>
+              {{/each}}
               {{else}}
-                <tr>
-                  <td colspan="7" class="cen" style="padding: 12px; color: #555;">
-                    No hay movimientos registrados para este criterio.
-                  </td>
-                </tr>
+              <tr>
+                <td colspan="7" class="cen" style="padding: 12px; color: #555;">
+                  No hay movimientos registrados para este criterio.
+                </td>
+              </tr>
               {{/if}}
             </tbody>
           </table>
 
-          <!-- Totales al pie alineados al estilo de reporteExistencias -->
+          <!-- Totales al pie -->
           <table class="tabla-totales-pie">
             <tr>
               <td style="width: 10%;"></td>

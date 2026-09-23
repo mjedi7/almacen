@@ -12,7 +12,8 @@ const imgToBase64 = (filePath) => {
   return null;
 };
 
-const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
+
+    const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
 async function generarPDF(templateName, data, pdfOptions = {}) {
@@ -20,21 +21,21 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
   try {
     const templatePath = path.join(__dirname, `../templates/${templateName}`);
 
-    console.log('>>> [PDF RUTA DISCO]:', templatePath); // <-- Ver ruta real
-
     if (!fs.existsSync(templatePath)) {
       throw new Error(`No se encontró la plantilla en: ${templatePath}`);
     }
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
-    console.log('>>> [PDF CONTENIDO]:', templateHtml.includes('KÁRDEX - PRUEBA') ? 'SÍ TIENE EL CAMBIO' : 'NO TIENE EL CAMBIO'); // <-- Ver si tiene el cambio
-    
     const compiledTemplate = handlebars.compile(templateHtml);
+
+    // Obtenemos las imágenes en base64
+    const bannerBase64 = imgToBase64(bannerPath);
+    const pieBase64 = imgToBase64(piePath);
 
     const htmlFinal = compiledTemplate({
       ...data,
-      bannerBase64: imgToBase64(bannerPath),
-      pieBase64: imgToBase64(piePath)
+      bannerBase64: bannerBase64
+      // Nota: ya no es obligatorio pasar pieBase64 al HTML si lo metemos al footerTemplate
     });
 
     browser = await puppeteer.launch({
@@ -54,16 +55,25 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       printBackground: true,
       displayHeaderFooter: true,
       headerTemplate: '<div></div>',
+      // METEMOS LA IMAGEN DIRECTAMENTE AQUÍ:
       footerTemplate: `
-        <div style="width: 100%; font-size: 8pt; font-family: Helvetica, Arial, sans-serif; color: #000; display: flex; justify-content: space-between; align-items: center; padding-left: 14mm; padding-right: 14mm; box-sizing: border-box;">
-          <div><b>Usuario:</b> ${usuarioPie}</div>
-          <div><b>Fecha:</b> ${fechaPie}</div>
-          <div>Pág. <span class="pageNumber"></span> de <span class="totalPages"></span></div>
+        <div style="width: 100%; box-sizing: border-box; padding: 0 10mm; font-family: Helvetica, Arial, sans-serif;">
+          ${pieBase64 ? `
+            <img 
+              src="${pieBase64}" 
+              style="width: 100%; height: auto; max-height: 28mm; display: block; margin: 0 auto 3px auto;" 
+            />
+          ` : ''}
+          <div style="width: 100%; font-size: 8pt; color: #000; display: flex; justify-content: space-between; align-items: center;">
+            <div><b>Usuario:</b> ${usuarioPie}</div>
+            <div><b>Fecha:</b> ${fechaPie}</div>
+            <div>Pág. <span class="pageNumber"></span> de <span class="totalPages"></span></div>
+          </div>
         </div>
       `,
       margin: {
         top: '12mm',
-        bottom: '18mm',
+        bottom: '48mm', // <-- Aumentamos de 18mm a 28mm para que quepa la imagen + el texto holgadamente o 12mm
         left: '12mm',
         right: '12mm'
       },
