@@ -22,7 +22,8 @@ const imgToBase64 = (filePath) => {
   return `data:image/${mimeType};base64,${bitmap.toString('base64')}`;
 };
 
-const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
+
+    const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
 
@@ -77,6 +78,10 @@ async function generarPDF(
     const compiledTemplate = handlebars.compile(
       templateHtml
     );
+
+    // Obtenemos las imágenes en base64
+    const bannerBase64 = imgToBase64(bannerPath);
+    const pieBase64 = imgToBase64(piePath);
 
     // Obtenemos las imágenes en base64
     const bannerBase64 = imgToBase64(bannerPath);
