@@ -22,18 +22,10 @@ const imgToBase64 = (filePath) => {
   return `data:image/${mimeType};base64,${bitmap.toString('base64')}`;
 };
 
-/**
- * Rutas de imágenes institucionales.
- */
-const bannerPath = path.join(
-  __dirname,
-  '../../reports/imagenes/banner.png'
-);
+const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
+const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
-const piePath = path.join(
-  __dirname,
-  '../../reports/imagenes/pie.png'
-);
+
 
 /**
  * Hoja de estilos compartida por todos los reportes.
@@ -63,10 +55,7 @@ async function generarPDF(
   let browser = null;
 
   try {
-    const templatePath = path.join(
-      __dirname,
-      `../templates/${templateName}`
-    );
+    const templatePath = path.join(__dirname, `../templates/${templateName}`);
 
     if (!fs.existsSync(templatePath)) {
       throw new Error(
@@ -89,10 +78,14 @@ async function generarPDF(
       templateHtml
     );
 
+    // Obtenemos las imágenes en base64
+    const bannerBase64 = imgToBase64(bannerPath);
+    const pieBase64 = imgToBase64(piePath);
+
     const htmlFinal = compiledTemplate({
       ...data,
-      bannerBase64: imgToBase64(bannerPath),
-      pieBase64: imgToBase64(piePath)
+      bannerBase64: bannerBase64
+      // Nota: ya no es obligatorio pasar pieBase64 al HTML si lo metemos al footerTemplate
     });
 
     browser = await puppeteer.launch({
@@ -153,42 +146,26 @@ async function generarPDF(
       displayHeaderFooter: true,
 
       headerTemplate: '<div></div>',
-
+      // METEMOS LA IMAGEN DIRECTAMENTE AQUÍ:
       footerTemplate: `
-        <div
-          style="
-            width: 100%;
-            padding-left: 12mm;
-            padding-right: 12mm;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #000;
-            font-family: Helvetica, Arial, sans-serif;
-            font-size: 8pt;
-          "
-        >
-          <div>
-            <b>Usuario:</b> ${usuarioPie}
-          </div>
-
-          <div>
-            <b>Fecha:</b> ${fechaPie}
-          </div>
-
-          <div>
-            Pág.
-            <span class="pageNumber"></span>
-            de
-            <span class="totalPages"></span>
+        <div style="width: 100%; box-sizing: border-box; padding: 0 10mm; font-family: Helvetica, Arial, sans-serif;">
+          ${pieBase64 ? `
+            <img 
+              src="${pieBase64}" 
+              style="width: 100%; height: auto; max-height: 28mm; display: block; margin: 0 auto 3px auto;" 
+            />
+          ` : ''}
+          <div style="width: 100%; font-size: 8pt; color: #000; display: flex; justify-content: space-between; align-items: center;">
+            <div><b>Usuario:</b> ${usuarioPie}</div>
+            <div><b>Fecha:</b> ${fechaPie}</div>
+            <div>Pág. <span class="pageNumber"></span> de <span class="totalPages"></span></div>
           </div>
         </div>
       `,
 
       margin: {
         top: '12mm',
-        bottom: '18mm',
+        bottom: '48mm', // <-- Aumentamos de 18mm a 28mm para que quepa la imagen + el texto holgadamente o 12mm
         left: '12mm',
         right: '12mm'
       },
@@ -209,13 +186,13 @@ async function generarPDF(
       preferCSSPageSize: false
     };
 
-		/* console.log(
-		  'OPCIONES FINALES DEL PDF:',
-		  JSON.stringify(defaultOptions, null, 2)
-		); 
-		*/
+    /* console.log(
+      'OPCIONES FINALES DEL PDF:',
+      JSON.stringify(defaultOptions, null, 2)
+    ); 
+    */
 
-		const pdfBuffer = await page.pdf(defaultOptions);
+    const pdfBuffer = await page.pdf(defaultOptions);
 
     return pdfBuffer;
   } catch (error) {
