@@ -3,7 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
+  <title>Kárdex de Almacén</title>
   <style>
+    /* Neutraliza los márgenes CSS externos para respetar la configuración de Puppeteer */
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -11,10 +18,12 @@
     html,
     body {
       margin: 0;
-      padding: 0;
+      padding: 0 12mm;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 10pt;
       color: #000;
+      background: #fff;
+      counter-reset: pagina;
     }
 
     /* Tabla envolvente principal que repite encabezado en cada página */
@@ -37,7 +46,7 @@
       padding: 0;
     }
 
-    /* Membrete y Títulos Institucionales */
+    /* Membrete y títulos institucionales */
     .header-container {
       width: 100%;
       text-align: center;
@@ -82,7 +91,7 @@
       text-align: center;
     }
 
-    /* Cuadro de Metadatos del Artículo (estilo table-header) */
+    /* Cuadro de metadatos del artículo */
     .table-header {
       width: 100%;
       border-collapse: collapse !important;
@@ -117,7 +126,7 @@
       width: 32%;
     }
 
-    /* Tabla Detalle de Movimientos */
+    /* Tabla detalle de movimientos */
     .table-detalle {
       width: 100%;
       border-collapse: collapse !important;
@@ -171,10 +180,56 @@
       padding: 4px 5px;
       vertical-align: top;
     }
+
+    /* Contenedor fijo de lado a lado */
+    .pie-fijo-completo {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 1000;
+      line-height: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Datos del reporte situados arriba de la imagen */
+    .pie-fijo-datos {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 12mm 4px 12mm;
+      font-size: 10pt;
+      line-height: normal;
+      color: #000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Contador dinámico de página */
+    .pie-fijo-datos .num-pagina::after {
+      counter-increment: pagina;
+      content: "Pág. " counter(pagina);
+    }
+
+    /* Imagen institucional con proporción natural */
+    .pie-fijo-completo img {
+      width: 100%;
+      height: auto;                     /* Mantiene la proporción original sin estirar */
+      max-height: 35mm;                 /* Límite para que no empuje el contenido */
+      object-fit: contain;              /* Respeta el aspecto sin deformar */
+      object-position: bottom center;   /* Se asegura de que la base descanse al ras */
+      display: block;
+      margin: 0 auto;
+      padding: 0;
+      vertical-align: bottom;
+    }
   </style>
 </head>
 
-<body>
+<body class="report">
 
   <table class="main-table">
     <!-- Encabezado repetible institucional -->
@@ -281,9 +336,19 @@
         </td>
       </tr>
     </tbody>
-
   </table>
 
-</body>
+  <!-- Pie institucional completo (correctamente ubicado al final del body) -->
+  <div class="pie-fijo-completo">
+    <div class="pie-fijo-datos">
+      <div><b>Usuario:</b> {{usuarioPie}}</div>
+      <div><b>Fecha:</b> {{fechaPie}}</div>
+      <div class="num-pagina"></div>
+    </div>
+    {{#if pieBase64}}
+    <img src="{{pieBase64}}" alt="Pie Institucional">
+    {{/if}}
+  </div>
 
+</body>
 </html>
