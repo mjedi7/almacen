@@ -11,7 +11,8 @@ import { proveedores } from '../models/proveedores';
 @Component({
   selector: 'app-mis-seguimientos',
   templateUrl: './mis-seguimientos.component.html',
-  styleUrls: ['./mis-seguimientos.component.css']
+  styleUrls: ['./mis-seguimientos.component.css'],
+  providers: [CurrencyPipe]
 })
 export class MisSeguimientosComponent implements OnInit {
 
@@ -20,24 +21,22 @@ export class MisSeguimientosComponent implements OnInit {
   myFiles!: Array<any>;
   numidentificador: any;
 
-  stocks: any = [];
-  partidas: any = [];
-  productos: any = [];
-  proveedores: any = [];
-  catalogoProveedores: any = [];
-  datosproveedor: any = [];
+  stocks: any[] = [];
+  partidas: any[] = [];
+  productos: any[] = [];
+  proveedores: proveedores[] = [];
+  catalogoProveedores: any[] = [];
+  datosproveedor: any[] = [];
 
-  tipo: string;
-  opcionSeleccionada: string = '';
-  verSeleccion: string;
   mostrarBoton: boolean = false;
-  fecha_registrox: any = '';
+  fecha_registrox: string = '';
 
   costo_unitario: number = 0;
   articuloValido: boolean = false;
 
   terminoBusqueda: string = '';
   productosFiltrados: any[] = [];
+  mostrarDropdown: boolean = false;
 
   Recargastock: recargaAlmacen = {
     partida: null,
@@ -50,16 +49,16 @@ export class MisSeguimientosComponent implements OnInit {
     totalCompra: null
   };
 
-  day: string;
-  month: string;
-  year: string;
-  direccionSeleccionada: number;
+  day: string = '';
+  month: string = '';
+  year: string = '';
+  direccionSeleccionada: number | null = null;
 
-  monedaFormateada: any = '$ 0.00';
-  monedaFormateada2: any = '$ 0.00';
+  monedaFormateada: string | null = '$ 0.00';
+  monedaFormateada2: string | null = '$ 0.00';
 
   constructor(
-    private traer: TraerDatosService,
+    public traer: TraerDatosService,
     private currencyPipe: CurrencyPipe,
     private proveedoresService: ProveedoresService
   ) { }
@@ -72,109 +71,103 @@ export class MisSeguimientosComponent implements OnInit {
 
     this.day = dia < 10 ? '0' + dia : dia.toString();
     this.month = mes < 10 ? '0' + mes : mes.toString();
+    this.year = anio.toString();
 
-    this.fecha_registrox = `${this.day}-${this.month}-${anio}`;
+    this.fecha_registrox = `${this.day}-${this.month}-${this.year}`;
 
     this.traerPartidas();
     this.traerProveedoresCatalogo();
   }
 
-  traerProveedoresCatalogo() {
-    this.traer.http.get(`${this.API_URL}/traerProveedores`).subscribe({
-      next: (res: any) => {
+  traerProveedoresCatalogo(): void {
+    this.traer.http.get<any[]>(`${this.API_URL}/traerProveedores`).subscribe({
+      next: (res: any[]) => {
         this.catalogoProveedores = res || [];
       },
-      error: (err) => console.error('Error al traer proveedores:', err)
+      error: (err: any) => console.error('Error al traer proveedores:', err)
     });
   }
 
-  // Agrega esta propiedad arriba junto a las demás
-mostrarDropdown: boolean = false;
+  opcionSeleccionadaX(): void {
+    this.articuloValido = false;
+    this.terminoBusqueda = '';
+    this.Recargastock.producto = null;
+    this.productos = [];
+    this.productosFiltrados = [];
+    this.direccionSeleccionada = null;
+    this.proveedores = [];
+    this.mostrarDropdown = false;
 
-// 1. Al cambiar de partida, resetea y llena la lista
-opcionSeleccionadaX() {
-  this.articuloValido = false;
-  this.terminoBusqueda = '';
-  this.Recargastock.producto = null;
-  this.productos = [];
-  this.productosFiltrados = [];
-  this.direccionSeleccionada = null;
-  this.proveedores = [];
-  this.mostrarDropdown = false;
+    if (!this.Recargastock.partida) return;
 
-  if (!this.Recargastock.partida) return;
+    this.traer.http.get<any[]>(`${this.API_URL}/articulos/traerProductos/${this.Recargastock.partida}`)
+      .subscribe({
+        next: (res: any[]) => {
+          this.productos = res || [];
+          this.productosFiltrados = [...this.productos];
+        },
+        error: (err: any) => console.error('Error al traer productos por partida:', err)
+      });
+  }
 
-  this.traer.http.get(`${this.API_URL}/articulos/traerProductos/${this.Recargastock.partida}`)
-    .subscribe({
-      next: (res: any) => {
-        this.productos = res || [];
+  abrirDropdown(): void {
+    if (this.Recargastock.partida) {
+      this.mostrarDropdown = true;
+      if (!this.terminoBusqueda) {
         this.productosFiltrados = [...this.productos];
-      },
-      error: (err) => console.error('Error al traer productos por partida:', err)
-    });
-}
+      }
+    }
+  }
 
-// 2. Control de visibilidad del desplegable
-abrirDropdown() {
-  if (this.Recargastock.partida) {
-    this.mostrarDropdown = true;
-    if (!this.terminoBusqueda) {
+  alternarDropdown(): void {
+    if (!this.Recargastock.partida) return;
+    this.mostrarDropdown = !this.mostrarDropdown;
+    if (this.mostrarDropdown && !this.terminoBusqueda) {
       this.productosFiltrados = [...this.productos];
     }
   }
-}
 
-alternarDropdown() {
-  if (!this.Recargastock.partida) return;
-  this.mostrarDropdown = !this.mostrarDropdown;
-  if (this.mostrarDropdown && !this.terminoBusqueda) {
-    this.productosFiltrados = [...this.productos];
-  }
-}
+  filtrarProductos(): void {
+    this.mostrarDropdown = true;
+    this.Recargastock.producto = null;
+    this.articuloValido = false;
+    this.proveedores = [];
+    this.direccionSeleccionada = null;
 
-// 3. Filtro en caliente conforme escribe
-filtrarProductos() {
-  this.mostrarDropdown = true;
-  this.Recargastock.producto = null; // Invalida hasta que elija uno oficial de la lista
-  this.articuloValido = false;
-  this.proveedores = [];
-  this.direccionSeleccionada = null;
+    const busqueda = (this.terminoBusqueda || '').toLowerCase().trim();
+    if (!busqueda) {
+      this.productosFiltrados = [...this.productos];
+      return;
+    }
 
-  const busqueda = (this.terminoBusqueda || '').toLowerCase().trim();
-  if (!busqueda) {
-    this.productosFiltrados = [...this.productos];
-    return;
+    this.productosFiltrados = this.productos.filter(p =>
+      (p.descripcion && p.descripcion.toLowerCase().includes(busqueda)) ||
+      (p.clave && p.clave.toLowerCase().includes(busqueda)) ||
+      (p.idproducto && p.idproducto.toString().includes(busqueda)) ||
+      (p.id && p.id.toString().includes(busqueda))
+    );
   }
 
-  this.productosFiltrados = this.productos.filter(p =>
-    (p.descripcion && p.descripcion.toLowerCase().includes(busqueda)) ||
-    (p.clave && p.clave.toLowerCase().includes(busqueda)) ||
-    (p.idproducto && p.idproducto.toString().includes(busqueda)) ||
-    (p.id && p.id.toString().includes(busqueda))
-  );
-}
+  seleccionarProducto(prod: any): void {
+    const idReal = prod.id || prod.idproducto;
+    this.Recargastock.producto = idReal;
+    this.terminoBusqueda = prod.clave ? `${prod.clave} - ${prod.descripcion}` : prod.descripcion;
+    this.mostrarDropdown = false;
 
-// 4. Click en el producto de la lista (asigna el ID real directo)
-seleccionarProducto(prod: any) {
-  const idReal = prod.id || prod.idproducto;
-  this.Recargastock.producto = idReal;
-  this.terminoBusqueda = prod.clave ? `${prod.clave} - ${prod.descripcion}` : prod.descripcion;
-  this.mostrarDropdown = false;
+    this.direccionSeleccionada = null;
+    this.articuloValido = false;
+    this.cargarProveedoresPorProducto(Number(idReal));
+  }
 
-  this.direccionSeleccionada = null;
-  this.articuloValido = false;
-  this.cargarProveedoresPorProducto(+idReal);
-}
-
-  buscarYSeleccionar() {
+  buscarYSeleccionar(): void {
     const match = this.productos.find(p => p.descripcion === this.terminoBusqueda);
 
     if (match) {
-      this.Recargastock.producto = match.id;
+      const idReal = match.id || match.idproducto;
+      this.Recargastock.producto = idReal;
       this.direccionSeleccionada = null;
       this.articuloValido = false;
-
-      this.cargarProveedoresPorProducto(+this.Recargastock.producto);
+      this.cargarProveedoresPorProducto(Number(idReal));
     } else {
       this.Recargastock.producto = null;
       this.proveedores = [];
@@ -182,14 +175,14 @@ seleccionarProducto(prod: any) {
     }
   }
 
-  cargarProveedoresPorProducto(idArticulo: number) {
+  cargarProveedoresPorProducto(idArticulo: number): void {
     this.proveedoresService.traerProveedoresPorArticulo(idArticulo)
       .subscribe({
         next: (res: proveedores[]) => {
           this.proveedores = res || [];
 
           if (this.proveedores.length === 1) {
-            this.direccionSeleccionada = this.proveedores[0].id;
+            this.direccionSeleccionada = Number(this.proveedores[0].id);
             this.CapturarValor();
           } else if (this.proveedores.length > 1) {
             Swal.fire({
@@ -203,12 +196,12 @@ seleccionarProducto(prod: any) {
             this.ofrecerVincularProveedor(idArticulo);
           }
         },
-        error: (err) => console.error('Error al cargar proveedores del producto:', err)
+        error: (err: any) => console.error('Error al cargar proveedores del producto:', err)
       });
   }
 
-  ofrecerVincularProveedor(idArticulo: number) {
-    const opciones: any = {};
+  ofrecerVincularProveedor(idArticulo: number): void {
+    const opciones: Record<string, string> = {};
     this.catalogoProveedores.forEach((prov: any) => {
       opciones[prov.id] = prov.nombre || prov.razon_social || `Proveedor #${prov.id}`;
     });
@@ -231,7 +224,7 @@ seleccionarProducto(prod: any) {
       }
     }).then((result) => {
       if (result.isConfirmed && result.value) {
-        const idProveedorSeleccionado = +result.value;
+        const idProveedorSeleccionado = Number(result.value);
         this.relacionarArticuloProveedor(idArticulo, idProveedorSeleccionado);
       } else {
         this.direccionSeleccionada = null;
@@ -240,7 +233,7 @@ seleccionarProducto(prod: any) {
     });
   }
 
-  relacionarArticuloProveedor(idArticulo: number, idProveedor: number) {
+  relacionarArticuloProveedor(idArticulo: number, idProveedor: number): void {
     const payload = {
       articulo_id: idArticulo,
       proveedor_id: idProveedor
@@ -248,27 +241,27 @@ seleccionarProducto(prod: any) {
 
     this.traer.http.post(`${this.API_URL}/articulos/relacionarProveedor`, payload)
       .subscribe({
-        next: (resp: any) => {
+        next: () => {
           Swal.fire('¡Relacionado!', 'El artículo fue vinculado al proveedor con éxito', 'success');
           this.direccionSeleccionada = idProveedor;
           this.cargarProveedoresPorProducto(idArticulo);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error al vincular proveedor:', err);
           Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
         }
       });
   }
 
-  CapturarValor() {
+  CapturarValor(): void {
     const idproveedor = this.direccionSeleccionada;
     const idArticulo = this.Recargastock.producto;
 
     if (!idproveedor || !idArticulo) return;
 
-    this.traer.http.get(`${this.API_URL}/traerCostoArticulo/${idproveedor}/${this.Recargastock.producto}`)
+    this.traer.http.get(`${this.API_URL}/traerCostoArticulo/${idproveedor}/${idArticulo}`, { responseType: 'text' })
       .subscribe({
-        next: (res: any) => {
+        next: (res: string) => {
           if (res === 'ArticuloNoEncontrado') {
             Swal.fire({
               title: 'No encontrado',
@@ -285,30 +278,32 @@ seleccionarProducto(prod: any) {
             this.Recargastock.folio = '';
             this.Recargastock.cantidad = 0;
           } else {
-            this.costo_unitario = +res;
+            this.costo_unitario = Number(res) || 0;
             this.articuloValido = true;
             if (this.Recargastock.cantidad) {
               this.CalcularImporteyTotal();
             }
           }
         },
-        error: (err) => console.error('Error al traer costo unitario:', err)
+        error: (err: any) => console.error('Error al traer costo unitario:', err)
       });
   }
 
-  CalcularImporteyTotal() {
-    if (this.Recargastock.cantidad <= 0) {
-      this.Recargastock.cantidad = 1;
-    }
+  CalcularImporteyTotal(): void {
+    const cant = Number(this.Recargastock.cantidad) || 0;
+    const cantidadSegura = cant <= 0 ? 1 : cant;
+    this.Recargastock.cantidad = cantidadSegura;
 
-    this.Recargastock.importe = (this.costo_unitario * this.Recargastock.cantidad);
-    this.monedaFormateada = this.currencyPipe.transform(this.Recargastock.importe, 'USD', '$');
+    const importeCalculado = this.costo_unitario * cantidadSegura;
+    this.Recargastock.importe = importeCalculado;
+    this.monedaFormateada = this.currencyPipe.transform(importeCalculado, 'USD', '$');
 
-    this.Recargastock.totalCompra = (this.Recargastock.importe + (this.Recargastock.importe * 0.16));
-    this.monedaFormateada2 = this.currencyPipe.transform(this.Recargastock.totalCompra, 'USD', '$');
+    const totalCalculado = importeCalculado + (importeCalculado * 0.16);
+    this.Recargastock.totalCompra = totalCalculado;
+    this.monedaFormateada2 = this.currencyPipe.transform(totalCalculado, 'USD', '$');
   }
 
-  RecargarStock(form: NgForm) {
+  RecargarStock(form: NgForm): void {
     this.Recargastock.proveedor = this.direccionSeleccionada ? this.direccionSeleccionada.toString() : '';
 
     if (
@@ -336,10 +331,11 @@ seleccionarProducto(prod: any) {
       if (result.isConfirmed) {
         this.traer.http.post(
           `${this.API_URL}/recargarStock/${this.Recargastock.producto}/${this.Recargastock.proveedor}`,
-          this.Recargastock
+          this.Recargastock,
+          { responseType: 'text' }
         ).subscribe({
-          next: (res: any) => {
-            if (res === 'Save' || res === 'reload' || res?.ok) {
+          next: (res: string) => {
+            if (res === 'Save' || res === 'reload') {
               Swal.fire('¡Guardado!', '¡Los datos fueron agregados al stock!', 'success');
 
               this.articuloValido = false;
@@ -367,7 +363,7 @@ seleccionarProducto(prod: any) {
               Swal.fire('Error', 'Contacte a soporte', 'error');
             }
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error al recargar stock:', err);
             Swal.fire('Error', 'Ocurrió un problema en el servidor al procesar la compra', 'error');
           }
@@ -376,11 +372,11 @@ seleccionarProducto(prod: any) {
     });
   }
 
-  traerPartidas() {
-    this.traer.http.get(`${this.API_URL}/traerPartidas`)
+  traerPartidas(): void {
+    this.traer.http.get<any[]>(`${this.API_URL}/traerPartidas`)
       .subscribe({
-        next: (res: any) => this.partidas = res,
-        error: (err) => console.error('Error al traer partidas:', err)
+        next: (res: any[]) => this.partidas = res || [],
+        error: (err: any) => console.error('Error al traer partidas:', err)
       });
   }
 }
