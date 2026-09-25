@@ -83,9 +83,7 @@ async function generarPDF(
     const bannerBase64 = imgToBase64(bannerPath);
     const pieBase64 = imgToBase64(piePath);
 
-    // Obtenemos las imágenes en base64
-    const bannerBase64 = imgToBase64(bannerPath);
-    const pieBase64 = imgToBase64(piePath);
+  
 
     const htmlFinal = compiledTemplate({
       ...data,
