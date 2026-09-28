@@ -1,147 +1,90 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SidebarService {
 
+  // Control reactivo del estado colapsado (mini-sidebar)
+  private isMiniSubject = new BehaviorSubject<boolean>(false);
+  public isMini$ = this.isMiniSubject.asObservable();
+
+  toggle(): void {
+    this.isMiniSubject.next(!this.isMiniSubject.value);
+  }
+
+  setMini(value: boolean): void {
+    this.isMiniSubject.next(value);
+  }
+
+  get isMiniValue(): boolean {
+    return this.isMiniSubject.value;
+  }
+
   // ALMACÉN
-
-
   menu: any[] = [
     {
       titulo: 'Almacén',
       icono: '',
       submenu: [
-
-        {
-          titulo: 'Registrar Compra',
-          url: 'generar-documento',
-          mostrar: false
-        },
-
-        {
-          titulo: 'Recargar Stock',
-          url: 'mis-seguimientos',
-          mostrar: false
-        },
-
-        {
-          titulo: 'Existencias',
-          url: 'existencias',
-          mostrar: false
-        },
-
-        // Agregado por Oscar
-        {
-          titulo: 'Cargar existencias a DG',
-          url: 'cargar-existencias',
-          mostrar: false
-        },
-
-        // Creado por Juan
-        {
-          titulo: 'Usar artículo',
-          url: 'usar-articulo',
-          mostrar: false
-        }
-
+        { titulo: 'Registrar Compra', url: 'generar-documento', mostrar: false },
+        { titulo: 'Recargar Stock', url: 'mis-seguimientos', mostrar: false },
+        { titulo: 'Existencias', url: 'existencias', mostrar: false },
+        { titulo: 'Cargar existencias a DG', url: 'cargar-existencias', mostrar: false },
+        { titulo: 'Usar artículo', url: 'usar-articulo', mostrar: false }
       ]
     }
   ];
 
-
   // BUSCAR DOCUMENTO
-
   menu2: any[] = [
     {
       titulo: 'Buscar Documento',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Capturados',
-          url: '',
-          mostrar: false
-        },
-
-        {
-          titulo: 'Generados',
-          url: '',
-          mostrar: false
-        }
-
+        { titulo: 'Capturados', url: '', mostrar: false },
+        { titulo: 'Generados', url: '', mostrar: false }
       ]
     }
   ];
 
-
   // TRANSFERENCIAS
-
   menu3: any[] = [
     {
       titulo: 'Transferencias',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Asignar Artículos',
-          url: 'estadistico-general',
-          mostrar: false
-        }
-
+        { titulo: 'Asignar Artículos', url: 'estadistico-general', mostrar: false }
       ]
     }
   ];
 
-
   // REQUISICIONES
-
-
   menu4: any[] = [
     {
       titulo: 'Requisiciones',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Generar',
-          url: 'generar-requisicion',
-          mostrar: false
-        },
-
-        {
-          titulo: 'Pendientes',
-          url: 'requisiciones-pendientes',
-          mostrar: false
-        }
-
+        { titulo: 'Generar', url: 'generar-requisicion', mostrar: false },
+        { titulo: 'Pendientes', url: 'requisiciones-pendientes', mostrar: false }
       ]
     }
   ];
 
-
   // MOVIMIENTOS
-
   menu4B: any[] = [
     {
       titulo: 'Movimientos',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Salidas',
-          url: 'lista-movimientos',
-          mostrar: true
-        }
-
+        { titulo: 'Salidas', url: 'lista-movimientos', mostrar: true }
       ]
     }
   ];
 
   // ARTÍCULOS
-
-menu55: any[] = [
+  menu55: any[] = [
     {
       titulo: 'Artículos',
       icono: 'mdi mdi-gauge',
@@ -153,95 +96,51 @@ menu55: any[] = [
     },
   ];
 
-
   // REPORTES
-
   menu44: any[] = [
     {
       titulo: 'Reportes',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Reporte Compras',
-          url: 'reporte-compras',
-          mostrar: false
-        },
-
-        {
-          titulo: 'Existencia x Partida',
-          url: 'reporte-existencia-x-partida',
-          mostrar: false
-        },
-
-        {
-          titulo: 'Movimiento x Partida',
-          url: 'reporte-movimiento-x-partida',
-          mostrar: false
-        }
-
+        { titulo: 'Reporte Compras', url: 'reporte-compras', mostrar: false },
+        { titulo: 'Existencia x Partida', url: 'reporte-existencia-x-partida', mostrar: false },
+        { titulo: 'Movimiento x Partida', url: 'reporte-movimiento-x-partida', mostrar: false }
       ]
     }
   ];
 
-
   // USUARIOS
-
   menu5: any[] = [
     {
       titulo: 'Usuarios',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Ver usuarios',
-          url: 'lista-usuarios',
-          mostrar: false
-        }
-
+        { titulo: 'Ver usuarios', url: 'lista-usuarios', mostrar: false }
       ]
     }
   ];
 
-
-  // MOVIMIENTOS
-
+  // MOVIMIENTOS (duplicado/respaldo)
   menu6: any[] = [
     {
       titulo: 'Movimientos',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Salidas',
-          url: 'lista-movimientos',
-          mostrar: true
-        }
-
+        { titulo: 'Salidas', url: 'lista-movimientos', mostrar: true }
       ]
     }
   ];
 
-
   // CONTRASEÑAS
-
-
   menu10: any[] = [
     {
       titulo: 'Contraseña',
       icono: 'mdi mdi-gauge',
       submenu: [
-
-        {
-          titulo: 'Cambiar',
-          url: 'cambio-password',
-          mostrar: false
-        }
-
+        { titulo: 'Cambiar', url: 'cambio-password', mostrar: false }
       ]
     }
   ];
-
 
   constructor() { }
 

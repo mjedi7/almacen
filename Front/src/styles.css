@@ -81,8 +81,14 @@
    TRANSICIÓN SUAVE PARA TOGGLE DE SIDEBAR Y LOGO
    ============================================================== */
 
-/* 1. Suaviza el contenedor donde vive el logo */
+/* 1. Suaviza y alinea el contenedor donde vive el logo */
 .topbar .top-navbar .navbar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -105,13 +111,21 @@
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+
+
+/* Evitar que la lista de la hamburguesa se superponga */
+.topbar .top-navbar .navbar-collapse {
+    display: flex !important;
+    align-items: center !important;
+}
+
 /* Contenedor flexible del banner */
 .banner-container {
     display: flex;
     justify-content: center;
     align-items: center;
     flex: 1 1 auto;
-    min-width: 0; /* Permite que el flex container se encoja correctamente */
+    min-width: 0;
     padding: 0 10px;
 }
 
@@ -120,14 +134,34 @@
     background: transparent;
     max-width: 100%;
     width: auto;
-    max-height: 75px;   /* Altura límite para que no estire de más la barra */
-    height: auto;       /* Mantiene la proporción original */
+    max-height: 75px;
+    height: auto;
     object-fit: contain;
 }
 
-/* Opcional: si la pantalla es muy pequeña (móviles/tablets) ocultar o achicar más */
+/* Si la pantalla es móvil/tablet, ocultar banner para no apretar el header */
 @media (max-width: 768px) {
     .banner-container {
-        display: none; /* En pantallas de celular suele ocultarse para que quepa el menú y perfil */
+        display: none;
     }
+}
+
+/* 1. Encoger sidebar cuando tiene mini-sidebar */
+#main-wrapper.mini-sidebar .left-sidebar {
+    width: 60px !important;
+}
+
+/* 2. Ocultar los textos de las opciones del menú guinda */
+#main-wrapper.mini-sidebar .sidebar-nav ul li a span.hide-menu {
+    display: none !important;
+}
+
+/* 3. Ajustar el margen del contenido para que aproveche la pantalla */
+#main-wrapper.mini-sidebar .page-wrapper {
+    margin-left: 60px !important;
+}
+
+/* 4. Encoger el contenedor del logo en el navbar */
+#main-wrapper.mini-sidebar .topbar .top-navbar .navbar-header {
+    width: 70px !important;
 }
