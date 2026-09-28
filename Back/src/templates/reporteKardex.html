@@ -33,15 +33,15 @@
       border: none;
     }
 
-    .main-table > thead {
+    .main-table>thead {
       display: table-header-group;
     }
 
-    .main-table > tbody {
+    .main-table>tbody {
       display: table-row-group;
     }
 
-    .main-table > tbody > tr > td {
+    .main-table>tbody>tr>td {
       border: none;
       padding: 0;
     }
@@ -61,7 +61,7 @@
 
     .header-banner img {
       max-width: 100%;
-      height: 95px;
+      height: 110px;
       object-fit: contain;
     }
 
@@ -195,36 +195,94 @@
       padding: 0;
     }
 
-    /* Datos del reporte situados arriba de la imagen */
-    .pie-fijo-datos {
+    /* Contenedor que empuja los totales al extremo derecho */
+    .totales-derecha-contenedor {
       width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 100mm;
+      page-break-inside: avoid;
+    }
+
+    .totales-caja {
+      min-width: 200px;
+      font-size: 10pt;
+      justify-content: end;
+    }
+
+    .totales-fila {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .totales-fila .lbl {
+      font-weight: bold;
+      padding-right: 15px;
+    }
+
+    .totales-fila .val {
+      text-align: right;
+      font-family: inherit;
+    }
+
+    /* Datos del reporte alineados al margen exacto de la tabla (12mm) */
+    .pie-fijo-datos {
+      position: absolute;
+      left: 12mm;
+      /* Alineado al borde izquierdo de la tabla */
+      right: 12mm;
+      /* Alineado al borde derecho de la tabla */
+      bottom: 24mm;
+      /* Altura suficiente para quedar arriba del pie institucional */
       box-sizing: border-box;
-      padding: 0 12mm 4px 12mm;
+      padding: 0;
+      margin: 0;
       font-size: 10pt;
       line-height: normal;
       color: #000;
       display: flex;
-      justify-content: space-between;
+      justify-content: space-evenly;
       align-items: center;
+      z-index: 1002;
     }
 
-    /* Contador dinámico de página */
-    .pie-fijo-datos .num-pagina::after {
-      counter-increment: pagina;
-      content: "Pág. " counter(pagina);
-    }
-
-    /* Imagen institucional con proporción natural */
-    .pie-fijo-completo img {
+    /* Envoltura relativa para la imagen y el número de página */
+    .pie-contenedor-img {
+      position: relative;
       width: 100%;
-      height: auto;                     /* Mantiene la proporción original sin estirar */
-      max-height: 35mm;                 /* Límite para que no empuje el contenido */
-      object-fit: contain;              /* Respeta el aspecto sin deformar */
-      object-position: bottom center;   /* Se asegura de que la base descanse al ras */
+      line-height: 0;
+    }
+
+    /* Imagen institucional */
+    .pie-contenedor-img img {
+      width: 100%;
+      height: auto;
+      max-height: 35mm;
+      object-fit: contain;
+      object-position: bottom center;
       display: block;
       margin: 0 auto;
-      padding: 0;
       vertical-align: bottom;
+    }
+
+    /* Número de página posicionado al lado inferior derecho de la imagen */
+    .pie-contenedor-img .num-pagina {
+      position: absolute;
+      right: 10mm;
+      /* Alineado con el margen de 12mm de la hoja */
+      bottom: 4mm;
+      /* Altura respecto a la base del papel */
+      font-size: 8pt;
+      line-height: normal;
+      color: #000;
+      font-weight: bold;
+      z-index: 1001;
+    }
+
+    .pie-contenedor-img .num-pagina::after {
+      counter-increment: pagina;
+      content: "Pág. " counter(pagina);
     }
   </style>
 </head>
@@ -243,7 +301,8 @@
             </div>
             {{/if}}
             <div class="sub-header-title">COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ</div>
-            <div class="report-name">DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES</div>
+            <div class="report-name">DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+            </div>
             <div class="main-title">KÁRDEX DE ALMACÉN</div>
           </div>
         </td>
@@ -320,18 +379,18 @@
           </table>
 
           <!-- Totales al pie -->
-          <table class="tabla-totales-pie">
-            <tr>
-              <td style="width: 10%;"></td>
-              <td style="width: 27%;"></td>
-              <td style="width: 22%;">
-                <div><b>Total Entradas:</b> &nbsp; {{totales.entradas}}</div>
-                <div style="margin-top: 4px;"><b>Total Salidas:</b> &nbsp; {{totales.salidas}}</div>
-              </td>
-              <td style="width: 13%;"></td>
-              <td style="width: 28%;"></td>
-            </tr>
-          </table>
+          <div class="totales-derecha-contenedor">
+            <div class="totales-caja">
+              <div class="totales-fila">
+                <span class="lbl">Total Entradas:</span>
+                <span class="val">{{totales.entradas}}</span>
+              </div>
+              <div class="totales-fila">
+                <span class="lbl">Total Salidas:</span>
+                <span class="val">{{totales.salidas}}</span>
+              </div>
+            </div>
+          </div>
 
         </td>
       </tr>
@@ -343,12 +402,16 @@
     <div class="pie-fijo-datos">
       <div><b>Usuario:</b> {{usuarioPie}}</div>
       <div><b>Fecha:</b> {{fechaPie}}</div>
+    </div>
+
+    {{#if pieBase64}}
+    <div class="pie-contenedor-img">
+      <img src="{{pieBase64}}" alt="Pie Institucional">
       <div class="num-pagina"></div>
     </div>
-    {{#if pieBase64}}
-    <img src="{{pieBase64}}" alt="Pie Institucional">
     {{/if}}
   </div>
 
 </body>
+
 </html>
