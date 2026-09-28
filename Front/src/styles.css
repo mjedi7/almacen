@@ -104,3 +104,30 @@
 .page-wrapper {
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
+
+/* Contenedor flexible del banner */
+.banner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0; /* Permite que el flex container se encoja correctamente */
+    padding: 0 10px;
+}
+
+/* Imagen responsiva */
+.banner-pleca {
+    background: transparent;
+    max-width: 100%;
+    width: auto;
+    max-height: 75px;   /* Altura límite para que no estire de más la barra */
+    height: auto;       /* Mantiene la proporción original */
+    object-fit: contain;
+}
+
+/* Opcional: si la pantalla es muy pequeña (móviles/tablets) ocultar o achicar más */
+@media (max-width: 768px) {
+    .banner-container {
+        display: none; /* En pantallas de celular suele ocultarse para que quepa el menú y perfil */
+    }
+}
