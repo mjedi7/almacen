@@ -76,3 +76,31 @@
 .modal {
     z-index: 1050 !important;
 }
+
+/* ============================================================== 
+   TRANSICIÓN SUAVE PARA TOGGLE DE SIDEBAR Y LOGO
+   ============================================================== */
+
+/* 1. Suaviza el contenedor donde vive el logo */
+.topbar .top-navbar .navbar-header {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. Suaviza la apertura y cierre de la barra lateral */
+.left-sidebar,
+.sidebar-nav,
+.scroll-sidebar {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 3. Suaviza los textos del menú al encogerse */
+.sidebar-nav ul li a span.hide-menu {
+    transition: opacity 0.25s ease, max-width 0.3s ease !important;
+}
+
+/* 4. Suaviza el contenido central para que no brinque */
+.page-wrapper {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

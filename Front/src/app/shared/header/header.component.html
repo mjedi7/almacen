@@ -1,72 +1,69 @@
 <header class="topbar">
-    <nav class="navbar top-navbar navbar-expand-md navbar-light" style="background-color: #ffffff">
+  <nav class="navbar top-navbar navbar-expand-md navbar-light" style="background-color: #ffffff">
 
+    <div class="navbar-header">
+      <a class="navbar-brand" routerLink="/dashboard">
+        <b>
+          <!-- Icono de la cajita (se queda siempre) -->
+          <img src="./assets/images/logo.png" width="60px" height="55px" alt="homepage" class="dark-logo" />
 
-        <div class="navbar-header">
-            <a class="navbar-brand" routerLink="/dashboard">
-                <b>
-               
-                    <img src="./assets/images/logo.png" width="60px" height="55px" alt="homepage" class="dark-logo" />
-                    <img src="./assets/images/letras.png" width="90px" height="30px" class="letras" >
-               
-                    <!--"<img src="./assets/images/logo.png" width="60px" height="55px" alt="homepage" class="light-logo" />-->
-                </b>
-            </a>
-        </div>
+          <!-- Texto SICAI con la clase dinámica -->
+          <img 
+            src="./assets/images/letras.png" 
+            width="90px" 
+            height="30px" 
+            class="letras"
+            [class.letras-ocultas]="isSidebarMini" 
+            alt="SICAI" 
+          />
+        </b>
+      </a>
+    </div>
 
-        <div class="navbar-collapse">
+    <div class="navbar-collapse">
+      <ul class="navbar-nav mr-auto">
+        <!-- Hamburguesa Mobile -->
+        <li class="nav-item"> 
+          <a class="nav-link nav-toggler hidden-md-up waves-effect waves-dark" (click)="toggleSidebar()" href="javascript:void(0)">
+            <i style="color: #b40f0f" class="ti-menu"></i>
+          </a> 
+        </li>
 
-            <ul class="navbar-nav mr-auto">
-                <!-- Lineas Ocultar  -->
-                <li class="nav-item"> <a class="nav-link nav-toggler hidden-md-up waves-effect waves-dark" href="javascript:void(0)"><i style="color: #b40f0f" class="ti-menu"></i></a> </li>
-                <li class="nav-item"> <a class="nav-link sidebartoggler hidden-sm-down waves-effect waves-dark" href="javascript:void(0)"><i style="color: #b40f0f" class="ti-menu"></i></a> </li>
-                <li class="nav-item hidden-sm-down"></li>
+        <!-- Hamburguesa Desktop -->
+        <li class="nav-item"> 
+          <a class="nav-link sidebartoggler hidden-sm-down waves-effect waves-dark" (click)="toggleSidebar()" href="javascript:void(0)">
+            <i style="color: #b40f0f" class="ti-menu"></i>
+          </a> 
+        </li>
+      </ul>
+
+      <div class="navbar-collapse" style="text-align: center; background: transparent;">
+        <img class="rounded mx-auto d-block" style="background: transparent" src="./assets/images/pleca-diglet.jpg" width="660px" height="105px">
+      </div>
+
+      <!-- Datos del perfil -->
+      <ul class="navbar-nav my-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <img src="./assets/images/cecytev.ico" class="profile-pic" />
+          </a>
+          <div class="dropdown-menu dropdown-menu-right animated fadeIn fast">
+            <ul class="dropdown-user">
+              <li>
+                <div class="dw-user-box"></div>
+              </li>
+              <li role="separator" class="divider"></li>
+              <li><a style="color: #555555"><i style="color: #b40f0f" class="ti-home"></i><b> {{plantel}}</b></a></li>
+              <li><a style="color: #555555"><i style="color: #b40f0f" class="ti-user"></i><b> {{Correo}}</b></a></li>
+              <li role="separator" class="divider"></li>
+              <li>
+                <a style="color:#b40f0f" routerLink="/login"><i style="color: #646363" class="fa fa-power-off"></i><b> Cerrar sesión</b></a>
+              </li>
             </ul>
-            <div class="navbar-collapse" style="text-align: center; background: transparent;">
-
-
-                <img class="rounded mx-auto d-block " style="background: transparent" src="./assets/images/pleca-diglet.jpg" width="660px" height="105px">
-
-            </div>
-
-
-            <!-- Datos del perfil  -->
-            <ul class="navbar-nav my-lg-0">
-                <li class="nav-item dropdown">
-
-                    <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="./assets/images/cecytev.ico" class="profile-pic" /> </a>
-
-                    <div class="dropdown-menu dropdown-menu-right animated fadeIn fast">
-                        <ul class="dropdown-user">
-                            <li>
-                                <div class="dw-user-box">
-                                    <!-- <div class="u-img"><img src="../../../assets/images/cecytev.ico" alt="user"></div> -->
-                                    <!-- <div class="u-text">
-                                        <a style="color: #b40f0f" routerLink="/cambioContraseña"><i style="color: #646363" class="ti-loop"></i><b> Cambiar contraseña</b></a>
-                                    </div> -->
-                                </div>
-                            </li>
-                            <li role="separator" class="divider"></li>
-
-                            <li><a style="color: #555555"><i style="color: #b40f0f" class="ti-home"></i><b> {{plantel}}</b></a></li>
-                            <li><a style="color: #555555"><i style="color: #b40f0f" class="ti-user"></i><b> {{Correo}}</b></a></li>
-                            <li role="separator" class="divider"></li>
-
-                            <li role="separator" class="divider"></li>
-            
-                            <!-- <li>
-                                <a style="color: #b40f0f" routerLink="/cambio-password"><i style="color: #646363" class="ti-loop"></i><b> Cambiar contraseña</b></a>
-                            </li> -->
-
-                            <li>
-                                <a style="color:#b40f0f" routerLink="/login"><i style="color: #646363" class="fa fa-power-off"></i><b> Cerrar sesión</b></a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-            <h5 style="text-align:center"> <strong style="color: brown;">Bienvenido</strong><br> {{Nombre}}</h5>
-        </div>
-    </nav>
-
+          </div>
+        </li>
+      </ul>
+      <h5 style="text-align:center"> <strong style="color: brown;">Bienvenido</strong><br> {{Nombre}}</h5>
+    </div>
+  </nav>
 </header>
