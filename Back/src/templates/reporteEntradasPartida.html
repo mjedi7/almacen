@@ -3,21 +3,226 @@
 
 <head>
   <meta charset="UTF-8">
+  <title>Resumen de Compras - Entradas por Partida</title>
+  <style>
+    @page {
+      size: letter portrait;
+      margin: 12mm 12mm 25mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body.report {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      color: #000;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Encabezado */
+    .report-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .report-banner img{
+      width: 100%;
+      /* Ocupará el 100% del ancho disponible */
+      height: auto !important;
+      /* Crecerá en altura automáticamente en proporción */
+      max-width: 90%;
+    }
+
+    .report-heading {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .report-heading__institution {
+      font-size: 10pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 0 0 4px 0;
+    }
+
+    .report-heading__title {
+      font-size: 13pt;
+      font-weight: bold;
+      margin: 0 0 4px 0;
+      letter-spacing: 0.5px;
+    }
+
+    .report-period {
+      font-size: 10pt;
+      margin: 0;
+      font-weight: normal;
+    }
+
+    /* Tabla de metadatos */
+    .report-meta {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 10pt;
+    }
+
+    .report-meta td {
+      padding: 3px 4px;
+      vertical-align: top;
+    }
+
+    .report-meta__label {
+      font-weight: bold;
+      width: 12%;
+    }
+
+    /* Tabla principal de compras */
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000;
+      margin-bottom: 12px;
+    }
+
+    .report-table thead {
+      display: table-header-group;
+    }
+
+    .report-table tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .report-table th {
+      background-color: #f7faff;
+      border: 1px solid #000;
+      padding: 5px 4px;
+      font-size: 10pt;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .report-table td {
+      border: 1px solid #000;
+      padding: 4px 5px;
+      font-size: 10pt;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    .font-bold {
+      font-weight: bold;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      font-style: italic;
+      font-size: 10pt;
+      color: #555;
+      padding: 12px !important;
+    }
+
+    /* Resumen y Totales */
+    .report-results {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 10px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .report-count {
+      font-size: 10pt;
+    }
+
+    .totals-table {
+      border-collapse: collapse;
+      min-width: 200px;
+    }
+
+    .totals-table td {
+      padding: 2px 4px;
+      font-size: 10pt;
+    }
+
+    .totals-table__total td {
+      border-top: 1px solid #000;
+      padding-top: 4px;
+    }
+
+    /* Pie de página informativo */
+    .document-footer {
+      width: 100%;
+      margin-top: 20px;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+
+    .document-footer__content {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #ccc;
+      padding-top: 4px;
+    }
+
+    /* Membrete inferior pegado al fondo real de la página */
+    .institutional-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      text-align: center;
+      line-height: 0;
+      margin: 0;
+      padding: 0;
+      z-index: 1000;
+    }
+
+    .institutional-footer img {
+      width: 100%;
+      height: auto;
+      max-height: 36mm;
+      object-fit: contain;
+      object-position: bottom center;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 
 <body class="report report--compact page-portrait">
 
   {{#if bannerBase64}}
   <div class="report-banner report-banner--compact">
-    <img
-      src="{{bannerBase64}}"
-      alt="Banner institucional"
-    >
+    <img src="{{bannerBase64}}" alt="Banner institucional">
   </div>
   {{/if}}
 
   <header class="report-heading">
-
     <p class="report-heading__institution">
       Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
     </p>
@@ -29,185 +234,95 @@
     <p class="report-period">
       {{tipoReporte}}
     </p>
-
   </header>
 
   <!-- Información general -->
   <table class="report-meta">
-
-    <colgroup>
-      <col class="w-12">
-      <col class="w-38">
-      <col class="w-12">
-      <col class="w-38">
-    </colgroup>
-
     <tbody>
       <tr>
-        <td class="report-meta__label">
-          Partida:
-        </td>
-
-        <td>
-          {{partida.clave}} — {{partida.descripcion}}
-        </td>
-
-        <td class="report-meta__label">
-          Proveedores:
-        </td>
-
-        <td>
-          Todos
-        </td>
+        <td class="report-meta__label">Partida:</td>
+        <td style="width: 50%;">{{partida.clave}} — {{partida.descripcion}}</td>
+        <td class="report-meta__label" style="text-align: right;">Proveedores:</td>
+        <td style="width: 25%; text-align: left; padding-left: 10px;">Todos</td>
       </tr>
-
       <tr>
-        <td class="report-meta__label">
-          Período:
-        </td>
-
-        <td colspan="3">
-          Del {{fechaInicio}} al {{fechaFin}}
-        </td>
+        <td class="report-meta__label">Período:</td>
+        <td colspan="3">Del {{fechaInicio}} al {{fechaFin}}</td>
       </tr>
     </tbody>
-
   </table>
 
   <!-- Registros -->
-  <table class="report-table report-table--fixed report-table--soft">
-
-    <colgroup>
-      <col class="w-14">
-      <col class="w-34">
-      <col class="w-12">
-      <col class="w-third">
-      <col class="w-third">
-      <col class="w-third">
-    </colgroup>
-
+  <table class="report-table">
     <thead>
       <tr>
-        <th>Folio Factura</th>
-        <th>Proveedor</th>
-        <th>Fecha</th>
-        <th>Importe</th>
-        <th>Impuesto</th>
-        <th>Total</th>
+        <th style="width: 14%;">Folio Factura</th>
+        <th style="width: 36%;">Proveedor</th>
+        <th style="width: 12%;">Fecha</th>
+        <th style="width: 12%; text-align: right;">Importe</th>
+        <th style="width: 12%; text-align: right;">Impuesto</th>
+        <th style="width: 14%; text-align: right;">Total</th>
       </tr>
     </thead>
 
     <tbody>
-
       {{#if hayRegistros}}
-
-        {{#each registros}}
-        <tr>
-          <td class="text-center">
-            {{this.folioFactura}}
-          </td>
-
-          <td>
-            {{this.proveedor}}
-          </td>
-
-          <td class="text-center">
-            {{this.fechaCompra}}
-          </td>
-
-          <td class="text-right nowrap">
-            {{this.importe}}
-          </td>
-
-          <td class="text-right nowrap">
-            {{this.impuesto}}
-          </td>
-
-          <td class="text-right nowrap">
-            {{this.total}}
-          </td>
-        </tr>
-        {{/each}}
-
+      {{#each registros}}
+      <tr>
+        <td class="text-center">{{this.folioFactura}}</td>
+        <td class="text-left">{{this.proveedor}}</td>
+        <td class="text-center">{{this.fechaCompra}}</td>
+        <td class="text-right nowrap">{{this.importe}}</td>
+        <td class="text-right nowrap">{{this.impuesto}}</td>
+        <td class="text-right nowrap font-bold">{{this.total}}</td>
+      </tr>
+      {{/each}}
       {{else}}
-
-        <tr>
-          <td colspan="6" class="empty-state p-20">
-            No se encontraron compras para la partida y el período seleccionados.
-          </td>
-        </tr>
-
+      <tr>
+        <td colspan="6" class="empty-state">
+          No se encontraron compras para la partida y el período seleccionados.
+        </td>
+      </tr>
       {{/if}}
-
     </tbody>
-
   </table>
 
-  <!-- Resumen -->
+  <!-- Resumen y Totales -->
   <div class="report-results">
-
     <div class="report-count">
-      Registros encontrados:
-      <strong>{{totalRegistros}}</strong>
+      Registros encontrados: <strong>{{totalRegistros}}</strong>
     </div>
 
     <table class="totals-table">
       <tbody>
         <tr>
-          <td class="w-50 text-right font-bold">
-            Subtotal:
-          </td>
-
-          <td class="w-50 text-right nowrap">
-            {{totales.subtotal}}
-          </td>
+          <td class="text-right font-bold">Subtotal:</td>
+          <td class="text-right nowrap">{{totales.subtotal}}</td>
         </tr>
-
         <tr>
-          <td class="text-right font-bold">
-            I.V.A.:
-          </td>
-
-          <td class="text-right nowrap">
-            {{totales.iva}}
-          </td>
+          <td class="text-right font-bold">I.V.A.:</td>
+          <td class="text-right nowrap">{{totales.iva}}</td>
         </tr>
-
         <tr class="totals-table__total">
-          <td class="text-right font-bold">
-            Total:
-          </td>
-
-          <td class="text-right nowrap">
-            {{totales.total}}
-          </td>
+          <td class="text-right font-bold">Total:</td>
+          <td class="text-right nowrap font-bold">{{totales.total}}</td>
         </tr>
       </tbody>
     </table>
-
   </div>
 
   <!-- Pie informativo -->
   <footer class="document-footer">
     <div class="document-footer__content">
-
-      <div>
-        Partida: {{partida.clave}}
-      </div>
-
-      <div class="text-right">
-        Fecha del reporte: {{fechaReporte}}
-      </div>
-
+      <div>Partida: {{partida.clave}}</div>
+      <div class="text-right">Fecha del reporte: {{fechaReporte}}</div>
     </div>
   </footer>
 
+  <!-- Imagen del membrete inferior colocada en el fondo -->
   {{#if pieBase64}}
   <div class="institutional-footer">
-    <img
-      src="{{pieBase64}}"
-      alt="Pie institucional"
-    >
+    <img src="{{pieBase64}}" alt="Pie institucional">
   </div>
   {{/if}}
 
