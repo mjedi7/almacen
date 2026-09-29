@@ -163,219 +163,25 @@
 }
 
 
-/* ============================================================== 
-   COMPORTAMIENTO SIDEBAR: ESCRITORIO (>= 992px)
-   ============================================================== */
-@media (min-width: 992px) {
-
-    /* 1. Modo expandido normal */
-    #main-wrapper:not(.mini-sidebar) .left-sidebar {
-        width: 240px !important;
-        left: 0 !important;
-    }
-
-    #main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a span.hide-menu {
-        display: inline-block !important;
-        opacity: 1 !important;
-        white-space: normal !important;
-    }
-
-    #main-wrapper:not(.mini-sidebar) .page-wrapper {
-        margin-left: 240px !important;
-    }
-
-    #main-wrapper:not(.mini-sidebar) .topbar .top-navbar .navbar-header {
-        width: 240px !important;
-    }
-
-    /* 2. Modo colapsado: bloquea hover de AdminPro y ajusta anchos */
-    #main-wrapper.mini-sidebar .left-sidebar,
-    #main-wrapper.mini-sidebar .left-sidebar:hover {
-        width: 70px !important;
-    }
-
-    #main-wrapper.mini-sidebar .sidebar-nav ul li a span.hide-menu,
-    #main-wrapper.mini-sidebar .left-sidebar:hover .sidebar-nav ul li a span.hide-menu {
-        display: none !important;
-        width: 0 !important;
-        opacity: 0 !important;
-    }
-
-    #main-wrapper.mini-sidebar .page-wrapper {
-        margin-left: 70px !important;
-    }
-
-    #main-wrapper.mini-sidebar .topbar .top-navbar .navbar-header {
-        width: 70px !important;
-    }
-}
-
 
 /* ============================================================== 
-   COMPORTAMIENTO SIDEBAR: MÓVIL Y VENTANA ANGOSTA (< 992px)
-   ============================================================== */
-@media (max-width: 991px) {
-
-    /* Quita el margen lateral para que el formulario use el 100% */
-    #main-wrapper .page-wrapper,
-    #main-wrapper.mini-sidebar .page-wrapper {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-
-    .topbar .top-navbar .navbar-header {
-        width: auto !important;
-        min-width: 60px !important;
-    }
-
-    .banner-container {
-        display: none !important;
-    }
-
-    /* Menú fuera de pantalla en modo cerrado */
-    #main-wrapper:not(.show-sidebar) .left-sidebar {
-        left: -240px !important;
-    }
-
-    /* Menú lateral desplegable flotante */
-    #main-wrapper.show-sidebar .left-sidebar {
-        left: 0 !important;
-        width: 240px !important;
-        z-index: 1050;
-    }
-}
-
-/* Cuando el aside tiene la clase mini activa directamente desde el servicio */
-.left-sidebar.mini-sidebar-active {
-    width: 70px !important;
-}
-
-.left-sidebar.mini-sidebar-active .hide-menu,
-.left-sidebar.mini-sidebar-active:hover .hide-menu {
-    display: none !important;
-    width: 0 !important;
-    opacity: 0 !important;
-}
-
-
-/* ============================================================== 
-   COMPORTAMIENTO SIDEBAR: PANTALLAS DE ESCRITORIO Y VENTANA A LA MITAD (>= 768px)
-   ============================================================== */
-@media (min-width: 768px) {
-
-    /* 1. MODO EXPANDIDO (Cuando NO está colapsado) */
-    #main-wrapper:not(.mini-sidebar) .left-sidebar:not(.mini-sidebar-active) {
-        width: 240px !important;
-        left: 0 !important;
-    }
-    #main-wrapper:not(.mini-sidebar) .left-sidebar:not(.mini-sidebar-active) .sidebar-nav ul li a span.hide-menu {
-        display: inline-block !important;
-        opacity: 1 !important;
-    }
-    #main-wrapper:not(.mini-sidebar) .page-wrapper {
-        margin-left: 240px !important;
-    }
-    #main-wrapper:not(.mini-sidebar) .topbar .top-navbar .navbar-header {
-        width: 240px !important;
-    }
-
-    /* 2. MODO COLAPSADO (mini-sidebar o cuando la ventana está a la mitad) */
-    #main-wrapper.mini-sidebar .left-sidebar,
-    .left-sidebar.mini-sidebar-active {
-        width: 70px !important;
-        left: 0 !important; /* ¡NUNCA desaparece a la mitad de la pantalla! */
-    }
-
-    #main-wrapper.mini-sidebar .sidebar-nav ul li a span.hide-menu,
-    .left-sidebar.mini-sidebar-active .sidebar-nav ul li a span.hide-menu {
-        display: none !important;
-        width: 0 !important;
-        opacity: 0 !important;
-    }
-
-    #main-wrapper.mini-sidebar .page-wrapper {
-        margin-left: 70px !important;
-    }
-    #main-wrapper.mini-sidebar .topbar .top-navbar .navbar-header {
-        width: 70px !important;
-    }
-}
-
-
-/* ============================================================== 
-   SIDEBAR COMPLETO SIEMPRE (ESCRITORIO Y PANTALLA A LA MITAD >= 768px)
-   ============================================================== */
-@media (min-width: 768px) {
-
-    /* 1. Forzar ancho completo del sidebar para que quepan los textos */
-    #main-wrapper:not(.mini-sidebar) .left-sidebar,
-    .left-sidebar:not(.mini-sidebar-active) {
-        width: 240px !important;
-        min-width: 240px !important;
-        left: 0 !important;
-    }
-
-    /* 2. Empujar el contenido de la derecha para no taparlo */
-    #main-wrapper:not(.mini-sidebar) .page-wrapper {
-        margin-left: 240px !important;
-    }
-
-    /* 3. Ajustar el encabezado superior con el logo */
-    #main-wrapper:not(.mini-sidebar) .topbar .top-navbar .navbar-header {
-        width: 240px !important;
-        min-width: 240px !important;
-    }
-
-    /* 4. Asegurar que las letras SIEMPRE se muestren completas */
-    #main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a .hide-menu,
-    .left-sidebar:not(.mini-sidebar-active) .sidebar-nav ul li a .hide-menu {
-        display: inline-block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        width: auto !important;
-        white-space: nowrap !important; /* Evita que las palabras se partan en renglones */
-    }
-
-    /* 5. Alinear icono y texto bonito a la izquierda */
-    #main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a,
-    .left-sidebar:not(.mini-sidebar-active) .sidebar-nav ul li a {
-        text-align: left !important;
-        padding: 10px 15px !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a i,
-    .left-sidebar:not(.mini-sidebar-active) .sidebar-nav ul li a i {
-        margin-right: 12px !important;
-        font-size: 1.2rem !important;
-    }
-
-    /* 6. Los badges con el número a la derecha */
-    .left-sidebar .label-themecolor {
-        display: inline-block !important;
-        margin-left: auto !important;
-    }
-}
-
-/* ============================================================== 
-   CONTROL DE SIDEBAR: EXPANDIDO VS RETRAÍDO (MINI)
+   COMPORTAMIENTO TOGGLE SIDEBAR (240px <--> 70px)
    ============================================================== */
 
 /* --- 1. ESTADO EXPANDIDO (NORMAL / 240px) --- */
 #main-wrapper:not(.mini-sidebar) .left-sidebar {
   width: 240px !important;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
 }
 
 #main-wrapper:not(.mini-sidebar) .page-wrapper {
   margin-left: 240px !important;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.25s ease;
 }
 
 #main-wrapper:not(.mini-sidebar) .topbar .top-navbar .navbar-header {
   width: 240px !important;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
 }
 
 #main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a .hide-menu {
@@ -383,7 +189,6 @@
   opacity: 1 !important;
   visibility: visible !important;
   white-space: nowrap !important;
-  transition: opacity 0.2s ease;
 }
 
 #main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a {
@@ -401,20 +206,20 @@
 /* --- 2. ESTADO RETRAÍDO (MINI / 70px) --- */
 #main-wrapper.mini-sidebar .left-sidebar {
   width: 70px !important;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
 }
 
 #main-wrapper.mini-sidebar .page-wrapper {
   margin-left: 70px !important;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.25s ease;
 }
 
 #main-wrapper.mini-sidebar .topbar .top-navbar .navbar-header {
   width: 70px !important;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
 }
 
-/* Ocultar textos, números y flechas sin dejar rastro en modo mini */
+/* Ocultar letras, números y flechitas en modo mini */
 #main-wrapper.mini-sidebar .left-sidebar .hide-menu,
 #main-wrapper.mini-sidebar .left-sidebar .label,
 #main-wrapper.mini-sidebar .left-sidebar .has-arrow::after {
@@ -426,7 +231,7 @@
   overflow: hidden !important;
 }
 
-/* Centrar iconos en el sidebar retraído */
+/* Centrar iconos en la barra delgada */
 #main-wrapper.mini-sidebar .sidebar-nav ul li a {
   text-align: center !important;
   display: block !important;
@@ -437,4 +242,36 @@
   margin-right: 0 !important;
   font-size: 1.4rem !important;
   display: inline-block !important;
+}
+
+/* Si el sidebar está en mini-sidebar, esconder al 100% las letras para que no se corten */
+.mini-sidebar .left-sidebar .sidebar-nav ul li a .hide-menu,
+.mini-sidebar aside.left-sidebar .hide-menu,
+.mini-sidebar #sidebarnav .hide-menu {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+}
+
+/* Si NO está en mini-sidebar, mostrar el texto COMPLETO y ancho */
+body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .left-sidebar {
+  width: 240px !important;
+  min-width: 240px !important;
+}
+
+body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .page-wrapper {
+  margin-left: 240px !important;
+}
+
+body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .left-sidebar .hide-menu {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: inherit !important;
+  width: auto !important;
+  white-space: nowrap !important;
 }

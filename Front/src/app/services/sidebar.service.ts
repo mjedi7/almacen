@@ -6,21 +6,27 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class SidebarService {
 
-  // Control reactivo del estado colapsado (mini-sidebar)
-  private isMiniSubject = new BehaviorSubject<boolean>(false);
-  public isMini$ = this.isMiniSubject.asObservable();
+ private miniSubject = new BehaviorSubject<boolean>(false);
+  public isMini$ = this.miniSubject.asObservable();
 
   toggle(): void {
-    this.isMiniSubject.next(!this.isMiniSubject.value);
+    const nuevoEstado = !this.miniSubject.value;
+    this.setMini(nuevoEstado);
   }
 
-  setMini(value: boolean): void {
-    this.isMiniSubject.next(value);
+  setMini(mini: boolean): void {
+    this.miniSubject.next(mini);
+
+    const wrapper = document.getElementById('main-wrapper');
+    if (wrapper) {
+      if (mini) {
+        wrapper.classList.add('mini-sidebar');
+      } else {
+        wrapper.classList.remove('mini-sidebar');
+      }
+    }
   }
 
-  get isMiniValue(): boolean {
-    return this.isMiniSubject.value;
-  }
 
   // ALMACÉN
   menu: any[] = [

@@ -64,16 +64,20 @@ export class HeaderComponent implements OnInit {
 
  checkScreenSize(): void {
     const width = window.innerWidth;
-
-    // Si la ventana está a la mitad o en laptop mediana (entre 768px y 1170px)
-    if (width >= 768 && width < 1170) {
-      this.sidebarService.setMini(true); // Se activa el mini y Angular oculta los textos
-    } else if (width >= 1170) {
-      this.sidebarService.setMini(false); // En monitor grande se expande normal
+    // Solo si es pantalla de celular (< 768px) lo mandamos a mini/cerrado
+    if (width < 768) {
+      this.sidebarService.setMini(true);
+    } else {
+      this.sidebarService.setMini(false);
     }
   }
 
-  toggleSidebar(): void {
+  toggleSidebar(event?: MouseEvent): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    console.log('¡CLIC DETECTADO EN TOGGLE!');
     this.sidebarService.toggle();
   }
 }

@@ -21,20 +21,18 @@
     </div>
 
     <div class="navbar-collapse">
-      <ul class="navbar-nav mr-auto">
-        <!-- Hamburguesa Mobile -->
+     <ul class="navbar-nav mr-auto">
+        <!-- Botón Hamburguesa universal (Desktop, Laptop y Mitad de pantalla) -->
         <li class="nav-item">
-          <a class="nav-link nav-toggler hidden-md-up waves-effect waves-dark" (click)="toggleSidebar()" href="javascript:void(0)">
-            <i style="color: #b40f0f" class="ti-menu" [class.menu-rotado]="sidebarService.isMini$ | async"></i>
-          </a>
-        </li>
-
-        <!-- Hamburguesa Desktop -->
-        <li class="nav-item">
-          <a class="nav-link sidebartoggler hidden-sm-down waves-effect waves-dark" (click)="toggleSidebar()" href="javascript:void(0)">
-            <i style="color: #b40f0f" class="ti-menu" [class.menu-rotado]="sidebarService.isMini$ | async"></i>
-          </a>
-        </li>
+  <button type="button" 
+          class="btn btn-link nav-link waves-effect waves-dark" 
+          (click)="toggleSidebar($event)" 
+          style="cursor: pointer; border: none; background: transparent; padding: 0.5rem 1rem;">
+    <i style="color: #b40f0f; font-size: 1.4rem;" 
+       class="ti-menu" 
+       [class.menu-rotado]="sidebarService.isMini$ | async"></i>
+  </button>
+</li>
       </ul>
 
       <div class="navbar-collapse banner-container" style="text-align: center; background: transparent;">
