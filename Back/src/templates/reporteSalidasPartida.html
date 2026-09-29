@@ -3,9 +3,17 @@
 
 <head>
   <meta charset="UTF-8">
+  <title>Salidas por Partida Presupuestal</title>
+  <style>
+    /* Asegura la visualización del contador de página */
+    .num-pagina::after {
+      counter-increment: pagina;
+      content: "Pág. " counter(pagina);
+    }
+  </style>
 </head>
 
-<body class="report report--compact">
+<body class="report report--normal">
 
   <table class="report-shell">
 
@@ -13,193 +21,128 @@
     <thead>
       <tr>
         <td>
-          <header class="report-header">
-
+          <header class="report-header" style="margin-bottom: 18px;">
             {{#if bannerBase64}}
             <div class="report-banner">
-              <img
-                src="{{bannerBase64}}"
-                alt="Banner Institucional"
-              >
+              <img src="{{bannerBase64}}" alt="Banner Institucional">
             </div>
             {{/if}}
 
             <div class="report-institution">
               COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
             </div>
-
             <div class="report-name">
-              SALIDAS POR PARTIDA PRESUPUESTAL
+              DIRECCIÓN ADMINISTRATIVA
+            </div>
+            <div class="report-department">
+              DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
             </div>
 
-            <div class="report-period">
-              {{periodo}}
+            <!-- Período compatible con {{periodo}} o con {{periodoInicio}} / {{periodoFin}} -->
+            <div class="report-period"
+              style="margin-top: 10px; font-size: 10pt; font-weight: bold; color: #000; text-transform: uppercase;">
+              {{#if periodo}}
+              RESUMEN DE MOVIMIENTOS DE ALMACÉN {{periodo}}
+              {{else}}
+              RESUMEN DE MOVIMIENTOS DE ALMACÉN DEL <u>{{periodoInicio}}</u> AL <u>{{periodoFin}}</u>
+              {{/if}}
             </div>
-
-            <div class="report-title">
-              {{tituloAlmacen}}
-            </div>
-
           </header>
         </td>
       </tr>
     </thead>
 
+    <!-- Cuerpo del reporte -->
     <tbody>
-
       {{#each gruposPartidas}}
       <tr class="page-row {{#if @last}}page-row--last{{/if}}">
         <td>
 
-          <section class="report-section">
+          <section class="report-section" style="margin-bottom: 25px;">
 
-            <!-- Información de la partida -->
-            <table class="report-table report-table--info">
+            <!-- Etiqueta de la partida -->
+            <div style="font-weight: bold; font-size: 9.5pt; margin-bottom: 10px;">
+              PARTIDA: {{this.clave}} {{#if this.descripcion}}- {{this.descripcion}}{{/if}}
+            </div>
 
-              <colgroup>
-                <col class="w-20">
-                <col class="w-80">
-              </colgroup>
+            <!-- Título de sección centrado -->
+            <div
+              style="font-weight: bold; font-size: 10.5pt; text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">
+              SALIDAS DE ALMACÉN
+            </div>
 
+            <!-- Tabla de movimientos (4 columnas) -->
+            <table class="report-table" cellspacing="0" cellpadding="0">
               <thead>
                 <tr>
-                  <th>Partida</th>
-                  <th>Nombre Partida</th>
+                  <th style="width: 32%; text-align: center;">PLANTEL / ÁREA</th>
+                  <th style="width: 34%; text-align: center;">PROVEEDOR</th>
+                  <th style="width: 17%; text-align: center;">FOLIO FACTURA</th>
+                  <th style="width: 17%; text-align: right;">TOTAL SIN IVA</th>
                 </tr>
               </thead>
 
               <tbody>
-                <tr>
-                  <td class="text-center">
-                    {{this.clave}}
-                  </td>
-
-                  <td class="text-left indent">
-                    {{this.descripcion}}
-                  </td>
-                </tr>
-              </tbody>
-
-            </table>
-
-            <!-- Movimientos de la partida -->
-            <table class="report-table">
-
-              <colgroup>
-                <col class="w-28">
-                <col class="w-32">
-                <col class="w-14">
-                <col class="w-11">
-                <col class="w-15">
-              </colgroup>
-
-              <thead>
-                <tr>
-                  <th class="text-left">
-                    Centro de Trabajo
-                  </th>
-
-                  <th class="text-left">
-                    Proveedor
-                  </th>
-
-                  <th>Folio Compra</th>
-
-                  <th>Fecha Compra</th>
-
-                  <th class="text-right">
-                    Total
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-
+                {{#if this.movimientos.length}}
                 {{#each this.movimientos}}
                 <tr>
-                  <td class="text-left">
-                    {{this.centro_trabajo}}
-                  </td>
-
-                  <td class="text-left">
-                    {{this.proveedor}}
-                  </td>
-
-                  <td class="text-center">
-                    {{this.folio_compra}}
-                  </td>
-
-                  <td class="text-center">
-                    {{this.fecha_compra}}
-                  </td>
-
-                  <td class="text-right">
-                    $ {{this.monto}}
-                  </td>
+                  <td class="text-left">{{this.centro_trabajo}}</td>
+                  <td class="text-left">{{this.proveedor}}</td>
+                  <td class="text-center">{{this.folio_compra}}</td>
+                  <td class="text-right">$ {{this.monto}}</td>
                 </tr>
                 {{/each}}
-
-                <!-- Subtotal -->
-                <tr class="row-subtotal">
-                  <td
-                    colspan="4"
-                    class="text-right pr-10"
-                  >
-                    Subtotal Partida {{this.clave}}:
-                  </td>
-
-                  <td class="text-right">
-                    $ {{this.subtotalTexto}}
+                {{else}}
+                <tr>
+                  <td colspan="4" class="empty-state">
+                    No se encontraron salidas registradas para esta partida.
                   </td>
                 </tr>
-
+                {{/if}}
               </tbody>
-
             </table>
+
+            <!-- Bloque de totales alineado a la derecha -->
+            <div class="totales-derecha-contenedor" style="margin-top: 12px;">
+              <div class="totales-caja" style="min-width: 180px;">
+                <div class="totales-fila">
+                  <span class="lbl">Subtotal</span>
+                  <span class="val">$ {{#if this.subtotalTexto}}{{this.subtotalTexto}}{{else if
+                    this.subtotal}}{{this.subtotal}}{{else}}{{../granTotal}}{{/if}}</span>
+                </div>
+                {{#if this.ivaTexto}}
+                <div class="totales-fila">
+                  <span class="lbl">I.V.A.</span>
+                  <span class="val">$ {{this.ivaTexto}}</span>
+                </div>
+                {{else if this.iva}}
+                <div class="totales-fila">
+                  <span class="lbl">I.V.A.</span>
+                  <span class="val">$ {{this.iva}}</span>
+                </div>
+                {{/if}}
+                <div class="totales-fila font-bold" style="font-size: 10pt;">
+                  <span class="lbl">Total</span>
+                  <span class="val">$ {{#if this.totalTexto}}{{this.totalTexto}}{{else if
+                    this.total}}{{this.total}}{{else}}{{../granTotal}}{{/if}}</span>
+                </div>
+              </div>
+            </div>
 
           </section>
 
         </td>
       </tr>
       {{/each}}
-
-      <!-- Total final -->
-      <tr class="no-break">
-        <td>
-
-          <table class="report-summary">
-
-            <colgroup>
-              <col class="w-60">
-              <col class="w-20">
-              <col class="w-20">
-            </colgroup>
-
-            <tbody>
-              <tr>
-                <td>
-                  <b>Total de registros impresos:</b>
-                  &nbsp; {{totalRegistrosImpresos}}
-                </td>
-
-                <td class="text-right font-bold">
-                  Gran Total:
-                </td>
-
-                <td class="text-right font-bold">
-                  $ {{granTotal}}
-                </td>
-              </tr>
-            </tbody>
-
-          </table>
-
-        </td>
-      </tr>
-
     </tbody>
 
   </table>
+
+  <!-- Pie con Usuario a la izquierda y Número de Página a la derecha -->
+  <div class="pie-fijo-datos" style="bottom: 8mm;">
+    <div><b>Usuario:</b> {{usuarioPie}}</div>
+    <div class="num-pagina"></div>
+  </div>
 
 </body>
 

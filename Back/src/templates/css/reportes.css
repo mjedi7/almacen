@@ -1,489 +1,335 @@
 /*
  * Sistema global de estilos para reportes PDF
- * Este archivo se utiliza en todas las plantillas.
+ * CECyTEV - Departamento de Almacén e Inventarios
  */
 
-/* CONFIGURACIÓN DE PÁGINA */
+/* ==========================================================================
+   1. CONFIGURACIÓN DE PÁGINA E IMPRESIÓN
+   ========================================================================== */
 
 @page {
   size: letter portrait;
-  margin: 10mm 12mm 16mm 12mm;
+  margin: 0; /* Puppeteer maneja los límites de impresión */
 }
 
-
-/* CONFIGURACIÓN GENERAL */
-
-body.report {
-  --font-body: 9pt;
-  --font-header: 9pt;
-  --font-header: 9pt;
-  --font-info: 9.5pt;
-  --font-title: 11pt;
-  --cell-padding: 4px 5px;
-
-  margin: 0;
-  padding: 0;
-  color: #000;
-  background: #fff;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.report,
-.report * {
+* {
   box-sizing: border-box;
 }
 
-/* Tamaños reutilizables */
+html,
+body.report {
+  margin: 0;
+  padding: 0 12mm; /* Margen institucional lateral exacto */
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+  background: #fff;
+  counter-reset: pagina;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Variantes de densidad tipográfica balanceadas */
+body.report {
+  --font-body: 9pt;
+  --font-header: 9.5pt;
+  --font-info: 9.5pt;
+  --font-title: 11pt;
+  --cell-padding: 4px 5px;
+}
+
+body.report--normal {
+  --font-body: 9.5pt;
+  --font-header: 9.5pt;
+  --font-info: 9.5pt;
+  --cell-padding: 4.5px 5px; /* Reducido de 10px a 5px para no ahogar las columnas */
+}
 
 body.report--compact {
   --font-body: 8.5pt;
   --font-header: 9pt;
-  --font-info: 9.5pt;
-  --cell-padding: 3.5px 5px;
+  --font-info: 9pt;
+  --cell-padding: 3.5px 4px;
 }
 
-body.report--normal {
-  --font-body: 10pt;
-  --font-header: 10pt;
-  --font-info: 10pt;
-  --cell-padding: 4px 6px;
+body.report--dense {
+  --font-body: 7.5pt;
+  --font-header: 8pt;
+  --font-info: 8.5pt;
+  --cell-padding: 2.5px 3px;
 }
 
+.capitalizar-primera {
+  display: inline-block;
+}
 
-/* ENCABEZADO INSTITUCIONAL */
+.capitalizar-primera::first-letter {
+  text-transform: uppercase;
+}
 
-.report-header {
+/* ==========================================================================
+   2. TABLA ENVOLVENTE (REPETICIÓN DE ENCABEZADOS EN MULTIPÁGINA)
+   ========================================================================== */
+
+.report-shell,
+.main-table {
   width: 100%;
-  margin-bottom: 12px;
+  border: none;
+  border-collapse: collapse;
+}
+
+.report-shell > thead,
+.main-table > thead {
+  display: table-header-group;
+}
+
+.report-shell > tbody,
+.main-table > tbody {
+  display: table-row-group;
+}
+
+.report-shell > thead > tr > td,
+.report-shell > tbody > tr > td,
+.main-table > thead > tr > td,
+.main-table > tbody > tr > td {
+  padding: 0;
+  border: none;
+}
+
+/* ==========================================================================
+   3. ENCABEZADO INSTITUCIONAL
+   ========================================================================== */
+
+.report-header,
+.header-container {
+  width: 100%;
+  margin-top: 2mm;
+  margin-bottom: 10px;
   text-align: center;
 }
 
-.report-banner {
+.report-banner,
+.header-banner {
   width: 100%;
   margin-bottom: 6px;
   text-align: center;
 }
 
-.report-banner img {
+.report-banner img,
+.header-banner img {
   max-width: 100%;
-  height: 105px;
+  height: 90px;
   object-fit: contain;
 }
 
 .report-institution,
-.report-name {
-  margin-bottom: 2px;
-  color: #000;
+.sub-header-title {
   font-size: 10pt;
   font-weight: bold;
   letter-spacing: 0.3px;
   text-align: center;
+  margin-bottom: 2px;
 }
 
-.report-period {
-  margin-bottom: 4px;
-  color: #333;
-  font-size: 9pt;
+.report-department,
+.report-name {
+  font-size: 10pt;
   font-weight: bold;
+  letter-spacing: 0.3px;
   text-align: center;
+  margin-bottom: 3px;
 }
 
-.report-title {
-  margin-bottom: 8px;
-  color: #000;
+.report-title,
+.main-title {
   font-size: var(--font-title);
   font-weight: bold;
+  letter-spacing: 0.3px;
   text-align: center;
+  margin-bottom: 6px;
 }
 
+/* ==========================================================================
+   4. TABLAS DE DATOS Y METADATOS
+   ========================================================================== */
 
-/* TABLA ENVOLVENTE */
-
-.report-shell {
+.report-table,
+.table-detalle,
+.table-header {
   width: 100%;
-  border: none;
-  border-collapse: collapse;
-}
-
-.report-shell > thead {
-  display: table-header-group;
-}
-
-.report-shell > tbody {
-  display: table-row-group;
-}
-
-.report-shell > thead > tr > td,
-.report-shell > tbody > tr > td {
-  padding: 0;
-  border: none;
-}
-
-
-/* TABLAS GENERALES */
-
-.report-table {
-  width: 100%;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
   border: 1.5px solid #000;
-  border-spacing: 0;
-  border-collapse: collapse;
 }
 
-.report-table thead {
+.table-header {
+  width: 100%;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  border: 1.5px solid #000;
+  margin-bottom: 16px !important; /* Aumenta de 8px/10px a 16px o 18px */
+  page-break-inside: avoid;
+}
+
+.report-table thead,
+.table-detalle thead {
   display: table-header-group;
 }
 
-.report-table tr {
+.report-table tr,
+.table-detalle tr {
   page-break-inside: avoid;
   break-inside: avoid;
 }
 
-.report-table th {
-  padding: 4px;
+.report-table th,
+.table-detalle th,
+.table-header th {
+  padding: 4px 5px;
   border: 1px solid #000;
-  background: #f7faff;
+  background-color: #f7faff;
   font-size: var(--font-header);
   font-weight: bold;
   text-align: center;
 }
 
-.report-table td {
+.report-table td,
+.table-detalle td,
+.table-header td {
   padding: var(--cell-padding);
   border: 1px solid #000;
   font-size: var(--font-body);
 }
 
+/* Estilo para metadatos tipo formulario */
+.table-header .lbl {
+  background-color: #f7faff;
+  font-weight: bold;
+  width: 18%;
+}
 
-/* Tabla pequeña de información */
+.table-header .val {
+  background-color: #fff;
+  width: 32%;
+}
 
-.report-table--info {
-  margin-bottom: 8px;
+/* ==========================================================================
+   5. TOTALES Y RESÚMENES
+   ========================================================================== */
+
+.totales-derecha-contenedor {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
   page-break-inside: avoid;
   break-inside: avoid;
 }
 
-.report-table--info th,
-.report-table--info td {
-  padding: 4px 6px;
-  font-size: var(--font-info);
-  text-align: center;
+.totales-caja {
+  min-width: 200px;
+  font-size: var(--font-body);
 }
 
-/* BLOQUES, SUBTOTALES Y RESÚMENES */
-
-.report-section {
-  margin-bottom: 15px;
+.totales-fila {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
-.row-subtotal {
-  background: #fafafa;
+.totales-fila .lbl {
   font-weight: bold;
+  padding-right: 15px;
+}
+
+.totales-fila .val {
+  text-align: right;
+  font-family: inherit;
+  white-space: nowrap;
 }
 
 .report-summary {
   width: 100%;
-  margin-top: 14px;
+  border-collapse: collapse;
   border: none;
-  border-collapse: collapse;
   page-break-inside: avoid;
   break-inside: avoid;
-  font-size: var(--font-info);
-}
-
-.report-summary td {
-  padding: 4px 5px;
-  border: none;
-  vertical-align: top;
-}
-
-.report .empty-state {
-  padding: 10px;
-  color: #666;
-  font-style: italic;
-  text-align: center;
-}
-
-/* SALTOS DE PÁGINA */
-
-.page-row {
-  page-break-after: always;
-  break-after: page;
-}
-
-.page-row--last {
-  page-break-after: auto;
-  break-after: auto;
-}
-
-.no-break {
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-/* ALINEACIÓN Y TEXTO */
-
-.report .text-left {
-  text-align: left;
-}
-
-.report .text-center {
-  text-align: center;
-}
-
-.report .text-right {
-  text-align: right;
-}
-
-.report .font-bold {
-  font-weight: bold;
-}
-
-.report .text-uppercase {
-  text-transform: uppercase;
-}
-
-.report .text-capitalize {
-  text-transform: capitalize;
-}
-
-.report .indent {
-  padding-left: 8px;
-}
-
-
-.report .pr-10 {
-  padding-right: 10px;
-}
-
-.report .mt-4 {
-  margin-top: 4px;
-}
-
-
-/* CATALOGO DE DIFERENTES ANCHOS */
-
-.w-9  { width:  9%; }
-.w-10 { width: 10%; }
-.w-11 { width: 11%; }
-.w-12 { width: 12%; }
-.w-13 { width: 13%; }
-.w-14 { width: 14%; }
-.w-15 { width: 15%; }
-.w-16 { width: 16%; }
-.w-18 { width: 18%; }
-.w-20 { width: 20%; }
-.w-25 { width: 25%; }
-.w-27 { width: 27%; }
-.w-28 { width: 28%; }
-.w-30 { width: 30%; }
-.w-32 { width: 32%; }
-.w-38 { width: 38%; }
-.w-44 { width: 44%; }
-.w-45 { width: 45%; }
-.w-50 { width: 50%; }
-.w-56 { width: 56%; }
-.w-60 { width: 60%; }
-.w-62 { width: 62%; }
-.w-80 { width: 80%; }
-.w-82 { width: 82%; }
-.w-100 { width: 100%; }
-
-
-
-/* ESPECIFICIO PARA reporteEntradasTodas.html */
-
-/* ENCABEZADO COMPACTO
-   Reutilizable en reportes tabulares */
-
-.report-banner--compact img {
-  width: 520pt;
-  max-width: 100%;
-  height: auto;
-  max-height: 55pt;
-}
-
-.report-heading {
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.report-heading__institution {
-  margin: 0;
-  font-size: 9pt;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.report-heading__title {
-  margin: 5px 0 0;
-  font-size: 14pt;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-/* INFORMACIÓN DEL REPORTE */
-
-.report-meta {
-  width: 100%;
-  margin-bottom: 10px;
-  border-collapse: collapse;
-  font-size: 9pt;
-}
-
-.report-meta td {
-  padding: 2px 4px;
-  vertical-align: top;
-}
-
-.report-meta__label {
-  font-weight: bold;
-}
-
-
-/* VARIANTES GENERALES DE TABLAS */
-
-.report-table--fixed {
-  table-layout: fixed;
-}
-
-.report-table--soft th {
-  padding: 5px 4px;
-  border-color: #333;
-  background: #e9ecef;
-  font-size: 8.5pt;
-}
-
-.report-table--soft td {
-  padding: 4px;
-  border-color: #b7b7b7;
-  font-size: 8pt;
-  vertical-align: middle;
-}
-
-
-/* RESUMEN Y TOTALES */
-
-.report-results {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-.report-count {
-  padding-top: 4px;
-  font-size: 8.5pt;
-}
-
-.totals-table {
-  width: 270px;
-  border-collapse: collapse;
-  font-size: 9pt;
-}
-
-.totals-table td {
-  padding: 4px 7px;
-  border-bottom: 1px solid #ccc;
-}
-
-.totals-table__total td {
-  border-top: 1px solid #333;
-  border-bottom: 2px solid #333;
-  font-weight: bold;
-}
-
-
-/* PIE DENTRO DEL DOCUMENTO */
-
-.document-footer {
-  position: fixed;
-  right: 0;
-  bottom: -12mm;
-  left: 0;
-  font-size: 7.5pt;
-}
-
-.document-footer__content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.institutional-footer {
-  position: fixed;
-  right: -10mm;
-  bottom: -17mm;
-  left: -10mm;
-  z-index: -1;
-  text-align: center;
-}
-
-.institutional-footer img {
-  width: 100%;
-  max-height: 38pt;
-  object-fit: cover;
-}
-
-
-/* ADICIONALES */
-
-.nowrap {
-  white-space: nowrap;
-}
-
-.report .p-20 {
-  padding: 20px;
-}
-
-.w-34 {
-  width: 34%;
-}
-
-.w-third {
-  width: 13.33%;
-}
-
-
-/* ESPECIFICIO PARA reporteKardex.html */
-
-/* Reportes con mucha información */
-
-body.report--dense {
-  --font-body: 7.5pt;
-  --font-header: 7.5pt;
-  --font-info: 8.5pt;
-  --cell-padding: 3.5px 3px;
-}
-
-.report-table--dense th {
-  padding: 4px 3px;
-  font-size: var(--font-header);
-}
-
-.report-table--dense td {
-  padding: var(--cell-padding);
   font-size: var(--font-body);
 }
 
-.justify-end {
-  justify-content: flex-end;
+.report-summary td {
+  border: none;
+  padding: 4px 2px;
 }
 
+/* ==========================================================================
+   6. PIE INSTITUCIONAL ESTANDARIZADO (IMAGEN + METADATOS)
+   ========================================================================== */
 
-/*  ESPECIFICIO PARA reporteListaSurtido.html  */
-
-/* REFERENCIA O IDENTIFICACIÓN DEL DOCUMENTO */
-
-.document-reference {
-  margin-bottom: 8px;
-  font-size: 8.5pt;
-  font-weight: bold;
-  line-height: 1.3;
+.pie-fijo-completo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   text-align: center;
+  z-index: 1000;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
 }
 
-/* FIRMAS */
+/* Barra de metadatos alineada a los 12mm de la tabla */
+.pie-fijo-datos {
+  position: fixed;
+  left: 12mm;
+  right: 12mm;
+  bottom: 6mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10pt;
+  line-height: normal;
+  color: #000;
+  z-index: 1002;
+}
+
+.pie-contenedor-img {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+.pie-contenedor-img img {
+  width: 100%;
+  height: auto;
+  max-height: 35mm;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+  margin: 0 auto;
+  vertical-align: bottom;
+}
+
+.pie-contenedor-img .num-pagina {
+  position: absolute;
+  right: 10mm;
+  bottom: 4mm;
+  font-size: 8pt;
+  line-height: normal;
+  color: #000;
+  font-weight: bold;
+  z-index: 1001;
+}
+
+/* Contador dinámico global */
+.num-pagina::after {
+  counter-increment: pagina;
+  content: "Pág. " counter(pagina);
+}
+
+/* ==========================================================================
+   7. FIRMAS INSTITUCIONALES
+   ========================================================================== */
 
 .signature-grid {
   display: table;
@@ -496,36 +342,78 @@ body.report--dense {
 
 .signature {
   display: table-cell;
-  padding: 0 4px;
-  font-size: 7pt;
+  padding: 0 8px;
+  font-size: 8.5pt;
   text-align: center;
   vertical-align: top;
 }
 
 .signature__line {
-  margin-top: 30px;
+  margin-top: 35px;
   padding-top: 3px;
-  border-top: 0.5pt solid #000;
+  border-top: 1px solid #000;
   font-weight: bold;
 }
 
 .signature__role {
   margin-top: 2px;
   color: #333;
-  font-size: 6.5pt;
+  font-size: 8pt;
 }
 
+/* ==========================================================================
+   8. UTILIDADES Y FORMATEO
+   ========================================================================== */
 
-/* Pie contenido dentro de los márgenes de la hoja */
-
-.institutional-footer--contained {
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: auto;
+.cen,
+.text-center {
+  text-align: center;
 }
 
-.institutional-footer--contained img {
-  max-height: 45px;
-  object-fit: contain;
+.num,
+.text-right {
+  text-align: right;
+  white-space: nowrap; /* Impide que el símbolo $ o el importe quiebren */
 }
+
+.text-left {
+  text-align: left;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.empty-state {
+  padding: 12px;
+  color: #555;
+  text-align: center;
+  font-style: italic;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* Clases de ancho estándar */
+.w-10 { width: 10%; }
+.w-11 { width: 11%; }
+.w-13 { width: 13%; }
+.w-14 { width: 14%; }
+.w-15 { width: 15%; }
+.w-16 { width: 16%; }
+.w-17 { width: 17%; }
+.w-18 { width: 18%; }
+.w-20 { width: 20%; }
+.w-22 { width: 22%; }
+.w-25 { width: 25%; }
+.w-27 { width: 27%; }
+.w-30 { width: 30%; }
+.w-40 { width: 40%; }
+.w-44 { width: 44%; }
+.w-50 { width: 50%; }
+.w-54 { width: 54%; }
+.w-56 { width: 56%; }
+.w-60 { width: 60%; }
+.w-80 { width: 80%; }
+.w-100 { width: 100%; }
