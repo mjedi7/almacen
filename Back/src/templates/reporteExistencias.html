@@ -3,6 +3,25 @@
 
 <head>
   <meta charset="UTF-8">
+  <title>Existencias y Costos Actuales</title>
+  <style>
+    /* Asegurar que las claves y números no salten de línea */
+    .table-detalle td.cen,
+    .table-detalle td.num {
+      white-space: nowrap;
+    }
+
+    /* Espacio superior para que el banner nunca se corte */
+    .report-banner {
+      margin-top: 3mm;
+      margin-bottom: 6px;
+    }
+
+    .report-banner img {
+      max-height: 85px;
+      object-fit: contain;
+    }
+  </style>
 </head>
 
 <body class="report report--normal">
@@ -17,10 +36,7 @@
 
             {{#if bannerBase64}}
             <div class="report-banner">
-              <img
-                src="{{bannerBase64}}"
-                alt="Banner Institucional"
-              >
+              <img src="{{bannerBase64}}" alt="Banner Institucional">
             </div>
             {{/if}}
 
@@ -33,7 +49,7 @@
             </div>
 
             <div class="report-title">
-              {{tituloAlmacen}}
+              {{#if tituloAlmacen}}{{tituloAlmacen}}{{else}}Almacén General{{/if}}
             </div>
 
           </header>
@@ -41,116 +57,75 @@
       </tr>
     </thead>
 
+    <!-- Espaciador reservado para que la tabla corte antes del pie -->
+    <tfoot>
+      <tr>
+        <td style="height: 20mm; border: none; background: transparent;"></td>
+      </tr>
+    </tfoot>
+
     <tbody>
 
       {{#each gruposPartidas}}
       <tr class="page-row {{#if @last}}page-row--last{{/if}}">
         <td>
 
-          <section class="report-section">
+          <section class="report-section" style="margin-bottom: 20px;">
 
-            <!-- Información de la partida -->
-            <table class="report-table report-table--info">
-
-              <colgroup>
-                <col class="w-14">
-                <col class="w-56">
-                <col class="w-15">
-                <col class="w-15">
-              </colgroup>
-
+            <!-- 1. Cuadro superior de la partida bien estructurado -->
+            <table class="table-header" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000;">
               <thead>
                 <tr>
-                  <th>Partida</th>
-                  <th>Nombre Partida</th>
-                  <th>Productos</th>
-                  <th>Proveedores</th>
+                  <th style="width: 14%; text-align: center;">Partida</th>
+                  <th style="width: 56%; text-align: center;">Nombre Partida</th>
+                  <th style="width: 15%; text-align: center;">Productos</th>
+                  <th style="width: 15%; text-align: center;">Proveedores</th>
                 </tr>
               </thead>
-
               <tbody>
                 <tr>
-                  <td class="text-center">
-                    {{this.clave}}
-                  </td>
-
-                  <td class="text-left indent">
-                    {{this.descripcion}}
-                  </td>
-
-                  <td class="text-center">
-                    Todos
-                  </td>
-
-                  <td class="text-center">
-                    Todos
-                  </td>
+                  <td class="text-center">{{this.clave}}</td>
+                  <td class="text-left" style="padding-left: 8px;">{{this.descripcion}}</td>
+                  <td class="text-center">Todos</td>
+                  <td class="text-center">Todos</td>
                 </tr>
               </tbody>
-
             </table>
 
-            <!-- Artículos de la partida -->
-            <table class="report-table">
+            <!-- Separador físico garantizado entre ambos cuadros -->
+            <div style="height: 14px; width: 100%;"></div>
 
-              <colgroup>
-                <col class="w-16">
-                <col class="w-44">
-                <col class="w-13">
-                <col class="w-11">
-                <col class="w-16">
-              </colgroup>
-
+            <!-- 2. Artículos de la partida con mayúscula inicial -->
+            <table class="table-detalle" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000;">
               <thead>
                 <tr>
-                  <th>Clave</th>
-
-                  <th class="text-left">
-                    Artículo
-                  </th>
-
-                  <th class="text-right">
-                    Costo
-                  </th>
-
-                  <th>
-                    Existencia
-                  </th>
-
-                  <th class="text-right">
-                    Costo total
-                  </th>
+                  <th style="width: 22%; text-align: center;">Clave</th>
+                  <th style="width: 43%; text-align: center;">Artículo</th>
+                  <th style="width: 11%; text-align: center;">Costo</th>
+                  <th style="width: 10%; text-align: center;">Existencia</th>
+                  <th style="width: 14%; text-align: center;">Costo total</th>
                 </tr>
               </thead>
 
               <tbody>
-
+                {{#if this.articulos.length}}
                 {{#each this.articulos}}
                 <tr>
-                  <td class="text-center">
-                    {{this.clave}}
-                  </td>
-
-                  <td class="text-left text-capitalize">
-                    {{this.articulo}}
-                  </td>
-
-                  <td class="text-right">
-                    $ {{this.costo}}
-                  </td>
-
-                  <td class="text-center font-bold">
-                    {{this.existencia}}
-                  </td>
-
-                  <td class="text-right">
-                    $ {{this.costo_total}}
-                  </td>
+                  <td class="cen" style="white-space: nowrap;">{{this.clave}}</td>
+                  <td class="text-left">{{primeraMayuscula this.articulo}}</td>
+                  <td class="num" style="white-space: nowrap;">$ {{this.costo}}</td>
+                  <td class="cen font-bold">{{this.existencia}}</td>
+                  <td class="num" style="white-space: nowrap;">$ {{this.costo_total}}</td>
                 </tr>
                 {{/each}}
-
+                {{else}}
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    No hay artículos registrados para esta partida.
+                  </td>
+                </tr>
+                {{/if}}
               </tbody>
-
             </table>
 
           </section>
@@ -163,44 +138,30 @@
       <tr class="no-break">
         <td>
 
-          <table class="report-summary">
-
-            <colgroup>
-              <col class="w-16">
-              <col class="w-44">
-              <col class="w-13">
-              <col class="w-11">
-              <col class="w-16">
-            </colgroup>
-
+          <table class="report-summary" style="width: 100%; margin-top: 10px;">
             <tbody>
               <tr>
-                <td></td>
-
-                <td>
+                <td style="width: 60%; vertical-align: top;">
                   <div>
                     <b>Existencias totales de artículos:</b>
                     &nbsp; {{existenciasTotales}}
                   </div>
 
-                  <div class="mt-4">
+                  <div style="margin-top: 4px;">
                     <b>Total de registros impresos:</b>
                     &nbsp; {{totalRegistrosImpresos}}
                   </div>
                 </td>
 
-                <td></td>
-
-                <td class="text-right font-bold">
+                <td style="width: 20%; text-align: right; font-weight: bold; vertical-align: top;">
                   Total
                 </td>
 
-                <td class="text-right font-bold">
+                <td style="width: 20%; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">
                   $ {{granTotal}}
                 </td>
               </tr>
             </tbody>
-
           </table>
 
         </td>
@@ -209,6 +170,12 @@
     </tbody>
 
   </table>
+
+  <!-- Pie con Usuario y Número de Página -->
+  <div class="pie-fijo-datos" style="bottom: 8mm;">
+    <div><b>Usuario:</b> {{usuarioPie}}</div>
+    <div class="num-pagina"></div>
+  </div>
 
 </body>
 
