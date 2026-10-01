@@ -169,13 +169,13 @@ menu55: any[] = [
         },
 
         {
-          titulo: 'Existencia x Partida',
+          titulo: 'Existencia Por Partida',
           url: 'reporte-existencia-x-partida',
           mostrar: false
         },
 
         {
-          titulo: 'Movimiento x Partida',
+          titulo: 'Movimiento Por Partida',
           url: 'reporte-movimiento-x-partida',
           mostrar: false
         }

@@ -28,3 +28,10 @@ table.dataTable td:nth-child(2) {
   white-space: normal;
   word-break: normal;
 }
+
+.alert-info {
+  width: 50%;
+  margin: 0 auto;
+  text-align: center;
+}
+
