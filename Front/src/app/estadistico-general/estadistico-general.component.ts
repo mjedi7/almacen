@@ -19,32 +19,42 @@ import { HttpHeaders } from '@angular/common/http';
 export class EstadisticoGeneralComponent implements OnInit {
 
   transferencia: Transferencias = {
+
     plantel: null,
+
     partida: null,
+
     idcosto: null,
+
     fecha: null,
+
     cantidadEnStock: null,
+
     cantidadTransferir: null,
+
     consecutivo: null,
+
     autorizo: localStorage.getItem('nombre'),
+
     recibio: '',
+
     nombreProducto: ''
+
   };
+
+  plantelesTransferencia: number[] = [];
 
   productosFiltrados: any[] = [];
   productoBuscado: string = '';
   dtOptions: any = {};
   dtTrigger = new Subject();
-
   API_URL = environment.uri_api;
-
   articulosTransferir: any = [];
   totales: any;
   planteles: any = [];
   partidas: any = [];
   productos: any = [];
   datosAdmin: any = [];
-
   direccionSeleccionada: string = '';
   asig: any[] = [];
   numlista: number = 0;
@@ -147,7 +157,7 @@ export class EstadisticoGeneralComponent implements OnInit {
                 }
               });
 
-              this.generarFormatoListaSurtido();
+              this.obtenerPlantelesTransferencia();
             }
           });
       } else {
@@ -156,39 +166,131 @@ export class EstadisticoGeneralComponent implements OnInit {
     });
   }
 
-  generarFormatoListaSurtido() {
-    this.traer.http.get(
-      this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${this.transferencia.plantel}`,
-      { responseType: 'text' }
-    ).subscribe({
-      next: (res: any) => {
-        console.log(res);
-        this.generarFormatoListaSurtidoSinMontos();
-      },
-      error: (err) => {
-        console.error("Error al generar el PDF con montos", err);
-        Swal.fire('Error', 'Hubo un error al generar el PDF con montos', 'error');
+obtenerPlantelesTransferencia() {
+  this.traer.http.get(
+    this.API_URL + `/getListaArticulosTransferir/${this.transferencia.consecutivo}`
+  ).subscribe({
+    next: (res: any) => {
+
+      console.log("Movimientos de la transferencia:", res);
+
+      this.plantelesTransferencia = Array.from(
+  new Set<number>(
+    res.map((movimiento: any) =>
+      Number(movimiento.id_centrotrabajo_transfiere)
+    )
+  )
+);
+
+      console.log(
+        "Planteles de la transferencia:",
+        this.plantelesTransferencia
+      );
+
+      if (this.plantelesTransferencia.length === 0) {
+        Swal.fire(
+          'Error',
+          'No se encontraron planteles para esta transferencia',
+          'error'
+        );
+        return;
       }
-    });
-  }
 
-  generarFormatoListaSurtidoSinMontos() {
-    console.log("Entro a sin montos");
+      this.generarFormatoListaSurtido(0);
+    },
 
-    this.traer.http.get(
-      this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${this.transferencia.plantel}`,
-      { responseType: 'text' }
-    ).subscribe({
-      next: (res: any) => {
-        console.log(res);
+    error: (err) => {
+      console.error(
+        "Error al obtener los planteles de la transferencia",
+        err
+      );
+
+      Swal.fire(
+        'Error',
+        'No se pudieron obtener los planteles de la transferencia',
+        'error'
+      );
+    }
+  });
+}
+
+  generarFormatoListaSurtido(indice: number) {
+
+  const plantel = this.plantelesTransferencia[indice];
+
+  console.log("Generando PDF con montos para plantel:", plantel);
+
+  this.traer.http.get(
+    this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}`,
+    { responseType: 'text' }
+  ).subscribe({
+    next: (res: any) => {
+
+      console.log(res);
+
+      this.generarFormatoListaSurtidoSinMontos(indice);
+
+    },
+    error: (err) => {
+
+      console.error(
+        "Error al generar el PDF con montos",
+        err
+      );
+
+      Swal.fire(
+        'Error',
+        'Hubo un error al generar el PDF con montos',
+        'error'
+      );
+    }
+  });
+}
+
+generarFormatoListaSurtidoSinMontos(indice: number) {
+
+  const plantel = this.plantelesTransferencia[indice];
+
+  console.log("Generando PDF sin montos para plantel:", plantel);
+
+  this.traer.http.get(
+    this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}`,
+    { responseType: 'text' }
+  ).subscribe({
+    next: (res: any) => {
+
+      console.log(res);
+
+      const siguienteIndice = indice + 1;
+
+      if (siguienteIndice < this.plantelesTransferencia.length) {
+
+        // Todavía faltan planteles
+        this.generarFormatoListaSurtido(siguienteIndice);
+
+      } else {
+
+        // Ya se generaron los 2 PDFs de todos los planteles
         this.descargarZip();
-      },
-      error: (err) => {
-        console.error("Error al generar el PDF sin montos", err);
-        Swal.fire('Error', 'Hubo un error al generar el PDF sin montos', 'error');
+
       }
-    });
-  }
+    },
+
+    error: (err) => {
+
+      console.error(
+        "Error al generar el PDF sin montos",
+        err
+      );
+
+      Swal.fire(
+        'Error',
+        'Hubo un error al generar el PDF sin montos',
+        'error'
+      );
+    }
+  });
+}
 
   traerPartidas() {
     this.traer.http.get(this.API_URL + `/traerPartidas`)
