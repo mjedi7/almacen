@@ -1,31 +1,31 @@
 <!-- ============================================================== -->
 <!-- Left Sidebar -->
 <!-- ============================================================== -->
-<aside class="left-sidebar" [class.mini-sidebar-active]="sidebarService.isMini$ | async" style="background-color: brown;">
+<aside class="left-sidebar" [class.mini-sidebar-active]="sidebarService.isMini$ | async" style="background-color: #175C36;">
     <!-- Sidebar scroll-->
-    <div class="scroll-sidebar" style="background-color: brown;">
+    <div class="scroll-sidebar" style="background-color: #1B6E41;">
         <!-- Sidebar navigation-->
-        <nav class="sidebar-nav" style="background-color: brown;">
-            <ul id="sidebarnav">
+        <nav class="sidebar-nav" style="background-color: transparent;">
+            <ul id="sidebarnav" style="background-color: transparent;">
 
                 <!-- ALMACÉN -->
-                <li *ngFor="let item of menuItems" style="margin-top: 30px;">
+                <li *ngFor="let item of menuItems" style="margin-top: 15px;">
                     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration:none; background-color: brown;">
-                        <i class="mdi mdi-store" style="color: #FFF;"></i>
-                        <span class="hide-menu" style="color:#FFF;">
+                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                        <i class="mdi mdi-store" style="color: #FFFFFF;"></i>
+                        <span class="hide-menu" style="color: #FFFFFF;">
                             {{ item.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
+                            <span class="label label-rouded pull-right"
+                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                 {{ item.submenu.length }}
                             </span>
                         </span>
                     </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                    <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                         <li *ngFor="let subMenuItem of item.submenu">
                             <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration:none; color: #FFF; background-color: brown;">
-                                * {{ subMenuItem.titulo }}
+                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                • {{ subMenuItem.titulo }}
                             </a>
                         </li>
                     </ul>
@@ -34,21 +34,21 @@
                 <!-- TRANSFERENCIAS -->
                 <li *ngFor="let item3 of menuItems3">
                     <a *ngIf="vertransferencias" class="has-arrow waves-effect waves-dark" href="#"
-                        aria-expanded="false" style="text-decoration:none; background-color: brown;">
-                        <i class="mdi mdi-repeat" style="color: #FFF; background-color: brown;"></i>
-                        <span class="hide-menu" style="color: #FFF;">
+                        aria-expanded="false" style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                        <i class="mdi mdi-repeat" style="color: #FFFFFF;"></i>
+                        <span class="hide-menu" style="color: #FFFFFF;">
                             {{ item3.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
+                            <span class="label label-rouded pull-right"
+                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                 {{ item3.submenu.length }}
                             </span>
                         </span>
                     </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                    <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                         <li *ngFor="let subMenuItem of item3.submenu">
                             <a [routerLink]="subMenuItem.url"
-                                style="text-decoration:none; color: #FFF; background-color: brown;">
-                                * {{ subMenuItem.titulo }}
+                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                • {{ subMenuItem.titulo }}
                             </a>
                         </li>
                     </ul>
@@ -57,21 +57,21 @@
                 <!-- REQUISICIONES -->
                 <li *ngFor="let item4 of menuItems4">
                     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration:none; background-color: brown;">
-                        <i class="mdi mdi-file-document" style="color: #FFF; background-color: brown;"></i>
-                        <span class="hide-menu" style="color: #FFF;">
+                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                        <i class="mdi mdi-file-document" style="color: #FFFFFF;"></i>
+                        <span class="hide-menu" style="color: #FFFFFF;">
                             {{ item4.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
+                            <span class="label label-rouded pull-right"
+                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                 {{ item4.submenu.length }}
                             </span>
                         </span>
                     </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                    <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                         <li *ngFor="let subMenuItem of item4.submenu">
                             <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration:none; color: #FFF; background-color: brown;">
-                                * {{ subMenuItem.titulo }}
+                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                • {{ subMenuItem.titulo }}
                             </a>
                         </li>
                     </ul>
@@ -80,21 +80,21 @@
                 <!-- MOVIMIENTOS -->
                 <li *ngFor="let item4B of menuItems4B">
                     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration:none; background-color: brown;">
-                        <i class="mdi mdi-account-switch" style="color: #FFF; background-color: brown;"></i>
-                        <span class="hide-menu" style="color: #FFF;">
+                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                        <i class="mdi mdi-account-switch" style="color: #FFFFFF;"></i>
+                        <span class="hide-menu" style="color: #FFFFFF;">
                             {{ item4B.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
+                            <span class="label label-rouded pull-right"
+                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                 {{ item4B.submenu.length }}
                             </span>
                         </span>
                     </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                    <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                         <li *ngFor="let subMenuItem of item4B.submenu">
                             <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration:none; color: #FFF; background-color: brown;">
-                                * {{ subMenuItem.titulo }}
+                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                • {{ subMenuItem.titulo }}
                             </a>
                         </li>
                     </ul>
@@ -103,21 +103,21 @@
                 <!-- ARTÍCULOS -->
                 <li *ngFor="let item55 of menuItems55">
                     <a *ngIf="verArticulos" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration:none; background-color: brown;">
-                        <i class="mdi mdi-view-module" style="color: #FFF; background-color: brown;"></i>
-                        <span class="hide-menu" style="color: #FFF;">
+                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                        <i class="mdi mdi-view-module" style="color: #FFFFFF;"></i>
+                        <span class="hide-menu" style="color: #FFFFFF;">
                             {{ item55.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
+                            <span class="label label-rouded pull-right"
+                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                 {{ item55.submenu.length }}
                             </span>
                         </span>
                     </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                    <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                         <li *ngFor="let subMenuItem of item55.submenu">
                             <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration:none; color: #FFF; background-color: brown;">
-                                * {{ subMenuItem.titulo }}
+                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                • {{ subMenuItem.titulo }}
                             </a>
                         </li>
                     </ul>
@@ -127,21 +127,21 @@
                 <ng-container *ngIf="verReportes">
                     <li *ngFor="let item44 of menuItems44">
                         <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                            style="text-decoration:none; background-color: brown;">
-                            <i class="mdi mdi-chart-areaspline" style="color: #FFF; background-color: brown;"></i>
-                            <span class="hide-menu" style="color: #FFF;">
+                            style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                            <i class="mdi mdi-chart-areaspline" style="color: #FFFFFF;"></i>
+                            <span class="hide-menu" style="color: #FFFFFF;">
                                 {{ item44.titulo }}
-                                <span class="label label-rouded label-themecolor pull-right"
-                                    style="background-color: rgb(103, 101, 101)">
+                                <span class="label label-rouded pull-right"
+                                    style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                     {{ item44.submenu.length }}
                                 </span>
                             </span>
                         </a>
-                        <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                        <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                             <li *ngFor="let subMenuItem of item44.submenu">
                                 <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                    style="text-decoration:none; color: #FFF; background-color: brown;">
-                                    * {{ subMenuItem.titulo }}
+                                    style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                    • {{ subMenuItem.titulo }}
                                 </a>
                             </li>
                         </ul>
@@ -152,21 +152,21 @@
                 <ng-container *ngIf="muestraUsuarios">
                     <li *ngFor="let item5 of menuItems5">
                         <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                            style="text-decoration:none; background-color: brown;">
-                            <i class="mdi mdi-account-multiple" style="color: #FFF; background-color: brown;"></i>
-                            <span class="hide-menu" style="color: #FFF;">
+                            style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                            <i class="mdi mdi-account-multiple" style="color: #FFFFFF;"></i>
+                            <span class="hide-menu" style="color: #FFFFFF;">
                                 {{ item5.titulo }}
-                                <span class="label label-rouded label-themecolor pull-right"
-                                    style="background-color: rgb(103, 101, 101)">
+                                <span class="label label-rouded pull-right"
+                                    style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                     {{ item5.submenu.length }}
                                 </span>
                             </span>
                         </a>
-                        <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                        <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                             <li *ngFor="let subMenuItem of item5.submenu">
                                 <a [routerLink]="subMenuItem.url"
-                                    style="text-decoration:none; color: #FFF; background-color: brown;">
-                                    * {{ subMenuItem.titulo }}
+                                    style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                    • {{ subMenuItem.titulo }}
                                 </a>
                             </li>
                         </ul>
@@ -176,21 +176,21 @@
                 <!-- CONTRASEÑA -->
                 <li *ngFor="let item10 of menuItems10">
                     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration:none; background-color: brown;">
-                        <i class="mdi mdi-key" style="color: #FFF; background-color: brown;"></i>
-                        <span class="hide-menu" style="color: #FFF;">
+                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                        <i class="mdi mdi-key" style="color: #FFFFFF;"></i>
+                        <span class="hide-menu" style="color: #FFFFFF;">
                             {{ item10.titulo }}
-                            <span class="label label-rouded label-themecolor pull-right"
-                                style="background-color: rgb(103, 101, 101)">
+                            <span class="label label-rouded pull-right"
+                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
                                 {{ item10.submenu.length }}
                             </span>
                         </span>
                     </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: brown;">
+                    <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
                         <li *ngFor="let subMenuItem of item10.submenu">
                             <a [routerLink]="subMenuItem.url"
-                                style="text-decoration:none; color: #FFF; background-color: brown;">
-                                * {{ subMenuItem.titulo }}
+                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                • {{ subMenuItem.titulo }}
                             </a>
                         </li>
                     </ul>
