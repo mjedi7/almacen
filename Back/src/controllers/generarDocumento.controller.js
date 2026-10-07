@@ -15,7 +15,7 @@ const pool = new Pool({
 
 })
 
-jasper = require('node-jasper')({
+/*jasper = require('node-jasper')({
     path: '../../lib/jasperreports-6.19.1',
     reports: {
 
@@ -1217,4 +1217,4 @@ module.exports = {
     reporte_de_compras_x_partida,
     reporte_de_compras_x_proveedor
 
-}
+}*/
