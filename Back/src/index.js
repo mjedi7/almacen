@@ -93,7 +93,7 @@ app.use('/proveedores', require('./routes/proveedores'));
 // 2. RUTAS SIN PREFIJO
 app.use(require('./routes/routes.login'));
 app.use(require('./routes/traerDatosGenerales'));
-app.use(require('./routes/generarDocumento'));
+//app.use(require('./routes/generarDocumento'));
 app.use(require('./routes/generarDocumentoRespuesta'));
 app.use(require('./routes/requisiciones'));
 app.use(require('./routes/subirDocumentos'));
