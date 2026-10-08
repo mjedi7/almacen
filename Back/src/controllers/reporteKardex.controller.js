@@ -10,7 +10,7 @@ const pool = new Pool({
 });
 
 // REPORTE: KÁRDEX
-const pruebaReporte = async (req, res) => {
+const reporteKardex = async (req, res) => {
   try {
     const clavePartidaRaw = (req.params.clavePartida || req.query.clavePartida || '21101').toString().trim();
     const idParamRaw = (req.params.idCostos || req.query.idCostos || req.params.idArticulo || req.query.idArticulo || '48').toString().trim();
@@ -152,4 +152,4 @@ const pruebaReporte = async (req, res) => {
   }
 };
 
-module.exports = { pruebaReporte };
+module.exports = { reporteKardex };

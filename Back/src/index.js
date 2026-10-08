@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 
 // IMPORTACIÓN DEL CONTROLADOR DE SALIDAS
 const { generarReporteSalidasXPartida } = require('./controllers/reporteSalidasPartida.controller');
-const { pruebaReporte } = require('./controllers/reportesPDFKit.controller'); // <--- AÑADE ESTA LÍNEA
+const { reporteKardex } = require('./controllers/reporteKardex.controller'); // <--- AÑADE ESTA LÍNEA
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -67,7 +67,7 @@ app.get('/articulos/siguiente-clave/:idPartida', async (req, res) => {
 // ==========================================
 // RUTA DIRECTA DEL REPORTE DE SALIDAS
 // ==========================================
-app.post('/pdfkit/reporte-salidas-partida', (req, res) => {
+app.post('/reporte/salidas-partida', (req, res) => {
   console.log('>>> [OK] PETICIÓN LLEGÓ AL ENDPOINT EN INDEX.JS');
   return generarReporteSalidasXPartida(req, res);
 });
@@ -75,13 +75,13 @@ app.post('/pdfkit/reporte-salidas-partida', (req, res) => {
 // ==========================================
 // RUTA DIRECTA DEL KÁRDEX (PRIORIDAD MÁXIMA)
 // ==========================================
-app.get('/reporte/prueba', (req, res) => {
+app.get('/reporte/kardex/:idPartida?', (req, res) => {
   console.log('>>> [OK] PETICIÓN LLEGÓ AL KARDEX DIRECTO EN INDEX.JS');
-  return pruebaReporte(req, res);
+  return reporteKardex(req, res);
 });
-app.get('/reporte/prueba/:idPartida?', (req, res) => {
+app.get('/reporte/kardex/:idPartida?', (req, res) => {
   console.log('>>> [OK] PETICIÓN LLEGÓ AL KARDEX CON PARAMS EN INDEX.JS');
-  return pruebaReporte(req, res);
+  return reporteKardex(req, res);
 });
 
 // 1. RUTAS CON PREFIJO ESPECÍFICO (PRIORIDAD ALTA)
@@ -97,7 +97,7 @@ app.use(require('./routes/traerDatosGenerales'));
 app.use(require('./routes/generarDocumentoRespuesta'));
 app.use(require('./routes/requisiciones'));
 app.use(require('./routes/subirDocumentos'));
-app.use(require('./routes/reportesPDFKit')); 
+app.use(require('./routes/generarReportes')); 
 app.use(require('./routes/index')); // index siempre al final de las rutas
 
 app.listen(port, '0.0.0.0', () => {
