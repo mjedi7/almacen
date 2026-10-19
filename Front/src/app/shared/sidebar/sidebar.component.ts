@@ -41,7 +41,7 @@ export class SidebarComponent implements OnInit {
   muestraUsuarios: boolean = false;
 
   constructor(
-    private sidebarService: SidebarService,
+    public sidebarService: SidebarService, // public para binding en el template HTML
     private permodulos: RegistroService
   ) {
     this.menuItems = sidebarService.menu;
@@ -60,9 +60,9 @@ export class SidebarComponent implements OnInit {
     this.getpetmisosModulos();
   }
 
-  getpetmisosModulos() {
+  getpetmisosModulos(): void {
     const permisoRaw = localStorage.getItem('permiso');
-    var permiso = parseInt(permisoRaw || '0');
+    const permiso = parseInt(permisoRaw || '0', 10);
     this.muestraUsuarios = (permiso === 0);
 
     if (permiso === 0 || permiso === 1) {
@@ -84,19 +84,14 @@ export class SidebarComponent implements OnInit {
         this.menuItems4[0].submenu[1].mostrar = true;
       }
 
-		// Artículos
-
-		this.verArticulos = true;
-		if (this.menuItems55?.[0]?.submenu?.[0]) {
-		  this.menuItems55[0]
-			.submenu[0]
-			.mostrar = true;
-		}
-		if (this.menuItems55?.[0]?.submenu?.[1]) {
-		  this.menuItems55[0]
-			.submenu[1]
-			.mostrar = true;
-		}
+      // Artículos
+      this.verArticulos = true;
+      if (this.menuItems55?.[0]?.submenu?.[0]) {
+        this.menuItems55[0].submenu[0].mostrar = true;
+      }
+      if (this.menuItems55?.[0]?.submenu?.[1]) {
+        this.menuItems55[0].submenu[1].mostrar = true;
+      }
 
       // Movimientos
       this.movimientos = false;
@@ -104,9 +99,7 @@ export class SidebarComponent implements OnInit {
         this.menuItems6[0].submenu.forEach((sub: any) => sub.mostrar = false);
       }
 
-      // ==========================================
-      // REPORTES (Seguro con forEach)
-      // ==========================================
+      // Reportes
       this.verReportes = true;
       if (this.menuItems44?.[0]?.submenu) {
         this.menuItems44[0].submenu.forEach((item: any) => {
@@ -115,7 +108,7 @@ export class SidebarComponent implements OnInit {
       }
 
     } else if (permiso === 3) {
-      // ALMACEN
+      // Almacen
       if (this.menuItems?.[0]?.submenu) {
         this.menuItems[0].submenu[0].mostrar = false;
         this.menuItems[0].submenu[1].mostrar = false;
@@ -127,19 +120,19 @@ export class SidebarComponent implements OnInit {
       this.cargarexistencias = false;
       this.vertransferencias = false;
 
-      // REQUISICIONES
+      // Requisiciones
       if (this.menuItems4?.[0]?.submenu) {
         this.menuItems4[0].submenu[0].mostrar = true;
         this.menuItems4[0].submenu[1].mostrar = true;
       }
 
-      // MOVIMIENTOS
+      // Movimientos
       this.movimientos = true;
       if (this.menuItems6?.[0]?.submenu?.[0]) {
         this.menuItems6[0].submenu[0].mostrar = true;
       }
 
-      // REPORTES
+      // Reportes
       this.verReportes = false;
       if (this.menuItems44?.[0]?.submenu) {
         this.menuItems44[0].submenu.forEach((item: any) => {
@@ -147,7 +140,7 @@ export class SidebarComponent implements OnInit {
         });
       }
 
-      // Articulos
+      // Artículos
       this.verArticulos = false;
       if (this.menuItems55?.[0]?.submenu?.[0]) {
         this.menuItems55[0].submenu[0].mostrar = false;

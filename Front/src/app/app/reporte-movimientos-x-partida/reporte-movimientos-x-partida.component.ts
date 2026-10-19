@@ -13,7 +13,6 @@ import Swal from 'sweetalert2';
 })
 export class ReporteMovimientosXPartidaComponent implements OnInit {
 
-  // Se inicializa con undefined para cumplir con la interfaz Date | undefined
   reporte: reporte_x_partida = {
     fechaIni: undefined,
     fechaFin: undefined,
@@ -38,7 +37,6 @@ export class ReporteMovimientosXPartidaComponent implements OnInit {
       return;
     }
 
-    // Conversión segura a Date para evitar error de posible undefined
     const fechaInicioValida = new Date(this.reporte.fechaIni);
     const fechaFinValida = new Date(this.reporte.fechaFin);
 
@@ -57,7 +55,6 @@ export class ReporteMovimientosXPartidaComponent implements OnInit {
       return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : f;
     };
 
-    // Preparamos los parámetros requeridos por el backend
     const payload = {
       partida: this.reporte.partida || '0',
       fecha_inicio: formatearFecha(this.reporte.fechaIni),
@@ -67,10 +64,8 @@ export class ReporteMovimientosXPartidaComponent implements OnInit {
       usuario: localStorage.getItem('nombre') || 'ADMINISTRADOR'
     };
 
-    // Usamos las rutas directas que ya existen en generarDocumento.js
-    const endpoint = (this.reporte.partida === '0')
-      ? `${this.API_URL}/reporte_movimiento_x_partida_todos`
-      : `${this.API_URL}/reporte_movimiento_x_partida`;
+    // Nuevo endpoint unificado
+    const endpoint = `${this.API_URL}/reporte/salidas-partida`;
 
     const nombreDescarga = (this.reporte.partida === '0')
       ? 'Reporte_movimientos_por_partida_todos.pdf'

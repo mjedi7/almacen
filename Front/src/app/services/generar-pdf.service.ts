@@ -22,7 +22,7 @@ export class GenerarPDFService {
       .set('clavePartida', partida)
       .set('idCostos', idCosto);
 
-    return this.http.get(`${this.API}/reporte/prueba`, {
+    return this.http.get(`${this.API}/reporte/kardex/:idPartida?`, {
       params,
       responseType: 'blob'
     });
