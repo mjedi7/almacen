@@ -108,9 +108,23 @@ export class SidebarService {
       titulo: 'Reportes',
       icono: 'mdi mdi-gauge',
       submenu: [
-        { titulo: 'Reporte Compras', url: 'reporte-compras', mostrar: false },
-        { titulo: 'Existencia x Partida', url: 'reporte-existencia-x-partida', mostrar: false },
-        { titulo: 'Movimiento x Partida', url: 'reporte-movimiento-x-partida', mostrar: false }
+        {
+          titulo: 'Reporte Compras',
+          url: 'reporte-compras',
+          mostrar: false
+        },
+
+        {
+          titulo: 'Existencia Por Partida',
+          url: 'reporte-existencia-x-partida',
+          mostrar: false
+        },
+
+        {
+          titulo: 'Movimiento Por Partida',
+          url: 'reporte-movimiento-x-partida',
+          mostrar: false
+        }
       ]
     }
   ];

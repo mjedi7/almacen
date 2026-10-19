@@ -93,7 +93,7 @@
 
     <div class="form-group col-md-2">
       <label for="inputAddress">Cantidad adquirida</label>
-      <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress"
+      <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress" min="1"
         (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel">
       <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo
         Obligatorio</small>
@@ -114,7 +114,7 @@
       <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">
         Campo Obligatorio
       </small>
-    </div>>
+    </div>
 
   </div>
 
