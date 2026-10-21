@@ -13,6 +13,7 @@ const {
 const { generarReporteEntradasTodas } = require('../controllers/reporteEntradasTodas.controller');
 const { generarReporteEntradasPartida } = require('../controllers/reporteEntradasPartida.controller');
 const { generarReporteEntradasProveedor } = require('../controllers/reporteEntradasProveedor.controller');
+const {descargarzip} = require('../controllers/descargarZip.controller');
 
 // ==========================================
 // RUTAS DE REPORTES
@@ -38,5 +39,7 @@ router.get('/reporte/surtido-sin-montos/:folio/:plantel', ListaArticulosSurtidos
 router.post('/reporte/compras-todas', generarReporteEntradasTodas);
 router.post('/reporte/compras-partida', generarReporteEntradasPartida);
 router.post('/reporte/compras-proveedor', generarReporteEntradasProveedor);
+// Descarga del paquete ZIP
+router.post('/descargarzip', descargarzip);
 
 module.exports = router;
