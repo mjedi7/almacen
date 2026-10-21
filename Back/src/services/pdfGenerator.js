@@ -23,7 +23,7 @@ const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
 /**
- * Hoja de estilos compartida para otros reportes.
+ * Hoja de estilos compartida para los reportes generales.
  */
 const estilosPath = path.join(__dirname, '../templates/css/reportes.css');
 
@@ -38,7 +38,21 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     }
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
+
+    // Registrar los helpers ANTES de compilar
+    handlebars.registerHelper('primeraMayuscula', function (str) {
+      if (!str) return '';
+      const texto = String(str).trim();
+      return texto.charAt(0).toUpperCase() + texto.slice(1);
+    });
+
     const compiledTemplate = handlebars.compile(templateHtml);
+
+    handlebars.registerHelper('primeraMayuscula', function (str) {
+  if (!str) return '';
+  const texto = String(str).trim();
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+});
 
     // Conversión de recursos estáticos a Base64
     const bannerBase64 = imgToBase64(bannerPath);
@@ -78,8 +92,15 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       waitUntil: 'networkidle0'
     });
 
-    // Inyecta el CSS externo solo si se solicita de forma explícita
-    if (pdfOptions.usarEstilosCompartidos && fs.existsSync(estilosPath)) {
+    // Excluir plantillas con diseño propio
+    const nombreMin = templateName.toLowerCase();
+    const esExcluido = nombreMin.includes('kardex') || 
+                       nombreMin.includes('entradaspartida') ||
+                       nombreMin.includes('entradasproveedor');
+                       
+    const omitirEstilos = pdfOptions.usarEstilosCompartidos === false || esExcluido;
+
+    if (!omitirEstilos && fs.existsSync(estilosPath)) {
       await page.addStyleTag({
         path: estilosPath
       });
@@ -108,19 +129,19 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
     const defaultOptions = {
       printBackground: true,
-      displayHeaderFooter: false, // Desactivado para que use el del HTML sin conflictos
-      ...pdfOptions,
+      displayHeaderFooter: false,
       margin: {
         top: '12mm',
-        bottom: '30mm', // Espacio suficiente para la imagen y los textos
+        bottom: '38mm',
         left: '0px',
         right: '0px'
       },
       width: '8.5in',
       height: '11in',
-      preferCSSPageSize: false
+      preferCSSPageSize: false,
+      ...pdfOptions // Las opciones personalizadas sobreescriben los valores por defecto si se mandan
     };
-    
+
     const pdfBuffer = await page.pdf(defaultOptions);
 
     return pdfBuffer;

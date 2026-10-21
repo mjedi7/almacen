@@ -21,7 +21,7 @@ export class ReporteExistenciaXPartidaComponent implements OnInit {
   };
 
   partidas: any[] = [];
-  API_URL = 'http://localhost:3000';
+  API_URL = environment.uri_api;
 
   constructor(private traer: TraerDatosService) {}
 
@@ -29,7 +29,6 @@ export class ReporteExistenciaXPartidaComponent implements OnInit {
     this.traerPartidas();
   }
 
-//
   GeneraReporteExistenciasHTML(form: NgForm): void {
     if (!form.valid) {
       Swal.fire({
@@ -47,10 +46,10 @@ export class ReporteExistenciaXPartidaComponent implements OnInit {
       return;
     }
 
-    // 1. Obtención del usuario real guardado en tu login (nombre o correo)
+    // 1. Obtención del usuario real guardado en tu login
     const usuarioSesion = localStorage.getItem('nombre') || localStorage.getItem('usuario') || 'USUARIO';
 
-    // 2. Formateo de fecha sin desfase horario (evita la conversión UTC)
+    // 2. Formateo de fecha sin desfase horario
     let fechaFormateada = '';
     if (this.reporteExistencias.fecha) {
       const fechaStr = this.reporteExistencias.fecha.toString().split('T')[0];
@@ -97,7 +96,8 @@ export class ReporteExistenciaXPartidaComponent implements OnInit {
       didOpen: () => Swal.showLoading(null)
     });
 
-    this.traer.http.post(`${this.API_URL}/pdfkit/reporte-existencias`, payload, {
+    // Petición al endpoint modularizado (/reporte/existencias)
+    this.traer.http.post(`${this.API_URL}/reporte/existencias`, payload, {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       responseType: 'blob'
     }).subscribe({

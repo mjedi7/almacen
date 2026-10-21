@@ -36,7 +36,7 @@ export class ReporteComprasComponent implements OnInit {
   datosproveedor: any = [];
   proveedores: any = [];
   partidas: any = [];
-  articulosKardex: any = []; // Lista dinámica de artículos para el Kárdex
+  articulosKardex: any = [];
   API_URL = environment.uri_api;
   direccionSeleccionada: number;
 
@@ -50,7 +50,7 @@ export class ReporteComprasComponent implements OnInit {
     this.traerProveedores();
   }
 
-  // Se ejecuta cada vez que el usuario cambia la partida en el formulario de Kárdex
+  // Carga artículos dinámicos para el Kárdex al seleccionar una partida
   onPartidaKardexChange() {
     this.articulosKardex = [];
     this.reporteKardex.idCostos = '';
@@ -58,7 +58,7 @@ export class ReporteComprasComponent implements OnInit {
     const partidaSeleccionada = this.partidas.find((p: any) => p.clave === this.reporteKardex.clavePartida);
 
     if (partidaSeleccionada && partidaSeleccionada.id !== '0') {
-      this.traer.http.get(this.API_URL + `/traerProductos/${partidaSeleccionada.id}`)
+      this.traer.http.get(`${this.API_URL}/traerProductos/${partidaSeleccionada.id}`)
         .subscribe({
           next: (res: any) => {
             this.articulosKardex = res;
@@ -70,14 +70,14 @@ export class ReporteComprasComponent implements OnInit {
     }
   }
 
- GeneraReporte(form: NgForm) {
-  if (form.valid) {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }),
-      responseType: 'blob' as 'arraybuffer'
-    };
+  GeneraReporte(form: NgForm) {
+    if (!form.valid) {
+      Swal.fire({
+        title: 'Complete todos los campos',
+        icon: 'warning'
+      });
+      return;
+    }
 
     const usuarioSesion =
       localStorage.getItem('nombre') ||
@@ -89,71 +89,46 @@ export class ReporteComprasComponent implements OnInit {
       usuario: usuarioSesion
     };
 
-    if (this.reporte.partida === '0') {
-      this.traer.http.post(
-        this.API_URL + `/reporte_de_compras_todas`,
-        payload,
-        httpOptions
-      )
-        .subscribe((res: any) => {
-          const file = new Blob(
-            [res],
-            { type: 'application/pdf' }
-          );
+    // Endpoints actualizados bajo el prefijo /reporte/
+    const endpoint = (this.reporte.partida === '0')
+      ? `${this.API_URL}/reporte/compras-todas`
+      : `${this.API_URL}/reporte/compras-partida`;
 
-          const fileURL = URL.createObjectURL(file);
-          const link = document.createElement('a');
+    const nombreArchivo = (this.reporte.partida === '0')
+      ? 'Reporte_de_todas_las_compras.pdf'
+      : 'Reporte_compras_por_partida.pdf';
 
-          link.href = fileURL;
-          link.download = 'Reporte_de_todas_las_compras.pdf';
-
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          URL.revokeObjectURL(fileURL);
-        });
-    } else {
-      this.traer.http.post(
-        this.API_URL + `/reporte_de_compras_x_partida`,
-        payload,
-        httpOptions
-      )
-        .subscribe((res: any) => {
-          const file = new Blob(
-            [res],
-            { type: 'application/pdf' }
-          );
-
-          const fileURL = URL.createObjectURL(file);
-          const link = document.createElement('a');
-
-          link.href = fileURL;
-          link.download = 'Reporte_compras_por_partida.pdf';
-
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          URL.revokeObjectURL(fileURL);
-        });
-    }
-  } else {
     Swal.fire({
-      title: 'Complete todos los campos',
-      icon: 'warning'
+      title: 'Generando Reporte...',
+      text: 'Por favor espere un momento',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(null)
+    });
+
+    this.traer.http.post(endpoint, payload, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      responseType: 'blob'
+    }).subscribe({
+      next: (res: Blob) => {
+        Swal.close();
+        this.descargarArchivo(res, nombreArchivo);
+      },
+      error: (err) => {
+        Swal.close();
+        console.error('Error al generar compras:', err);
+        Swal.fire('Error', 'No se pudo generar el reporte de compras.', 'error');
+      }
     });
   }
-}
 
-GeneraReportePorProveedor(form: NgForm) {
-  if (form.valid) {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }),
-      responseType: 'blob' as 'arraybuffer'
-    };
+  GeneraReportePorProveedor(form: NgForm) {
+    if (!form.valid) {
+      Swal.fire({
+        title: 'Complete todos los campos',
+        icon: 'warning'
+      });
+      return;
+    }
 
     const usuarioSesion =
       localStorage.getItem('nombre') ||
@@ -165,92 +140,96 @@ GeneraReportePorProveedor(form: NgForm) {
       usuario: usuarioSesion
     };
 
-    this.traer.http.post(
-      this.API_URL + `/reporte_de_compras_x_proveedor`,
-      payload,
-      httpOptions
-    )
-      .subscribe((res: any) => {
-        const file = new Blob(
-          [res],
-          { type: 'application/pdf' }
-        );
-
-        const fileURL = URL.createObjectURL(file);
-        const link = document.createElement('a');
-
-        link.href = fileURL;
-        link.download = 'Reporte_compras_x_proveedor.pdf';
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(fileURL);
-      });
-  } else {
     Swal.fire({
-      title: 'Complete todos los campos',
-      icon: 'warning'
+      title: 'Generando Reporte...',
+      text: 'Por favor espere un momento',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(null)
+    });
+
+    // Endpoint actualizado a /reporte/compras-proveedor
+    this.traer.http.post(`${this.API_URL}/reporte/compras-proveedor`, payload, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      responseType: 'blob'
+    }).subscribe({
+      next: (res: Blob) => {
+        Swal.close();
+        this.descargarArchivo(res, 'Reporte_compras_x_proveedor.pdf');
+      },
+      error: (err) => {
+        Swal.close();
+        console.error('Error al generar compras por proveedor:', err);
+        Swal.fire('Error', 'No se pudo generar el reporte por proveedor.', 'error');
+      }
     });
   }
-}
-
 
   GeneraReporteKardex(form: NgForm) {
-    if (form.valid) {
+    if (!form.valid) {
       Swal.fire({
-        title: 'Generando Kárdex...',
-        text: 'Por favor espere un momento',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading(null);
+        title: 'Complete todos los campos',
+        icon: 'warning'
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Generando Kárdex...',
+      text: 'Por favor espere un momento',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(null)
+    });
+
+    this.reportesService.descargarKardex(this.reporteKardex.clavePartida, this.reporteKardex.idCostos)
+      .subscribe({
+        next: (pdfBlob: Blob) => {
+          Swal.close();
+          const fileURL = URL.createObjectURL(pdfBlob);
+          window.open(fileURL, '_blank');
+        },
+        error: (err: any) => {
+          Swal.close();
+          console.error('Error al generar Kárdex:', err);
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo generar el reporte de Kárdex. Verifique los datos.',
+            icon: 'error'
+          });
         }
       });
+  }
 
-      this.reportesService.descargarKardex(this.reporteKardex.clavePartida, this.reporteKardex.idCostos)
-        .subscribe({
-          next: (pdfBlob: Blob) => {
-            Swal.close();
-            const fileURL = URL.createObjectURL(pdfBlob);
-            window.open(fileURL, '_blank');
-          },
-          error: (err: any) => {
-            Swal.close();
-            console.error('Error al generar Kárdex:', err);
-            Swal.fire({
-              title: 'Error',
-              text: 'No se pudo generar el reporte de Kárdex. Verifique los datos.',
-              icon: 'error'
-            });
-          }
-        });
-    } else {
-      Swal.fire({
-        title: "Complete todos los campos",
-        icon: "warning"
-      });
-    }
+  private descargarArchivo(res: Blob, nombreArchivo: string): void {
+    const file = new Blob([res], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+
+    link.href = fileURL;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
   }
 
   traerPartidas() {
-    this.traer.http.get(this.API_URL + `/traerPartidas`)
+    this.traer.http.get(`${this.API_URL}/traerPartidas`)
       .subscribe((res: any) => {
-        this.partidas = res;
+        this.partidas = res || [];
         this.partidas.push({ id: '0', clave: '0', descripcion: 'Todos' });
       });
   }
 
   traerProveedores() {
-    this.traer.http.get(this.API_URL + `/traerProveedores`)
+    this.traer.http.get(`${this.API_URL}/traerProveedores`)
       .subscribe((res: any) => {
-        this.proveedores = res;
+        this.proveedores = res || [];
       });
   }
 
   CapturarValor() {
     const idproveedor = this.direccionSeleccionada;
-    this.traer.http.get(this.API_URL + `/traerDatosProveedores/${idproveedor}`)
+    this.traer.http.get(`${this.API_URL}/traerDatosProveedores/${idproveedor}`)
       .subscribe((res: any) => {
         this.datosproveedor = res;
       });

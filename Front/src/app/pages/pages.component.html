@@ -1,4 +1,4 @@
-<div id="main-wrapper">
+<div id="main-wrapper" [class.mini-sidebar]="sidebarService.isMini$ | async">
 
     <app-header></app-header>
 

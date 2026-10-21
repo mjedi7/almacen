@@ -1,4 +1,4 @@
-const { response } = require('express');
+/*const { response } = require('express');
 const { Pool } = require('pg');
 const archiver = require('archiver');
 const path = require('path');
@@ -1217,4 +1217,4 @@ module.exports = {
     reporte_de_compras_x_partida,
     reporte_de_compras_x_proveedor
 
-}
+}*/
