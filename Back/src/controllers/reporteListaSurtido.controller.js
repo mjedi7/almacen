@@ -38,24 +38,16 @@ const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
       LOWER(movimientosdg.nom_articulo) AS descripcion,
       cat_articulos.clave AS clave_articulo,
       movimientosdg.num_articulos_solicitados AS cantidad,
-      AVG(costos.precio_unitario) AS precio_unitario,
-      (movimientosdg.num_articulos_solicitados * AVG(costos.precio_unitario)) AS importe_total
+      costos.precio_unitario::numeric AS precio_unitario,
+      (movimientosdg.num_articulos_solicitados * costos.precio_unitario)::numeric AS importe_total
     FROM movimientosdg
       INNER JOIN costos ON costos.id = movimientosdg.id_costos
       INNER JOIN cat_articulos ON cat_articulos.id = costos.id_articulo
       INNER JOIN cat_partidas ON cat_partidas.id = cat_articulos.id_partidas
     WHERE movimientosdg.folio_transferencia = $1 
       AND movimientosdg.id_centrotrabajo_transfiere = $2
-    GROUP BY
-      movimientosdg.folio_transferencia,
-      cat_partidas.clave,
-      cat_articulos.clave,
-      movimientosdg.nom_articulo,
-      movimientosdg.num_articulos_solicitados,
-      movimientosdg.fecha
     ORDER BY cat_partidas.clave ASC, cat_articulos.clave ASC
   `;
-
   const [resEncabezado, resFecha, resArticulos] = await Promise.all([
     pool.query(queryEncabezado, [idPlantel]),
     pool.query(queryFecha, [idPlantel, folio]),

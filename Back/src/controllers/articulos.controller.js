@@ -406,53 +406,88 @@ const listarArticulosGeneral = async (req, res) => {
 
 // POST /articulos/relacionarProveedor
 const relacionarArticuloProveedor = async (req, res) => {
+  const client = await pool.connect();
+
   try {
     const { articulo_id, proveedor_id, costo = 0.00 } = req.body;
 
     if (!articulo_id || !proveedor_id) {
       return res.status(400).json({
         ok: false,
-        msg: 'articulo_id u proveedor_id son obligatorios'
+        msg: 'articulo_id y proveedor_id son obligatorios'
       });
     }
 
-    const existe = await pool.query(
-      `SELECT id FROM costos WHERE id_articulo = $1 AND id_proveedor = $2 AND esactivo = true LIMIT 1`,
-      [Number(articulo_id), Number(proveedor_id)]
+    const idArt = Number(articulo_id);
+    const idProv = Number(proveedor_id);
+    const costoUnitario = parseFloat(costo) || 0.00;
+
+    await client.query('BEGIN');
+
+    // 1. Revisar si ya existe relación en costos
+    const existe = await client.query(
+      `SELECT id, precio_unitario FROM costos 
+       WHERE id_articulo = $1 AND id_proveedor = $2 AND esactivo = true 
+       LIMIT 1`,
+      [idArt, idProv]
     );
 
+    let idCosto;
+
     if (existe.rows.length > 0) {
-      return res.status(200).json({
-        ok: true,
-        msg: 'El articulo ya se encontraba relacionado con este proveedor',
-        id: existe.rows[0].id
-      });
+      idCosto = existe.rows[0].id;
+
+      // Si ya existía pero ahora mandaron un costo > 0, lo actualizamos
+      if (costoUnitario > 0) {
+        await client.query(
+          `UPDATE costos SET precio_unitario = $1 WHERE id = $2`,
+          [costoUnitario, idCosto]
+        );
+      }
+    } else {
+      // Si no existe, lo insertamos
+      const insertCostos = `
+        INSERT INTO costos (id_articulo, id_proveedor, precio_unitario, fecha_inicio, esactivo)
+        VALUES ($1, $2, $3, NOW(), true)
+        RETURNING id
+      `;
+      const resCostos = await client.query(insertCostos, [idArt, idProv, costoUnitario]);
+      idCosto = resCostos.rows[0].id;
     }
 
-    const insertQuery = `
-      INSERT INTO costos (id_articulo, id_proveedor, precio_unitario, fecha_inicio, esactivo)
-      VALUES ($1, $2, $3, NOW(), true)
-      RETURNING id, id_articulo, id_proveedor, precio_unitario
-    `;
+    // 2. Asegurar que exista la fila en almacen para que recargarStock no devuelva 'SinRegistro'
+    const existeAlmacen = await client.query(
+      `SELECT id FROM almacen WHERE id_costos = $1 LIMIT 1`,
+      [idCosto]
+    );
 
-    const { rows } = await pool.query(insertQuery, [
-      Number(articulo_id),
-      Number(proveedor_id),
-      Number(costo)
-    ]);
+    if (existeAlmacen.rows.length === 0) {
+      await client.query(
+        `INSERT INTO almacen (id_costos, existencias, id_centrotrabajo)
+         VALUES ($1, 0, 47)`,
+        [idCosto]
+      );
+    }
+
+    await client.query('COMMIT');
 
     return res.status(201).json({
       ok: true,
-      msg: 'Artículo relacionado con el proveedor exitosamente',
-      relacion: rows[0]
+      msg: 'Artículo relacionado y dado de alta en almacén con éxito',
+      id_costo: idCosto,
+      precio_unitario: costoUnitario
     });
+
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('relacionarArticuloProveedor error:', error);
     return res.status(500).json({
       ok: false,
       msg: 'Error en el servidor al relacionar artículo y proveedor',
       error: error.message
     });
+  } finally {
+    client.release();
   }
 };
 

@@ -11,19 +11,19 @@ const pool = new Pool({
 const traerProveedoresPorArticulo = async (req, res) => {
   try {
     const { idArticulo } = req.params;
+    console.log('Consultando proveedores para artículo ID:', idArticulo);
 
-    // Cambiamos p.nombre_razon_social por p.razon_social
     const query = `
       SELECT DISTINCT p.id, p.razon_social
       FROM cat_proveedores p
       INNER JOIN costos c ON p.id = c.id_proveedor
-      WHERE c.id_articulo = $1 AND c.esactivo = true
+      WHERE c.id_articulo = $1
     `;
 
     const response = await pool.query(query, [idArticulo]);
+    console.log('Filas encontradas en BD:', response.rows);
 
     return res.status(200).json(response.rows);
-
   } catch (err) {
     console.error('Error al consultar proveedores por artículo:', err);
     return res.status(500).json({ message: 'Error en la base de datos' });
