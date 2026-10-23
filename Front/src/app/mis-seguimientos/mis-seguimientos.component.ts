@@ -37,6 +37,7 @@ export class MisSeguimientosComponent implements OnInit {
   terminoBusqueda: string = '';
   productosFiltrados: any[] = [];
   mostrarDropdown: boolean = false;
+  cargandoProveedores: boolean = false;
 
   Recargastock: recargaAlmacen = {
     partida: null,
@@ -97,6 +98,9 @@ export class MisSeguimientosComponent implements OnInit {
     this.direccionSeleccionada = null;
     this.proveedores = [];
     this.mostrarDropdown = false;
+    this.costo_unitario = 0;
+    this.monedaFormateada = '$ 0.00';
+    this.monedaFormateada2 = '$ 0.00';
 
     if (!this.Recargastock.partida) return;
 
@@ -133,6 +137,9 @@ export class MisSeguimientosComponent implements OnInit {
     this.articuloValido = false;
     this.proveedores = [];
     this.direccionSeleccionada = null;
+    this.costo_unitario = 0;
+    this.monedaFormateada = '$ 0.00';
+    this.monedaFormateada2 = '$ 0.00';
 
     const busqueda = (this.terminoBusqueda || '').toLowerCase().trim();
     if (!busqueda) {
@@ -149,42 +156,79 @@ export class MisSeguimientosComponent implements OnInit {
   }
 
   seleccionarProducto(prod: any): void {
-    const idReal = prod.id || prod.idproducto;
-    this.Recargastock.producto = idReal;
+    const idRealNum = Number(prod.id || prod.idproducto);
+    (this.Recargastock as any).producto = idRealNum.toString();
+
     this.terminoBusqueda = prod.clave ? `${prod.clave} - ${prod.descripcion}` : prod.descripcion;
     this.mostrarDropdown = false;
-
     this.direccionSeleccionada = null;
     this.articuloValido = false;
-    this.cargarProveedoresPorProducto(Number(idReal));
+    this.proveedores = [];
+    this.costo_unitario = 0;
+    this.monedaFormateada = '$ 0.00';
+    this.monedaFormateada2 = '$ 0.00';
+
+    if (idRealNum) {
+      this.cargarProveedoresPorProducto(idRealNum);
+    }
   }
 
   buscarYSeleccionar(): void {
-    const match = this.productos.find(p => p.descripcion === this.terminoBusqueda);
+    if (this.Recargastock.producto && !this.mostrarDropdown) {
+      return;
+    }
+
+    const texto = (this.terminoBusqueda || '').toLowerCase().trim();
+    if (!texto) return;
+
+    const match = this.productos.find(p =>
+      (p.descripcion && p.descripcion.toLowerCase() === texto) ||
+      (p.clave && p.clave.toLowerCase() === texto) ||
+      (`${p.clave} - ${p.descripcion}`.toLowerCase() === texto)
+    );
 
     if (match) {
-      const idReal = match.id || match.idproducto;
-      this.Recargastock.producto = idReal;
+      const idRealNum = Number(match.id || match.idproducto);
+      (this.Recargastock as any).producto = idRealNum.toString();
+      this.mostrarDropdown = false;
       this.direccionSeleccionada = null;
       this.articuloValido = false;
-      this.cargarProveedoresPorProducto(Number(idReal));
-    } else {
-      this.Recargastock.producto = null;
       this.proveedores = [];
-      this.direccionSeleccionada = null;
+      this.cargarProveedoresPorProducto(idRealNum);
     }
   }
 
   cargarProveedoresPorProducto(idArticulo: number): void {
+    if (this.cargandoProveedores) return;
+    this.cargandoProveedores = true;
+
+    this.proveedores = [];
+    this.direccionSeleccionada = null;
+    this.articuloValido = false;
+    this.costo_unitario = 0;
+    this.monedaFormateada = '$ 0.00';
+    this.monedaFormateada2 = '$ 0.00';
+
     this.proveedoresService.traerProveedoresPorArticulo(idArticulo)
       .subscribe({
-        next: (res: proveedores[]) => {
-          this.proveedores = res || [];
+        next: (res: any) => {
+          this.cargandoProveedores = false;
 
-          if (this.proveedores.length === 1) {
+          let lista: proveedores[] = [];
+          if (Array.isArray(res)) {
+            lista = res;
+          } else if (res && Array.isArray(res.rows)) {
+            lista = res.rows;
+          } else if (res && Array.isArray(res.data)) {
+            lista = res.data;
+          }
+
+          if (lista.length === 1) {
+            this.proveedores = lista;
             this.direccionSeleccionada = Number(this.proveedores[0].id);
             this.CapturarValor();
-          } else if (this.proveedores.length > 1) {
+          } else if (lista.length > 1) {
+            this.proveedores = lista;
             Swal.fire({
               title: 'Múltiples proveedores',
               text: 'Seleccione el proveedor correspondiente para este producto.',
@@ -193,101 +237,193 @@ export class MisSeguimientosComponent implements OnInit {
               showConfirmButton: false
             });
           } else {
+            this.proveedores = [];
+            this.direccionSeleccionada = null;
+            this.articuloValido = false;
             this.ofrecerVincularProveedor(idArticulo);
           }
         },
-        error: (err: any) => console.error('Error al cargar proveedores del producto:', err)
-      });
-  }
-
-  ofrecerVincularProveedor(idArticulo: number): void {
-    const opciones: Record<string, string> = {};
-    this.catalogoProveedores.forEach((prov: any) => {
-      opciones[prov.id] = prov.nombre || prov.razon_social || `Proveedor #${prov.id}`;
-    });
-
-    Swal.fire({
-      title: 'Artículo sin proveedor en almacén',
-      text: 'Este producto no está relacionado con ningún proveedor. ¿Deseas relacionarlo ahora?',
-      icon: 'warning',
-      input: 'select',
-      inputOptions: opciones,
-      inputPlaceholder: '-- Selecciona un proveedor --',
-      showCancelButton: true,
-      confirmButtonText: 'Relacionar',
-      cancelButtonText: 'Cancelar',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Debes seleccionar un proveedor para continuar';
-        }
-        return null;
-      }
-    }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        const idProveedorSeleccionado = Number(result.value);
-        this.relacionarArticuloProveedor(idArticulo, idProveedorSeleccionado);
-      } else {
-        this.direccionSeleccionada = null;
-        this.articuloValido = false;
-      }
-    });
-  }
-
-  relacionarArticuloProveedor(idArticulo: number, idProveedor: number): void {
-    const payload = {
-      articulo_id: idArticulo,
-      proveedor_id: idProveedor
-    };
-
-    this.traer.http.post(`${this.API_URL}/articulos/relacionarProveedor`, payload)
-      .subscribe({
-        next: () => {
-          Swal.fire('¡Relacionado!', 'El artículo fue vinculado al proveedor con éxito', 'success');
-          this.direccionSeleccionada = idProveedor;
-          this.cargarProveedoresPorProducto(idArticulo);
-        },
         error: (err: any) => {
-          console.error('Error al vincular proveedor:', err);
-          Swal.fire('Error', 'No se pudo relacionar el artículo con el proveedor', 'error');
+          this.cargandoProveedores = false;
+          this.proveedores = [];
+          this.direccionSeleccionada = null;
+          console.error('Error al cargar proveedores del producto:', err);
         }
       });
   }
 
-  CapturarValor(): void {
-    const idproveedor = this.direccionSeleccionada;
-    const idArticulo = this.Recargastock.producto;
+  // 1. Caso cuando el artículo NO tiene proveedor vinculado
+ofrecerVincularProveedor(idArticulo: number): void {
+  let opcionesHtml = '<option value="" disabled selected>-- Selecciona un proveedor --</option>';
+  this.catalogoProveedores.forEach((prov: any) => {
+    opcionesHtml += `<option value="${prov.id}">${prov.nombre || prov.razon_social || 'Proveedor #' + prov.id}</option>`;
+  });
 
-    if (!idproveedor || !idArticulo) return;
+  Swal.fire({
+    title: 'Asignar Proveedor y Costo',
+    html: `
+      <p class="text-muted" style="font-size: 14px; margin-bottom: 12px;">
+        Este artículo no cuenta con un proveedor ni costo asignado. Ingrésalos a continuación:
+      </p>
+      <div style="text-align: left;">
+        <label style="font-weight: 600; font-size: 13px;">Proveedor:</label>
+        <select id="swal-proveedor" class="swal2-select" style="width: 100%; margin: 5px 0 15px 0; display: flex;">
+          ${opcionesHtml}
+        </select>
 
-    this.traer.http.get(`${this.API_URL}/traerCostoArticulo/${idproveedor}/${idArticulo}`, { responseType: 'text' })
-      .subscribe({
-        next: (res: string) => {
-          if (res === 'ArticuloNoEncontrado') {
-            Swal.fire({
-              title: 'No encontrado',
-              text: 'El artículo con el proveedor seleccionado no se encuentra en el almacén',
-              icon: 'warning'
-            });
+        <label style="font-weight: 600; font-size: 13px;">Costo Unitario ($):</label>
+        <input id="swal-costo" type="number" step="0.01" min="0.01" class="swal2-input" placeholder="Ej. 125.50" style="width: 100%; margin: 5px 0 0 0;">
+      </div>
+    `,
+    icon: 'info',
+    showCancelButton: true,
+    confirmButtonText: 'Guardar y Asignar',
+    cancelButtonText: 'Cancelar',
+    focusConfirm: false,
+    preConfirm: () => {
+      const provSelect = document.getElementById('swal-proveedor') as HTMLSelectElement;
+      const costoInput = document.getElementById('swal-costo') as HTMLInputElement;
 
-            this.costo_unitario = 0.00;
-            this.articuloValido = false;
-            this.Recargastock.importe = 0;
-            this.Recargastock.totalCompra = 0;
-            this.monedaFormateada = '$ 0.00';
-            this.monedaFormateada2 = '$ 0.00';
-            this.Recargastock.folio = '';
-            this.Recargastock.cantidad = 0;
-          } else {
-            this.costo_unitario = Number(res) || 0;
-            this.articuloValido = true;
-            if (this.Recargastock.cantidad) {
-              this.CalcularImporteyTotal();
+      const provId = provSelect ? provSelect.value : '';
+      const costo = costoInput ? parseFloat(costoInput.value) : 0;
+
+      if (!provId) {
+        Swal.showValidationMessage('Debes seleccionar un proveedor');
+        return false;
+      }
+      if (!costo || costo <= 0) {
+        Swal.showValidationMessage('Ingresa un costo unitario válido mayor a $0.00');
+        return false;
+      }
+
+      return { idProveedor: Number(provId), costo: costo };
+    }
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      this.guardarVinculacionConCosto(idArticulo, result.value.idProveedor, result.value.costo);
+    } else {
+      this.limpiarSeleccion();
+    }
+  });
+}
+
+// Guarda la vinculación inicial de proveedor + costo
+guardarVinculacionConCosto(idArticulo: number, idProveedor: number, costo: number): void {
+  const payload = {
+    articulo_id: idArticulo,
+    proveedor_id: idProveedor,
+    costo: costo
+  };
+
+  this.traer.http.post<any>(`${this.API_URL}/articulos/relacionarProveedor`, payload)
+    .subscribe({
+      next: () => {
+        Swal.fire('¡Asignado!', 'Proveedor y costo vinculados correctamente', 'success');
+        
+        // Asignamos directamente en el formulario
+        this.direccionSeleccionada = idProveedor;
+        this.costo_unitario = costo;
+        (this.Recargastock as any).costo = costo;
+        this.monedaFormateada = this.currencyPipe.transform(this.costo_unitario, 'USD', '$');
+        this.articuloValido = true;
+
+        if (this.Recargastock.cantidad) {
+          this.CalcularImporteyTotal();
+        }
+
+        // Recargamos el select de proveedores para este producto
+        this.cargarProveedoresPorProducto(idArticulo);
+      },
+      error: (err: any) => {
+        console.error('Error al vincular:', err);
+        Swal.fire('Error', 'No se pudo guardar la vinculación', 'error');
+      }
+    });
+}
+
+// 2. Caso cuando el artículo YA tiene proveedor pero su costo está en 0
+CapturarValor(): void {
+  const idproveedor = this.direccionSeleccionada;
+  const idArticulo = this.Recargastock.producto;
+
+  if (!idproveedor || !idArticulo) return;
+
+  this.traer.http.get<any>(`${this.API_URL}/traerCostoArticulo/${idArticulo}/${idproveedor}`)
+    .subscribe({
+      next: (res: any) => {
+        let precioFinal = 0;
+        if (typeof res === 'object' && res !== null) {
+          precioFinal = parseFloat(res.precio_unitario ?? res.costo ?? res.precio ?? 0);
+        } else {
+          precioFinal = parseFloat(res) || 0;
+        }
+
+        // Si el costo viene en 0 o no tiene costo registrado:
+        if (precioFinal <= 0) {
+          Swal.fire({
+            title: 'Asignar Costo Unitario',
+            text: 'Este artículo tiene proveedor asignado, pero su costo actual es $0.00. Ingresa el costo unitario para continuar:',
+            input: 'number',
+            inputAttributes: {
+              step: '0.01',
+              min: '0.01',
+              placeholder: 'Ej. 50.00'
+            },
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Establecer Costo',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+              const num = parseFloat(value);
+              if (!value || isNaN(num) || num <= 0) {
+                return 'Debes ingresar un valor mayor a 0';
+              }
+              return null;
             }
-          }
-        },
-        error: (err: any) => console.error('Error al traer costo unitario:', err)
-      });
-  }
+          }).then((costoResult) => {
+            if (costoResult.isConfirmed && costoResult.value) {
+              const costoCapturado = parseFloat(costoResult.value);
+
+              // 1. Reflejamos en el formulario para que calcule subtotal y total de inmediato
+              this.costo_unitario = costoCapturado;
+              (this.Recargastock as any).costo = costoCapturado;
+              this.monedaFormateada = this.currencyPipe.transform(this.costo_unitario, 'USD', '$');
+              this.articuloValido = true;
+
+              if (this.Recargastock.cantidad) {
+                this.CalcularImporteyTotal();
+              }
+
+              // 2. Guardamos en el backend para que el costo quede persistido en la BD
+              this.guardarVinculacionConCosto(Number(idArticulo), Number(idproveedor), costoCapturado);
+            } else {
+              this.limpiarSeleccion();
+            }
+          });
+          return;
+        }
+
+        // Si ya tenía un costo válido mayor a 0
+        this.costo_unitario = precioFinal;
+        (this.Recargastock as any).costo = precioFinal;
+        this.articuloValido = true;
+        this.monedaFormateada = this.currencyPipe.transform(this.costo_unitario, 'USD', '$');
+
+        if (this.Recargastock.cantidad) {
+          this.CalcularImporteyTotal();
+        }
+      },
+      error: (err: any) => console.error('Error al traer costo unitario:', err)
+    });
+}
+
+limpiarSeleccion(): void {
+  this.direccionSeleccionada = null;
+  this.articuloValido = false;
+  this.costo_unitario = 0;
+  this.monedaFormateada = '$ 0.00';
+  this.monedaFormateada2 = '$ 0.00';
+}
 
   CalcularImporteyTotal(): void {
     const cant = Number(this.Recargastock.cantidad) || 0;
@@ -335,7 +471,10 @@ export class MisSeguimientosComponent implements OnInit {
           { responseType: 'text' }
         ).subscribe({
           next: (res: string) => {
-            if (res === 'Save' || res === 'reload') {
+            // Limpia comillas dobles y espacios si el backend respondió con res.json()
+            const respuestaLimpia = (res || '').replace(/['"]/g, '').trim();
+
+            if (respuestaLimpia === 'Save' || respuestaLimpia === 'reload') {
               Swal.fire('¡Guardado!', '¡Los datos fueron agregados al stock!', 'success');
 
               this.articuloValido = false;
@@ -357,7 +496,7 @@ export class MisSeguimientosComponent implements OnInit {
               };
 
               form.resetForm();
-            } else if (res === 'SinRegistro') {
+            } else if (respuestaLimpia === 'SinRegistro') {
               Swal.fire('Atención', 'El artículo no cuenta con un costo o registro asignado con este proveedor en el almacén.', 'warning');
             } else {
               Swal.fire('Error', 'Contacte a soporte', 'error');

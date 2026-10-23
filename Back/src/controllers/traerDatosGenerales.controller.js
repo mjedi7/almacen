@@ -198,25 +198,39 @@ const datosDelProveedor = async(req, res) => {
 
 
 const datosCostosArticulo = async(req, res) => {
+    // Normalizamos el orden: primero articulo, luego proveedor (o según cómo esté tu ruta)
+    // Para evitar confusiones con los nombres de req.params, leemos ambos posibles nombres:
+    const idArticulo = req.params.idArticulo || req.params.idProducto;
+    const idProveedor = req.params.idProveedor;
 
-    var idProveedor=req.params.idProveedor;
-    var idProducto=req.params.idProducto;
+    // Si tu ruta está como /traerCostoArticulo/:param1/:param2:
+    // param1 = 180 (artículo), param2 = 18 (proveedor)
+    const param1 = Object.values(req.params)[0];
+    const param2 = Object.values(req.params)[1];
 
-    console.log(idProveedor+" "+idProducto);
+    console.log(`Buscando costo -> id_articulo: ${param1}, id_proveedor: ${param2}`);
 
     try {
+        const query = `
+          SELECT precio_unitario 
+          FROM costos 
+          WHERE id_articulo = $1 AND id_proveedor = $2
+          ORDER BY id DESC 
+          LIMIT 1
+        `;
 
-    const response = await pool.query('SELECT precio_unitario FROM costos where id_proveedor='+idProveedor+' and id_articulo='+idProducto);
-    res.status(200).json(response.rows[0].precio_unitario);
+        const response = await pool.query(query, [param1, param2]);
+
+        if (response.rows.length > 0) {
+            return res.status(200).json(response.rows[0].precio_unitario);
+        } else {
+            return res.json('ArticuloNoEncontrado');
+        }
         
     } catch (error) {
-
-        res.json('ArticuloNoEncontrado');
-        
+        console.error('Error al consultar costo unitario:', error);
+        return res.json('ArticuloNoEncontrado');
     }
-
-
-    
 };
 
 const traerPlanteles = async(req, res) => {

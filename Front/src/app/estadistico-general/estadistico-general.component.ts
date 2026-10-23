@@ -7,9 +7,9 @@ import { environment } from 'src/environments/environment';
 import { Transferencias } from '../models/nuevoDocumento';
 import { NgForm } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { param } from 'jquery';
-import { FormControl } from '@angular/forms';
 import { HttpHeaders } from '@angular/common/http';
+
+declare var $: any;
 
 @Component({
   selector: 'app-estadistico-general',
@@ -47,7 +47,12 @@ export class EstadisticoGeneralComponent implements OnInit {
   productosFiltrados: any[] = [];
   productoBuscado: string = '';
   dtOptions: any = {};
+<<<<<<< HEAD
   dtTrigger = new Subject();
+=======
+  dtTrigger = new Subject<any>();
+
+>>>>>>> main
   API_URL = environment.uri_api;
   articulosTransferir: any = [];
   totales: any;
@@ -69,7 +74,6 @@ export class EstadisticoGeneralComponent implements OnInit {
     this.traerPartidas();
     this.traerPlanteles();
     this.TraerConsecutivo();
-    this.productosFiltrados;
   }
 
   filtrarProductos() {
@@ -87,9 +91,10 @@ export class EstadisticoGeneralComponent implements OnInit {
   }
 
   getListaArticulosTransferir() {
-    $('#articulos').DataTable().clear();
-    $('#articulos').DataTable().draw();
-    $('#articulos').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#articulos')) {
+      $('#articulos').DataTable().clear();
+      $('#articulos').DataTable().destroy();
+    }
 
     try {
       this.dtOptions = {
@@ -103,54 +108,50 @@ export class EstadisticoGeneralComponent implements OnInit {
         },
       };
 
-      var folio = this.transferencia.consecutivo;
+      const folio = this.transferencia.consecutivo;
 
-      this.traer.http.get(this.API_URL + `/getListaArticulosTransferir/${folio}`)
-        .subscribe((res) => {
-          this.articulosTransferir = res;
-          console.log(this.articulosTransferir);
-          this.dtTrigger.next();
-
-          if (this.articulosTransferir.length > 0) {
-            this.mostrarBotonTransferir = true;
-          } else {
-            this.mostrarBotonTransferir = false;
+      this.traer.http.get(`${this.API_URL}/getListaArticulosTransferir/${folio}`)
+        .subscribe({
+          next: (res: any) => {
+            this.articulosTransferir = res || [];
+            this.dtTrigger.next(null);
+            this.mostrarBotonTransferir = this.articulosTransferir.length > 0;
+          },
+          error: (err) => {
+            console.error('Error al cargar artículos a transferir:', err);
           }
         });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   eliminarArticulo(idarticulo: number) {
-    console.log(idarticulo);
-    this.traer.http.delete(this.API_URL + `/eliminarArticulo/${idarticulo}`)
-      .subscribe((res) => {
+    this.traer.http.delete(`${this.API_URL}/eliminarArticulo/${idarticulo}`)
+      .subscribe(() => {
         this.getListaArticulosTransferir();
       });
   }
 
   confirmarTranferencia() {
     Swal.fire({
-      title: "¿Estas seguro de terminar la lista?",
-      text: "Una vez terminada no podrá agregar nuevos artículos",
-      icon: "warning",
+      title: '¿Estás seguro de terminar la lista?',
+      text: 'Una vez terminada no podrá agregar nuevos artículos',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
       cancelButtonText: 'Cancelar',
-      confirmButtonText: "Si, terminar"
+      confirmButtonText: 'Sí, terminar'
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log("ID transferencia=" + this.transferencia.consecutivo);
-
-        this.traer.http.get(this.API_URL + `/confirmarTransferencia/${this.transferencia.consecutivo}`)
-          .subscribe((res) => {
-            if (res == "ListaOk") {
+        this.traer.http.get(`${this.API_URL}/confirmarTransferencia/${this.transferencia.consecutivo}`)
+          .subscribe((res: any) => {
+            if (res === 'ListaOk') {
               Swal.fire({
-                title: "Generando formatos...",
-                text: "Los artículos se asignaron. Se están preparando los documentos para la descarga.",
-                icon: "info",
+                title: 'Generando formatos...',
+                text: 'Los artículos se asignaron. Se están preparando los documentos.',
+                icon: 'info',
                 allowOutsideClick: false,
                 didOpen: () => {
                   Swal.showLoading(null);
@@ -160,12 +161,11 @@ export class EstadisticoGeneralComponent implements OnInit {
               this.obtenerPlantelesTransferencia();
             }
           });
-      } else {
-        console.log("Cancelado...");
       }
     });
   }
 
+<<<<<<< HEAD
 obtenerPlantelesTransferencia() {
   this.traer.http.get(
     this.API_URL + `/getListaArticulosTransferir/${this.transferencia.consecutivo}`
@@ -194,8 +194,23 @@ obtenerPlantelesTransferencia() {
           'error'
         );
         return;
+=======
+  generarFormatoListaSurtido() {
+    // Genera el primer PDF en el servidor
+    const url = `${this.API_URL}/reporte/surtido/${this.transferencia.consecutivo}/${this.transferencia.plantel}`;
+
+    this.traer.http.get(url, { responseType: 'text' }).subscribe({
+      next: (res) => {
+        console.log('PDF con montos generado:', res);
+        this.generarFormatoListaSurtidoSinMontos();
+      },
+      error: (err) => {
+        console.error('Error al generar el PDF con montos', err);
+        Swal.fire('Error', 'Hubo un error al generar el PDF con montos', 'error');
+>>>>>>> main
       }
 
+<<<<<<< HEAD
       this.generarFormatoListaSurtido(0);
     },
 
@@ -273,6 +288,20 @@ generarFormatoListaSurtidoSinMontos(indice: number) {
         // Ya se generaron los 2 PDFs de todos los planteles
         this.descargarZip();
 
+=======
+  generarFormatoListaSurtidoSinMontos() {
+    // Genera el segundo PDF en el servidor
+    const url = `${this.API_URL}/reporte/surtido-sin-montos/${this.transferencia.consecutivo}/${this.transferencia.plantel}`;
+
+    this.traer.http.get(url, { responseType: 'text' }).subscribe({
+      next: (res) => {
+        console.log('PDF sin montos generado:', res);
+        this.descargarZip();
+      },
+      error: (err) => {
+        console.error('Error al generar el PDF sin montos', err);
+        Swal.fire('Error', 'Hubo un error al generar el PDF sin montos', 'error');
+>>>>>>> main
       }
     },
 
@@ -293,57 +322,45 @@ generarFormatoListaSurtidoSinMontos(indice: number) {
 }
 
   traerPartidas() {
-    this.traer.http.get(this.API_URL + `/traerPartidas`)
+    this.traer.http.get(`${this.API_URL}/traerPartidas`)
       .subscribe((res: any) => {
         this.partidas = res;
-        console.log(this.partidas);
       });
   }
 
   descargarZip() {
-    const httpOptions = {
-      responseType: 'blob' as 'blob'
-    };
+    this.traer.http.post(`${this.API_URL}/descargarzip`, null, { responseType: 'blob' })
+      .subscribe({
+        next: (res: Blob) => {
+          const fileURL = window.URL.createObjectURL(res);
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.download = `Transferencia_${this.transferencia.consecutivo}.zip`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(fileURL);
 
-    this.traer.http.post(
-      this.API_URL + `/descargarzip`,
-      null,
-      httpOptions
-    ).subscribe({
-      next: (res: Blob) => {
-        const fileURL = window.URL.createObjectURL(res);
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.download = `Transferencia_${this.transferencia.consecutivo}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(fileURL);
-
-        Swal.fire({
-          title: "Lista asignada y descargada",
-          text: "Los archivos PDF se han descargado correctamente en tu equipo.",
-          icon: "success"
-        }).then(() => {
-          location.reload();
-        });
-      },
-      error: (error) => {
-        console.error('Error descargando ZIP', error);
-        Swal.fire('Error', 'No se pudo generar o descargar el archivo ZIP con los formatos.', 'error');
-      }
-    });
+          Swal.fire({
+            title: 'Lista asignada y descargada',
+            text: 'Los archivos PDF se han descargado correctamente en tu equipo.',
+            icon: 'success'
+          }).then(() => {
+            location.reload();
+          });
+        },
+        error: (error) => {
+          console.error('Error descargando ZIP', error);
+          Swal.fire('Error', 'No se pudo generar o descargar el archivo ZIP con los formatos.', 'error');
+        }
+      });
   }
 
   opcionSeleccionadaX() {
-    console.log(this.transferencia.partida);
-
-    this.traer.http.get(this.API_URL + `/traerProductosDesdeTransferir/${this.transferencia.partida}`)
+    this.traer.http.get(`${this.API_URL}/traerProductosDesdeTransferir/${this.transferencia.partida}`)
       .subscribe((res: any) => {
         this.productos = res;
         this.productosFiltrados = res;
-        console.log(this.productos);
-
         this.transferencia.cantidadEnStock = 0;
         this.transferencia.idcosto = null;
         this.transferencia.nombreProducto = '';
@@ -351,125 +368,95 @@ generarFormatoListaSurtidoSinMontos(indice: number) {
   }
 
   plantelSeleccionado() {
-    console.log(this.transferencia.plantel);
-
-    this.traer.http.get(this.API_URL + `/traerDatosAdministrativo/${this.transferencia.plantel}`)
+    this.traer.http.get(`${this.API_URL}/traerDatosAdministrativo/${this.transferencia.plantel}`)
       .subscribe((res: any) => {
         this.datosAdmin = res;
-        console.log(this.datosAdmin);
-        this.transferencia.recibio = res[0].administrativo;
+        if (res && res.length > 0) {
+          this.transferencia.recibio = res[0].administrativo;
+        }
       });
   }
 
   traerPlanteles() {
-    this.traer.http.get(this.API_URL + `/traerPlanteles`)
+    this.traer.http.get(`${this.API_URL}/traerPlanteles`)
       .subscribe((res: any) => {
         this.planteles = res;
-        console.log(this.planteles);
       });
   }
 
   TraerTotalDisponible() {
-    console.log(this.transferencia.partida);
-    console.log(this.transferencia.idcosto);
-
-    this.traer.http.get(this.API_URL + `/traerTotalDisponible/${this.transferencia.idcosto}`)
+    this.traer.http.get(`${this.API_URL}/traerTotalDisponible/${this.transferencia.idcosto}`)
       .subscribe((res: any) => {
-        if (res == "SinDatos") {
+        if (res === 'SinDatos') {
           this.transferencia.cantidadEnStock = 0;
         } else {
-          this.transferencia.cantidadEnStock = 0;
-          if (res.length > 0 && res[0].existencias) {
-            this.transferencia.cantidadEnStock = res[0].existencias;
-          }
-          console.log(res);
+          this.transferencia.cantidadEnStock = (res.length > 0 && res[0].existencias) ? res[0].existencias : 0;
         }
       });
   }
 
   TraerConsecutivo() {
-    this.traer.http.get(this.API_URL + `/traerConsecutivo`)
+    this.traer.http.get(`${this.API_URL}/traerConsecutivo`)
       .subscribe((res: any) => {
-        var consecutivo = res;
-        this.transferencia.consecutivo = consecutivo;
+        this.transferencia.consecutivo = res;
       });
   }
 
   agregarArticulo(form: NgForm) {
-    console.log(this.transferencia);
-
     if (this.transferencia.idcosto == null) {
       Swal.fire({
         title: 'Producto no válido',
         text: 'Debe elegir un producto de la lista',
         icon: 'warning'
       });
-    } else if (Number.isInteger(this.transferencia.cantidadTransferir) == false) {
+    } else if (!Number.isInteger(Number(this.transferencia.cantidadTransferir))) {
       Swal.fire({
-        title: 'Cantidad no valida',
+        title: 'Cantidad no válida',
         text: 'La cantidad a transferir debe ser número entero',
         icon: 'warning'
       });
     } else {
-      if (form.valid == true) {
-        console.log(this.transferencia);
-
+      if (form.valid) {
         if (this.transferencia.cantidadEnStock < this.transferencia.cantidadTransferir) {
           Swal.fire({
-            title: "Operación no realizada",
-            text: "No hay suficiente stock de este producto",
-            icon: "warning"
+            title: 'Operación no realizada',
+            text: 'No hay suficiente stock de este producto',
+            icon: 'warning'
           });
         } else if (this.transferencia.cantidadTransferir <= 0) {
           Swal.fire({
-            title: "Operación no realizada",
-            text: "Debe transferir mínimo 1 artículo",
-            icon: "warning"
+            title: 'Operación no realizada',
+            text: 'Debe transferir mínimo 1 artículo',
+            icon: 'warning'
           });
         } else {
-          this.traer.http.post(this.API_URL + `/TransferirArticulosPlantel`, this.transferencia)
+          this.traer.http.post(`${this.API_URL}/TransferirArticulosPlantel`, this.transferencia)
             .subscribe((res: any) => {
-              console.log(res);
-
-              if (res == "Add") {
-                Swal.fire(
-                  'Ok',
-                  'Articulo agregado a la lista',
-                  'success'
-                );
-
+              if (res === 'Add') {
+                Swal.fire('Ok', 'Artículo agregado a la lista', 'success');
                 this.transferencia.idcosto = null;
                 this.getListaArticulosTransferir();
                 this.productoBuscado = '';
                 this.transferencia.cantidadEnStock = null;
                 this.transferencia.cantidadTransferir = null;
-              } else if (res == "Duplicado") {
-                Swal.fire(
-                  'Artículo Duplicado',
-                  'Este artículo ya fue agregado a la lista',
-                  'warning'
-                );
+              } else if (res === 'Duplicado') {
+                Swal.fire('Artículo Duplicado', 'Este artículo ya fue agregado a la lista', 'warning');
               } else {
-                Swal.fire(
-                  'Error',
-                  '¡No se guardaron los cambios!',
-                  'error'
-                );
+                Swal.fire('Error', '¡No se guardaron los cambios!', 'error');
               }
             });
         }
       } else {
         Swal.fire({
-          title: "Operación no realizada",
-          text: "Complete todos los campos",
-          icon: "warning"
+          title: 'Operación no realizada',
+          text: 'Complete todos los campos',
+          icon: 'warning'
         });
       }
     }
   }
 
   validarProducto() {
-    console.log("Entro a validar Producto");
     this.transferencia.idcosto = null;
   }
 }
