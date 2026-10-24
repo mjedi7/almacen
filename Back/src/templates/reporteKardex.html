@@ -3,9 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Kárdex de Almacén</title>
+  <title>Remisión de Almacén</title>
   <style>
-    /* Neutraliza los márgenes CSS externos para respetar la configuración de Puppeteer */
     @page {
       size: letter portrait;
       margin: 0;
@@ -23,33 +22,13 @@
       font-size: 10pt;
       color: #000;
       background: #fff;
-      counter-reset: pagina;
     }
 
-    /* Tabla envolvente principal que repite encabezado en cada página */
-    .main-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: none;
-    }
-
-    .main-table>thead {
-      display: table-header-group;
-    }
-
-    .main-table>tbody {
-      display: table-row-group;
-    }
-
-    .main-table>tbody>tr>td {
-      border: none;
-      padding: 0;
-    }
-
-    /* Membrete y títulos institucionales */
+    /* Contenedor institucional superior */
     .header-container {
       width: 100%;
       text-align: center;
+      margin-top: 8mm;
       margin-bottom: 12px;
     }
 
@@ -61,127 +40,115 @@
 
     .header-banner img {
       max-width: 100%;
-      height: 110px;
+      height: 95px;
       object-fit: contain;
     }
 
-    .sub-header-title {
+    .report-institution {
       font-size: 10pt;
       font-weight: bold;
-      color: #000;
-      margin-bottom: 2px;
       letter-spacing: 0.3px;
-      text-align: center;
-    }
-
-    .report-name {
-      font-size: 10pt;
-      font-weight: bold;
-      color: #000;
       margin-bottom: 4px;
-      letter-spacing: 0.3px;
+    }
+
+    .document-reference {
+      font-size: 9.5pt;
+      line-height: 1.35;
+      margin-bottom: 14px;
       text-align: center;
     }
 
-    .main-title {
-      font-size: 11pt;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 6px;
-      text-align: center;
-    }
-
-    /* Cuadro de metadatos del artículo */
-    .table-header {
+    /* Tablas formales con estilo Kárdex */
+    .table-custom {
       width: 100%;
       border-collapse: collapse !important;
       border: 1.5px solid #000;
-      margin-bottom: 10px !important;
-      page-break-inside: avoid;
+      margin-bottom: 14px;
     }
 
-    .table-header th {
+    .table-custom th {
       background-color: #f7faff;
       border: 1px solid #000;
-      padding: 4px 6px;
-      font-size: 10pt;
-      font-weight: bold;
-      text-align: left;
-    }
-
-    .table-header td {
-      border: 1px solid #000;
-      padding: 4px 6px;
-      font-size: 10pt;
-    }
-
-    .table-header .lbl {
-      background-color: #f7faff;
-      font-weight: bold;
-      width: 18%;
-    }
-
-    .table-header .val {
-      background-color: #fff;
-      width: 32%;
-    }
-
-    /* Tabla detalle de movimientos */
-    .table-detalle {
-      width: 100%;
-      border-collapse: collapse !important;
-      border-spacing: 0 !important;
-      border: 1.5px solid #000;
-    }
-
-    .table-detalle thead {
-      display: table-header-group;
-    }
-
-    .table-detalle tr {
-      page-break-inside: avoid;
-    }
-
-    .table-detalle th {
-      background-color: #f7faff;
-      border: 1px solid #000;
-      padding: 4px;
-      font-size: 10pt;
+      padding: 6px 8px;
+      font-size: 9.5pt;
       font-weight: bold;
       text-align: center;
     }
 
-    .table-detalle td {
+    .table-custom td {
       border: 1px solid #000;
-      padding: 3.5px 5px;
-      font-size: 10pt;
+      padding: 6px 8px;
+      font-size: 9.5pt;
+      vertical-align: middle;
     }
 
-    .cen {
-      text-align: center;
-    }
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+    .nowrap { white-space: nowrap; }
+    .font-bold { font-weight: bold; }
 
-    .num {
-      text-align: right;
-    }
-
-    /* Totales finales */
-    .tabla-totales-pie {
+    /* Cuadro de Totales alineado a la derecha */
+    .totales-derecha-contenedor {
       width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+
+    .totals-table {
+      width: 250px;
       border-collapse: collapse;
-      border: none;
-      margin-top: 14px;
+      border: 1px solid #000;
+    }
+
+    .totals-table td {
+      padding: 4px 8px;
+      font-size: 9.5pt;
+      border: 1px solid #ccc;
+    }
+
+    .totals-table tr.total-destacado td {
+      border-top: 1.5px solid #000;
+      background-color: #f7faff;
+    }
+
+    /* Cuadrícula de firmas espaciosa */
+    .signature-grid {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 36px;
+      margin-bottom: 30mm;
       page-break-inside: avoid;
-      font-size: 10pt;
     }
 
-    .tabla-totales-pie td {
-      border: none;
-      padding: 4px 5px;
-      vertical-align: top;
+    .signature {
+      flex: 1;
+      text-align: center;
+      font-size: 8.5pt;
+      font-weight: bold;
     }
 
-    /* Contenedor fijo de lado a lado */
+    .signature__line {
+      border-bottom: 1.5px solid #000;
+      margin-top: 40px;
+      margin-bottom: 5px;
+      min-height: 18px;
+      font-size: 8pt;
+      font-weight: normal;
+    }
+
+    .signature__role {
+      font-size: 7.5pt;
+      font-weight: normal;
+      color: #333;
+      line-height: 1.2;
+    }
+
+    /* Pie institucional fijo */
     .pie-fijo-completo {
       position: fixed;
       bottom: 0;
@@ -189,228 +156,149 @@
       right: 0;
       width: 100%;
       text-align: center;
+      line-height: 0;
       z-index: 1000;
-      line-height: 0;
-      margin: 0;
-      padding: 0;
     }
 
-    /* Contenedor que empuja los totales al extremo derecho */
-    .totales-derecha-contenedor {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 100mm;
-      page-break-inside: avoid;
-    }
-
-    .totales-caja {
-      min-width: 200px;
-      font-size: 10pt;
-      justify-content: end;
-    }
-
-    .totales-fila {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .totales-fila .lbl {
-      font-weight: bold;
-      padding-right: 15px;
-    }
-
-    .totales-fila .val {
-      text-align: right;
-      font-family: inherit;
-    }
-
-    /* Datos del reporte alineados al margen exacto de la tabla (12mm) */
-    .pie-fijo-datos {
-      position: absolute;
-      left: 12mm;
-      /* Alineado al borde izquierdo de la tabla */
-      right: 12mm;
-      /* Alineado al borde derecho de la tabla */
-      bottom: 24mm;
-      /* Altura suficiente para quedar arriba del pie institucional */
-      box-sizing: border-box;
-      padding: 0;
-      margin: 0;
-      font-size: 10pt;
-      line-height: normal;
-      color: #000;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      z-index: 1002;
-    }
-
-    /* Envoltura relativa para la imagen y el número de página */
-    .pie-contenedor-img {
-      position: relative;
-      width: 100%;
-      line-height: 0;
-    }
-
-    /* Imagen institucional */
-    .pie-contenedor-img img {
+    .pie-fijo-completo img {
       width: 100%;
       height: auto;
-      max-height: 35mm;
+      max-height: 32mm;
       object-fit: contain;
       object-position: bottom center;
       display: block;
-      margin: 0 auto;
-      vertical-align: bottom;
-    }
-
-    /* Número de página posicionado al lado inferior derecho de la imagen */
-    .pie-contenedor-img .num-pagina {
-      position: absolute;
-      right: 10mm;
-      /* Alineado con el margen de 12mm de la hoja */
-      bottom: 4mm;
-      /* Altura respecto a la base del papel */
-      font-size: 8pt;
-      line-height: normal;
-      color: #000;
-      font-weight: bold;
-      z-index: 1001;
-    }
-
-    .pie-contenedor-img .num-pagina::after {
-      counter-increment: pagina;
-      content: "Pág. " counter(pagina);
     }
   </style>
 </head>
 
-<body class="report">
+<body>
 
-  <table class="main-table">
-    <!-- Encabezado repetible institucional -->
+  <!-- Encabezado -->
+  <div class="header-container">
+    {{#if bannerBase64}}
+    <div class="header-banner">
+      <img src="{{bannerBase64}}" alt="Banner Institucional">
+    </div>
+    {{/if}}
+
+    <div class="report-institution">
+      COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+    </div>
+
+    <div class="document-reference">
+      <span>R.F.C.: CEC941104AN5</span>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <span>REMISIÓN No: <strong>{{folioFormateado}}</strong></span>
+      <br>
+      DIRECCIÓN ADMINISTRATIVA
+      <br>
+      DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    </div>
+  </div>
+
+  <!-- Información de entrega -->
+  <table class="table-custom">
     <thead>
       <tr>
-        <td>
-          <div class="header-container">
-            {{#if bannerBase64}}
-            <div class="header-banner">
-              <img src="{{bannerBase64}}" alt="Banner Institucional">
-            </div>
-            {{/if}}
-            <div class="sub-header-title">COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ</div>
-            <div class="report-name">DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
-            </div>
-            <div class="main-title">KÁRDEX DE ALMACÉN</div>
-          </div>
-        </td>
+        <th style="width: 33%;">Entregado a:</th>
+        <th style="width: 42%;">Nombre del solicitante:</th>
+        <th style="width: 25%;">Fecha de atención:</th>
       </tr>
     </thead>
-
-    <!-- Contenido del Kárdex -->
     <tbody>
       <tr>
-        <td>
-
-          <!-- Cuadro de datos del artículo -->
-          <table class="table-header">
-            <tbody>
-              <tr>
-                <td class="lbl">Descripción:</td>
-                <td class="val" colspan="3">{{header.nom_articulo}}</td>
-              </tr>
-              <tr>
-                <td class="lbl">Clave artículo:</td>
-                <td class="val">{{header.clave_completa}}</td>
-                <td class="lbl">Fecha últ. compra:</td>
-                <td class="val">{{header.fecha_ult_compra}}</td>
-              </tr>
-              <tr>
-                <td class="lbl">Unidad entrada:</td>
-                <td class="val">{{header.unidad_medida}}</td>
-                <td class="lbl">Tipo costeo:</td>
-                <td class="val"><strong>P.E.P.S.</strong></td>
-              </tr>
-              <tr>
-                <td class="lbl">Unidad salida:</td>
-                <td class="val">{{header.unidad_medida}}</td>
-                <td class="lbl">Costo promedio:</td>
-                <td class="val">$ {{header.costo_promedio}}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- Tabla de movimientos (Kárdex) -->
-          <table class="table-detalle" cellspacing="0" cellpadding="0">
-            <thead>
-              <tr>
-                <th style="width: 10%;" class="cen">Doc/Folio</th>
-                <th style="width: 27%;">Plantel / Destino</th>
-                <th style="width: 11%;" class="num">Exist. Inicial</th>
-                <th style="width: 11%;" class="num">Ventas Acum.</th>
-                <th style="width: 13%;" class="num">Importe Total</th>
-                <th style="width: 11%;" class="num">Existencia</th>
-                <th style="width: 17%;" class="cen">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#if movimientos.length}}
-              {{#each movimientos}}
-              <tr>
-                <td class="cen">{{this.folio}}</td>
-                <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
-                <td class="num">{{this.existencia_inicial}}</td>
-                <td class="num">{{this.ventas_acumuladas}}</td>
-                <td class="num">$ {{this.importe_total}}</td>
-                <td class="num">{{this.existencia}}</td>
-                <td class="cen">{{this.fecha}}</td>
-              </tr>
-              {{/each}}
-              {{else}}
-              <tr>
-                <td colspan="7" class="cen" style="padding: 12px; color: #555;">
-                  No hay movimientos registrados para este criterio.
-                </td>
-              </tr>
-              {{/if}}
-            </tbody>
-          </table>
-
-          <!-- Totales al pie -->
-          <div class="totales-derecha-contenedor">
-            <div class="totales-caja">
-              <div class="totales-fila">
-                <span class="lbl">Total Entradas:</span>
-                <span class="val">{{totales.entradas}}</span>
-              </div>
-              <div class="totales-fila">
-                <span class="lbl">Total Salidas:</span>
-                <span class="val">{{totales.salidas}}</span>
-              </div>
-            </div>
-          </div>
-
-        </td>
+        <td class="text-center">{{meta.plantel}}</td>
+        <td class="text-center">{{meta.administrativo}}</td>
+        <td class="text-center">{{meta.fecha}}</td>
       </tr>
     </tbody>
   </table>
 
-  <!-- Pie institucional completo (correctamente ubicado al final del body) -->
-  <div class="pie-fijo-completo">
-    <div class="pie-fijo-datos">
-      <div><b>Usuario:</b> {{usuarioPie}}</div>
-      <div><b>Fecha:</b> {{fechaPie}}</div>
+  <!-- Tabla de Artículos -->
+  <table class="table-custom">
+    <thead>
+      <tr>
+        <th style="width: 10%;">Cantidad</th>
+        <th style="width: 18%;">Clave</th>
+        <th style="width: 12%;">Costeo</th>
+        <th>Descripción</th>
+        {{#if conMontos}}
+        <th style="width: 13%;">P/U</th>
+        <th style="width: 13%;">Importe</th>
+        {{/if}}
+      </tr>
+    </thead>
+    <tbody>
+      {{#each articulos}}
+      <tr>
+        <td class="text-center">{{this.cantidad}}</td>
+        <td class="text-center">{{this.clave}}</td>
+        <td class="text-center">PEPS</td>
+        <td class="text-left">{{this.descripcion}}</td>
+        {{#if ../conMontos}}
+        <td class="text-right nowrap">{{this.precio_unitario}}</td>
+        <td class="text-right nowrap">{{this.importe_total}}</td>
+        {{/if}}
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <!-- Totales -->
+  {{#if conMontos}}
+  <div class="totales-derecha-contenedor">
+    <table class="totals-table">
+      <tbody>
+        <tr>
+          <td class="text-left font-bold">Subtotal:</td>
+          <td class="text-right nowrap font-bold">${{totales.subtotal}}</td>
+        </tr>
+        <tr>
+          <td class="text-left font-bold">I.V.A. (16%):</td>
+          <td class="text-right nowrap font-bold">${{totales.iva}}</td>
+        </tr>
+        <tr class="total-destacado">
+          <td class="text-left font-bold">Total:</td>
+          <td class="text-right nowrap font-bold">${{totales.total}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {{/if}}
+
+  <!-- Firmas de conformidad -->
+  <section class="signature-grid">
+    <div class="signature">
+      RECIBIÓ
+      <div class="signature__line">{{meta.director}}</div>
+      <div class="signature__role">DIRECTOR / JEFE DEPTO / AUXILIAR</div>
     </div>
 
-    {{#if pieBase64}}
-    <div class="pie-contenedor-img">
-      <img src="{{pieBase64}}" alt="Pie Institucional">
-      <div class="num-pagina"></div>
+    <div class="signature">
+      ENTREGÓ
+      <div class="signature__line">&nbsp;</div>
+      <div class="signature__role">ENCARGADO DE ALMACÉN</div>
     </div>
-    {{/if}}
+
+    <div class="signature">
+      REVISÓ
+      <div class="signature__line">LIC. ISRAEL SOBERANIZ MORALES</div>
+      <div class="signature__role">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
+    </div>
+
+    <div class="signature">
+      AUTORIZÓ
+      <div class="signature__line">M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ</div>
+      <div class="signature__role">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
+    </div>
+  </section>
+
+  <!-- Pie institucional inferior -->
+  {{#if pieBase64}}
+  <div class="pie-fijo-completo">
+    <img src="{{pieBase64}}" alt="Pie Institucional">
   </div>
+  {{/if}}
 
 </body>
 

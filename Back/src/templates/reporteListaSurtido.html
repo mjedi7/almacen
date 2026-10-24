@@ -3,250 +3,300 @@
 
 <head>
   <meta charset="UTF-8">
+  <title>Lista de Surtido</title>
+  <style>
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0 12mm;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      color: #000;
+      background: #fff;
+    }
+
+    /* Encabezado institucional */
+    .header-container {
+      width: 100%;
+      text-align: center;
+      margin-top: 8mm;
+      margin-bottom: 12px;
+    }
+
+    .header-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .header-banner img {
+      max-width: 100%;
+      height: 95px;
+      object-fit: contain;
+    }
+
+    .report-institution {
+      font-size: 10pt;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .document-reference {
+      font-size: 9.5pt;
+      line-height: 1.35;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    /* Tablas formales con estilo Kárdex */
+    .table-custom {
+      width: 100%;
+      border-collapse: collapse !important;
+      border: 1.5px solid #000;
+      margin-bottom: 14px;
+    }
+
+    .table-custom th {
+      background-color: #f7faff;
+      border: 1px solid #000;
+      padding: 6px 8px;
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .table-custom td {
+      border: 1px solid #000;
+      padding: 6px 8px;
+      font-size: 9.5pt;
+      vertical-align: middle;
+    }
+
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+    .nowrap { white-space: nowrap; }
+    .font-bold { font-weight: bold; }
+
+    /* Totales alineados a la derecha */
+    .totales-derecha-contenedor {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+
+    .totals-table {
+      width: 250px;
+      border-collapse: collapse;
+      border: 1px solid #000;
+    }
+
+    .totals-table td {
+      padding: 5px 8px;
+      font-size: 9.5pt;
+      border: 1px solid #ccc;
+    }
+
+    .totals-table tr.total-destacado td {
+      border-top: 1.5px solid #000;
+      background-color: #f7faff;
+    }
+
+    /* Firmas espaciadas */
+    .signature-grid {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 36px;
+      margin-bottom: 30mm;
+      page-break-inside: avoid;
+    }
+
+    .signature {
+      flex: 1;
+      text-align: center;
+      font-size: 8.5pt;
+      font-weight: bold;
+    }
+
+    .signature__line {
+      border-bottom: 1.5px solid #000;
+      margin-top: 40px;
+      margin-bottom: 5px;
+      min-height: 18px;
+      font-size: 8pt;
+      font-weight: normal;
+    }
+
+    .signature__role {
+      font-size: 7.5pt;
+      font-weight: normal;
+      color: #333;
+      line-height: 1.2;
+    }
+
+    /* Pie institucional fijo */
+    .pie-fijo-completo {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      text-align: center;
+      line-height: 0;
+      z-index: 1000;
+    }
+
+    .pie-fijo-completo img {
+      width: 100%;
+      height: auto;
+      max-height: 32mm;
+      object-fit: contain;
+      object-position: bottom center;
+      display: block;
+    }
+  </style>
 </head>
 
-<body class="report report--dense">
+<body>
 
-  <!-- Banner superior -->
-  {{#if bannerBase64}}
-  <div class="report-banner report-banner--compact">
-    <img
-      src="{{bannerBase64}}"
-      alt="Banner Institucional"
-    >
-  </div>
-  {{/if}}
+  <!-- Banner y encabezado -->
+  <div class="header-container">
+    {{#if bannerBase64}}
+    <div class="header-banner">
+      <img src="{{bannerBase64}}" alt="Banner Institucional">
+    </div>
+    {{/if}}
 
-  <div class="report-institution">
-    COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
-  </div>
+    <div class="report-institution">
+      COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+    </div>
 
-  <!-- Identificación de la remisión -->
-  <div class="document-reference">
-    <span>R.F.C.: CEC941104AN5</span>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-
-    <span>
-      REMISIÓN No:
-      <strong>{{folioFormateado}}</strong>
-    </span>
-
-    <br>
-
-    DIRECCIÓN ADMINISTRATIVA
-
-    <br>
-
-    DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    <div class="document-reference">
+      <span>R.F.C.: CEC941104AN5</span>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <span>REMISIÓN No: <strong>{{folioFormateado}}</strong></span>
+      <br>
+      DIRECCIÓN ADMINISTRATIVA
+      <br>
+      DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    </div>
   </div>
 
   <!-- Información de entrega -->
-  <table class="report-table report-table--dense report-table--info">
-
-    <colgroup>
-      <col class="w-30">
-      <col class="w-45">
-      <col class="w-25">
-    </colgroup>
-
+  <table class="table-custom">
     <thead>
       <tr>
-        <th>Entregado a:</th>
-        <th>Nombre del solicitante:</th>
-        <th>Fecha de atención</th>
+        <th style="width: 33%;">Entregado a:</th>
+        <th style="width: 42%;">Nombre del solicitante:</th>
+        <th style="width: 25%;">Fecha de atención:</th>
       </tr>
     </thead>
-
     <tbody>
       <tr>
-        <td class="text-center">
-          {{meta.plantel}}
-        </td>
-
-        <td class="text-center">
-          {{meta.administrativo}}
-        </td>
-
-        <td class="text-center">
-          {{meta.fecha}}
-        </td>
+        <td class="text-center">{{meta.plantel}}</td>
+        <td class="text-center">{{meta.administrativo}}</td>
+        <td class="text-center">{{meta.fecha}}</td>
       </tr>
     </tbody>
-
   </table>
 
-  <!-- Artículos -->
-  <table class="report-table report-table--dense">
-
-    {{#if conMontos}}
-    <colgroup>
-      <col class="w-10">
-      <col class="w-18">
-      <col class="w-10">
-      <col class="w-38">
-      <col class="w-12">
-      <col class="w-12">
-    </colgroup>
-    {{else}}
-    <colgroup>
-      <col class="w-10">
-      <col class="w-18">
-      <col class="w-10">
-      <col class="w-62">
-    </colgroup>
-    {{/if}}
-
+  <!-- Tabla de Artículos -->
+  <table class="table-custom">
     <thead>
       <tr>
-        <th>Cantidad</th>
-        <th>Clave</th>
-        <th>Costeo</th>
+        <th style="width: 10%;">Cantidad</th>
+        <th style="width: 18%;">Clave</th>
+        <th style="width: 12%;">Costeo</th>
         <th>Descripción</th>
-
         {{#if conMontos}}
-        <th>P/U</th>
-        <th>Importe</th>
+        <th style="width: 13%;">P/U</th>
+        <th style="width: 13%;">Importe</th>
         {{/if}}
       </tr>
     </thead>
-
     <tbody>
-
       {{#each articulos}}
       <tr>
-        <td class="text-center">
-          {{this.cantidad}}
-        </td>
-
-        <td class="text-center">
-          {{this.clave}}
-        </td>
-
-        <td class="text-center">
-          PEPS
-        </td>
-
-        <td class="text-left">
-          {{this.descripcion}}
-        </td>
-
+        <td class="text-center">{{this.cantidad}}</td>
+        <td class="text-center">{{this.clave}}</td>
+        <td class="text-center">PEPS</td>
+        <td class="text-left">{{this.descripcion}}</td>
         {{#if ../conMontos}}
-        <td class="text-right nowrap">
-          {{this.precio_unitario}}
-        </td>
-
-        <td class="text-right nowrap">
-          {{this.importe_total}}
-        </td>
+        <td class="text-right nowrap">${{this.precio_unitario}}</td>
+        <td class="text-right nowrap">${{this.importe_total}}</td>
         {{/if}}
       </tr>
       {{/each}}
-
     </tbody>
-
   </table>
 
-  <!-- Totales -->
+  <!-- Totales alineados a la derecha -->
   {{#if conMontos}}
-  <div class="report-results justify-end">
-
+  <div class="totales-derecha-contenedor">
     <table class="totals-table">
       <tbody>
         <tr>
-          <td class="text-left font-bold">
-            Subtotal:
-          </td>
-
-          <td class="text-right nowrap font-bold">
-            ${{totales.subtotal}}
-          </td>
+          <td class="text-left font-bold">Subtotal:</td>
+          <td class="text-right nowrap font-bold">${{totales.subtotal}}</td>
         </tr>
-
         <tr>
-          <td class="text-left font-bold">
-            I.V.A. (16%):
-          </td>
-
-          <td class="text-right nowrap font-bold">
-            ${{totales.iva}}
-          </td>
+          <td class="text-left font-bold">I.V.A. (16%):</td>
+          <td class="text-right nowrap font-bold">${{totales.iva}}</td>
         </tr>
-
-        <tr class="totals-table__total">
-          <td class="text-left font-bold">
-            Total:
-          </td>
-
-          <td class="text-right nowrap font-bold">
-            ${{totales.total}}
-          </td>
+        <tr class="total-destacado">
+          <td class="text-left font-bold">Total:</td>
+          <td class="text-right nowrap font-bold">${{totales.total}}</td>
         </tr>
       </tbody>
     </table>
-
   </div>
   {{/if}}
 
-  <!-- Firmas -->
+  <!-- Firmas de conformidad -->
   <section class="signature-grid">
-
     <div class="signature">
       RECIBIÓ
-
-      <div class="signature__line">
-        {{meta.director}}
-      </div>
-
-      <div class="signature__role">
-        DIRECTOR / JEFE DEPTO / AUXILIAR
-      </div>
+      <div class="signature__line">{{meta.director}}</div>
+      <div class="signature__role">DIRECTOR / JEFE DEPTO / AUXILIAR</div>
     </div>
 
     <div class="signature">
       ENTREGÓ
-
-      <div class="signature__line">
-        &nbsp;
-      </div>
-
-      <div class="signature__role">
-        ENCARGADO DE ALMACÉN
-      </div>
+      <div class="signature__line">&nbsp;</div>
+      <div class="signature__role">ENCARGADO DE ALMACÉN</div>
     </div>
 
     <div class="signature">
       REVISÓ
-
-      <div class="signature__line">
-        LIC. ISRAEL SOBERANIZ MORALES
-      </div>
-
-      <div class="signature__role">
-        JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES
-      </div>
+      <div class="signature__line">LIC. ISRAEL SOBERANIZ MORALES</div>
+      <div class="signature__role">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
     </div>
 
     <div class="signature">
       AUTORIZÓ
-
-      <div class="signature__line">
-        M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ
-      </div>
-
-      <div class="signature__role">
-        ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA
-      </div>
+      <div class="signature__line">M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ</div>
+      <div class="signature__role">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
     </div>
-
   </section>
 
-  <!-- Banner inferior -->
+  <!-- Pie institucional -->
   {{#if pieBase64}}
-  <div class="institutional-footer institutional-footer--contained">
-    <img
-      src="{{pieBase64}}"
-      alt="Pie Institucional"
-    >
+  <div class="pie-fijo-completo">
+    <img src="{{pieBase64}}" alt="Pie Institucional">
   </div>
   {{/if}}
 

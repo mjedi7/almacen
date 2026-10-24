@@ -32,6 +32,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
   try {
     const templatePath = path.join(__dirname, `../templates/${templateName}`);
+console.log('>>> RUTA REAL QUE ESTÁ LEYENDO PUPPETEER:', templatePath); // <--- AGREGA ESTA LÍNEA
 
     if (!fs.existsSync(templatePath)) {
       throw new Error(`No se encontró la plantilla en: ${templatePath}`);
@@ -96,7 +97,8 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const nombreMin = templateName.toLowerCase();
     const esExcluido = nombreMin.includes('kardex') || 
                        nombreMin.includes('entradaspartida') ||
-                       nombreMin.includes('entradasproveedor');
+                       nombreMin.includes('entradasproveedor')||
+                       nombreMin.includes('surtido');
                        
     const omitirEstilos = pdfOptions.usarEstilosCompartidos === false || esExcluido;
 
@@ -130,7 +132,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const defaultOptions = {
       printBackground: true,
       displayHeaderFooter: false,
-      margin: {
+      margin: esExcluido ? { top: '0px', bottom: '0px', left: '0px', right: '0px' } : {
         top: '12mm',
         bottom: '38mm',
         left: '0px',
@@ -138,10 +140,9 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       },
       width: '8.5in',
       height: '11in',
-      preferCSSPageSize: false,
-      ...pdfOptions // Las opciones personalizadas sobreescriben los valores por defecto si se mandan
+      preferCSSPageSize: esExcluido ? true : false,
+      ...pdfOptions
     };
-
     const pdfBuffer = await page.pdf(defaultOptions);
 
     return pdfBuffer;
