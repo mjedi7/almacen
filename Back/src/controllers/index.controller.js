@@ -228,7 +228,6 @@ const registrarStock = async (req, res) => {
         subTotal
     } = req.body;
 
-    // Aseguramos capturar la partida si viniera con cualquiera de los nombres
     var idPartida = partida || req.body.id_partidas;
 
     try {
@@ -237,54 +236,99 @@ const registrarStock = async (req, res) => {
             [producto, proveedor, costo]
         );
 
+        let ultimoID;
+
         if (comprobarDuplicado.rowCount > 0) {
-            return res.json('Duplicado');
+            // Si ya existe ese costo con ese proveedor, reutilizamos el id_costo
+            ultimoID = comprobarDuplicado.rows[0].id;
         } else {
             iva = 16;
-
-            var response1 = await pool.query(
-                'SELECT id, descripcion FROM cat_articulos WHERE id = $1',
-                [producto]
-            );
-            var nombreProducto = response1.rows[0].descripcion;
-
-            var response = await pool.query(
+            var responseCostos = await pool.query(
                 'INSERT INTO costos(id_articulo, id_proveedor, precio_unitario, iva, precio_total, fecha_inicio, esactivo) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id AS ultimoid;',
                 [producto, proveedor, costo, iva, total, fechaAd, true]
             );
-
-            var ultimoID = response.rows[0].ultimoid;
-
-            if (response) {
-                var response2 = await pool.query(
-                    'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-                    [centro_trabajo, ultimoID, cantidad, fechaAd, true, unidad, descripcion, idPartida, nombreProducto]
-                );
-            } else {
-                return res.json("Error");
-            }
-
-            if (response2) {
-                // AQUÍ AGREGAMOS id_partidas Y EL PARÁMETRO $6 (idPartida)
-                var response3 = await pool.query(
-                    'INSERT INTO compras(id_costo, total_articulos, fecha_compra, folio_compra, esactivo, id_partidas) VALUES ($1, $2, $3, $4, $5, $6)',
-                    [ultimoID, cantidad, fechaAd, folio, true, idPartida]
-                );
-            }
-
-            const impuestoReal = (parseFloat(subTotal) * 0.16) || 0;
-
-            await pool.query(
-                'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-                [folio, proveedor, fechaAd, subTotal, impuestoReal, total, idPartida]
-            );
-
-            return res.json("Save");
+            ultimoID = responseCostos.rows[0].ultimoid;
         }
+
+        var response1 = await pool.query(
+            'SELECT id, descripcion FROM cat_articulos WHERE id = $1',
+            [producto]
+        );
+        var nombreProducto = response1.rows[0]?.descripcion || descripcion;
+
+        // 1. Verificamos si ya existe el registro en almacen para este id_costos y centro de trabajo
+        var existeEnAlmacen = await pool.query(
+            'SELECT id FROM almacen WHERE id_costos = $1 AND id_centrotrabajo = $2',
+            [ultimoID, centro_trabajo]
+        );
+
+        if (existeEnAlmacen.rowCount === 0) {
+            // Se crea el registro en almacen con existencias en 0 (a la espera de recepciones)
+            await pool.query(
+                'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+                [centro_trabajo, ultimoID, 0, fechaAd, true, unidad, descripcion, idPartida, nombreProducto]
+            );
+        }
+
+        // 2. Insertamos en compras con cantidad_recibida en 0 y estatus 'Pendiente'
+        await pool.query(
+            'INSERT INTO compras(id_costo, total_articulos, cantidad_recibida, estatus, fecha_compra, folio_compra, esactivo, id_partidas) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+            [ultimoID, cantidad, 0, 'Pendiente', fechaAd, folio, true, idPartida]
+        );
+
+        // 3. Insertamos o verificamos la cabecera en compras_reportes
+        const impuestoReal = (parseFloat(subTotal) * 0.16) || 0;
+        var existeReporte = await pool.query(
+            'SELECT id FROM compras_reportes WHERE folio_factura = $1',
+            [folio]
+        );
+
+        if (existeReporte.rowCount === 0) {
+            await pool.query(
+                'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida, estatus_entrega) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+                [folio, proveedor, fechaAd, subTotal, impuestoReal, total, idPartida, 'Pendiente']
+            );
+        }
+
+        return res.json("Save");
+
     } catch (error) {
-        console.log(error);
+        console.error("Error en registrarStock:", error);
         return res.json("Error");
     }
+};
+
+const recibirEntregaParcial = async (req, res) => {
+
+    const {folio_compra, id_costo, cantidad_recibida_ahora, id_centrotrabajo} = req.body;
+    const cantidadLlegada = parseInt(cantidad_recibida_ahora, 10);
+
+    try{
+        const compraRes = await pool.query(
+            'SELECT id, total_articulos, cantidad_recibida WHERE folio_compra = $1 AND id_costo = $2',
+            [folio_compra, id_costo]
+        );
+
+        if(compraRes.rowCount === 0) {
+            return res.status(404).json({
+                error: 'Artículo no encontrado en la compra'
+            });
+        }
+
+        const item = compraRes.rows[0];
+        const nuevaCantidadRecibida = (item.cantidad_recibida || 0) + cantidadLlegada;
+
+        if(nuevaCantidadRecibida > item.total_articulos) {
+            return res.status(400).json({
+                error: `La cantidad total recibida (${nuevaCantidadRecibida}) supera la cantidad pedida (${item.total_articulos}`
+            })
+        }
+
+
+    }catch(error) {
+
+    }
+
 };
 
 
@@ -629,30 +673,33 @@ const getSalidas = async (req, res) => {
 
 
 const getexistenciasBajas = async (req, res) => {
-
     try {
+        const idplantel = req.params.idplantel;
 
-        var idplantel = req.params.idplantel;
+        const query = `
+            SELECT 
+                pa.descripcion AS partida,
+                al.nombre_producto AS "descripcion",
+                co.precio_unitario AS costo,
+                al.existencias,
+                pro.razon_social AS proveedor,
+                pro.telefono
+            FROM almacen al
+            INNER JOIN costos co ON (al.id_costos = co.id)
+            INNER JOIN cat_articulos ca ON (co.id_articulo = ca.id)
+            INNER JOIN cat_partidas pa ON (ca.id_partidas = pa.id)
+            INNER JOIN cat_proveedores pro ON (co.id_proveedor = pro.id)
+            WHERE al.id_centrotrabajo = $1 AND al.existencias <= 10
+            ORDER BY pa.clave, ca.clave, co.precio_unitario ASC
+        `;
 
-        const response = await pool.query('Select pa.descripcion as partida, al.nombre_producto as "descripcion", al.existencias, pro.razon_social as proveedor,pro.telefono ' +
-            ' from almacen al ' +
-            ' INNER JOIN costos co ON (al.id_costos = co.id) ' +
-            ' INNER JOIN cat_articulos ca ON (co.id_articulo = ca.id) ' +
-            ' INNER JOIN cat_partidas pa ON (ca.id_partidas = pa.id) ' +
-            ' INNER JOIN cat_proveedores pro on (co.id_proveedor=pro.id)' +
-            ' where al.id_centrotrabajo =' + idplantel + ' and al.existencias <=10 ' +
-            ' ORDER BY pa.clave, ca.clave');
-
+        const response = await pool.query(query, [idplantel]);
         res.status(200).json(response.rows);
 
-
-
     } catch (error) {
-        console.log(error);
-
+        console.error("Error en getexistenciasBajas:", error);
+        res.status(500).json({ error: "Error al obtener existencias bajas" });
     }
-
-
 };
 
 
