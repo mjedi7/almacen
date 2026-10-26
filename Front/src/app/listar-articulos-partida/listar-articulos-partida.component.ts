@@ -12,7 +12,6 @@ import {
   ListarArticulosPartidaService
 } from '../services/listar-articulos-partida.service';
 
-
 @Component({
   selector: 'app-listar-articulos-partida',
   templateUrl: './listar-articulos-partida.component.html',
@@ -41,7 +40,7 @@ export class ListarArticulosPartidaComponent
   cargandoArticulos: boolean = false;
 
 
-  dtOptions: DataTables.Settings = {};
+  dtOptions: any = {};
 
   dtTrigger: Subject<any> = new Subject<any>();
 
@@ -356,7 +355,7 @@ export class ListarArticulosPartidaComponent
      */
     this.dtElement.dtInstance
       .then(
-        (dtInstance: DataTables.Api) => {
+        (dtInstance: any) => {
 
           dtInstance.destroy();
 

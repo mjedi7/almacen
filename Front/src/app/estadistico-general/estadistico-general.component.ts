@@ -47,12 +47,7 @@ export class EstadisticoGeneralComponent implements OnInit {
   productosFiltrados: any[] = [];
   productoBuscado: string = '';
   dtOptions: any = {};
-<<<<<<< HEAD
   dtTrigger = new Subject();
-=======
-  dtTrigger = new Subject<any>();
-
->>>>>>> main
   API_URL = environment.uri_api;
   articulosTransferir: any = [];
   totales: any;
@@ -165,7 +160,6 @@ export class EstadisticoGeneralComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
 obtenerPlantelesTransferencia() {
   this.traer.http.get(
     this.API_URL + `/getListaArticulosTransferir/${this.transferencia.consecutivo}`
@@ -194,23 +188,8 @@ obtenerPlantelesTransferencia() {
           'error'
         );
         return;
-=======
-  generarFormatoListaSurtido() {
-    // Genera el primer PDF en el servidor
-    const url = `${this.API_URL}/reporte/surtido/${this.transferencia.consecutivo}/${this.transferencia.plantel}`;
-
-    this.traer.http.get(url, { responseType: 'text' }).subscribe({
-      next: (res) => {
-        console.log('PDF con montos generado:', res);
-        this.generarFormatoListaSurtidoSinMontos();
-      },
-      error: (err) => {
-        console.error('Error al generar el PDF con montos', err);
-        Swal.fire('Error', 'Hubo un error al generar el PDF con montos', 'error');
->>>>>>> main
       }
 
-<<<<<<< HEAD
       this.generarFormatoListaSurtido(0);
     },
 
@@ -288,20 +267,6 @@ generarFormatoListaSurtidoSinMontos(indice: number) {
         // Ya se generaron los 2 PDFs de todos los planteles
         this.descargarZip();
 
-=======
-  generarFormatoListaSurtidoSinMontos() {
-    // Genera el segundo PDF en el servidor
-    const url = `${this.API_URL}/reporte/surtido-sin-montos/${this.transferencia.consecutivo}/${this.transferencia.plantel}`;
-
-    this.traer.http.get(url, { responseType: 'text' }).subscribe({
-      next: (res) => {
-        console.log('PDF sin montos generado:', res);
-        this.descargarZip();
-      },
-      error: (err) => {
-        console.error('Error al generar el PDF sin montos', err);
-        Swal.fire('Error', 'Hubo un error al generar el PDF sin montos', 'error');
->>>>>>> main
       }
     },
 
