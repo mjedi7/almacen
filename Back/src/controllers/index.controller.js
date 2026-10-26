@@ -299,72 +299,116 @@ const registrarStock = async (req, res) => {
 };
 
 const recibirEntregaParcial = async (req, res) => {
+    const client = await pool.connect();
 
-    const {folio_compra, id_costo, cantidad_recibida_ahora, id_centrotrabajo} = req.body;
-    const cantidadLlegada = parseInt(cantidad_recibida_ahora, 10);
+    try {
+        const { 
+            folio_compra, 
+            id_compra, // ID del registro específico en la tabla 'compras'
+            cantidad_recibida_ahora, 
+            id_centrotrabajo, 
+            id_usuario, 
+            usuario_nombre, 
+            referencia, 
+            observaciones 
+        } = req.body;
 
-    try{
-        const compraRes = await pool.query(
-            'SELECT id, total_articulos, cantidad_recibida WHERE folio_compra = $1 AND id_costo = $2',
-            [folio_compra, id_costo]
+        const cantidadLlegada = parseInt(cantidad_recibida_ahora, 10);
+
+        if (isNaN(cantidadLlegada) || cantidadLlegada <= 0) {
+            return res.status(400).json({ error: "Cantidad inválida" });
+        }
+
+        // Iniciamos transacción SQL
+        await client.query('BEGIN');
+
+        // 1. Consultamos el artículo en la tabla 'compras'
+        const compraRes = await client.query(
+            `SELECT c.id, c.id_compra_reporte, c.id_costo, c.total_articulos, COALESCE(c.cantidad_recibida, 0) AS cantidad_recibida
+             FROM compras c
+             INNER JOIN compras_reportes cr ON c.id_compra_reporte = cr.id
+             WHERE c.id = $1 AND cr.folio_factura = $2 AND c.esactivo = true FOR UPDATE`,
+            [id_compra, folio_compra]
         );
 
-        if(compraRes.rowCount === 0) {
-            return res.status(404).json({
-                error: 'Artículo no encontrado en la compra'
-            });
+        if (compraRes.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: "Artículo no encontrado en la compra especificada" });
         }
 
         const item = compraRes.rows[0];
-        const nuevaCantidadRecibida = (item.cantidad_recibida || 0) + cantidadLlegada;
+        const nuevaCantidadRecibida = item.cantidad_recibida + cantidadLlegada;
 
-        if(nuevaCantidadRecibida > item.total_articulos) {
-            return res.status(400).json({
-                error: `La cantidad total recibida (${nuevaCantidadRecibida}) supera la cantidad pedida (${item.total_articulos}`
+        if (nuevaCantidadRecibida > item.total_articulos) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ 
+                error: `La cantidad total (${nuevaCantidadRecibida}) supera la cantidad pedida (${item.total_articulos})` 
             });
         }
 
         const nuevoEstatus = nuevaCantidadRecibida >= item.total_articulos ? 'Entregada' : 'Incompleta';
 
-        await pool.query(
-            'UPDATE compras SET cantidad_recibida = $1, status = $2 WHERE id = $3',
+        // 2. Insertamos la CABECERA de la recepción (recepciones_compra)
+        const resCabecera = await client.query(
+            `INSERT INTO recepciones_compra (
+                fecha_recepcion, registrado_en, id_usuario, usuario_nombre, referencia, observaciones, solicitud_original
+            ) VALUES (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2, $3, $4, $5) RETURNING id`,
+            [id_usuario || null, usuario_nombre || 'Sistema', referencia || folio_compra, observaciones || 'Entrega parcial', folio_compra]
+        );
+
+        const idRecepcion = resCabecera.rows[0].id;
+
+        // 3. Insertamos el DETALLE de la recepción (recepciones_compra_detalle)
+        await client.query(
+            `INSERT INTO recepciones_compra_detalle (id_recepcion, id_compra, cantidad)
+             VALUES ($1, $2, $3)`,
+            [idRecepcion, item.id, cantidadLlegada]
+        );
+
+        // 4. Actualizamos el acumulado y estatus en 'compras'
+        await client.query(
+            `UPDATE compras SET cantidad_recibida = $1, estatus = $2 WHERE id = $3`,
             [nuevaCantidadRecibida, nuevoEstatus, item.id]
         );
 
-        await pool.query(
-            'UPDATE almacen SET existencias = existencias + $1, WHERE id_costos = $2 AND id_centrotrabajo = $3',
-            [cantidadLlegada, id_costo, id_centrotrabajo]
+        // 5. Incrementamos el stock real en 'almacen'
+        await client.query(
+            `UPDATE almacen SET existencias = COALESCE(existencias, 0) + $1 
+             WHERE id_costos = $2 AND id_centrotrabajo = $3`,
+            [cantidadLlegada, item.id_costo, id_centrotrabajo]
         );
 
-        const todasLasPartidas = await pool.query(
-            'SELECT estatus FROM compras WHERE folio_compra = "$1',
-            [folio_compra]
+        // 6. Verificamos si todo el folio en 'compras_reportes' ya se completó
+        const partidasReporte = await client.query(
+            `SELECT estatus FROM compras WHERE id_compra_reporte = $1`,
+            [item.id_compra_reporte]
         );
 
-        const estatusArray = todasLasPartidas.rows.map(r => r.estatus);
-        let estatusGeneral  = 'Incompleta';
+        const estatusArray = partidasReporte.rows.map(r => r.estatus);
+        const estatusGeneral = estatusArray.every(est => est === 'Entregada') ? 'Entregada' : 'Incompleta';
 
-        if(estatusArray.every(est => est === 'Entregada')) {
-            estatusGeneral = 'Entregado'
-        }
+        await client.query(
+            `UPDATE compras_reportes SET estatus_entrega = $1 WHERE id = $2`,
+            [estatusGeneral, item.id_compra_reporte]
+        );
 
-        await pool.query(
-            'UPDATE compras_reportes SET estatus_entrega = $1 WHERE folio_factura = $2',
-            [estatusGeneral, folio_compra]
-        )
+        // Confirmamos los cambios
+        await client.query('COMMIT');
 
         return res.json({ 
-            mensaje: "Entrega registrada con éxito", 
+            mensaje: "Recepción registrada correctamente", 
+            id_recepcion: idRecepcion,
             estatusArticulo: nuevoEstatus, 
-            estatusCompra: estatusGeneral 
+            estatusGeneral 
         });
 
-
-    }catch(error) {
-        console.error("Error al recibir entrega:", error);
-        return res.status(500).json({ error: "Error en el servidor al registrar entrega" });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error("Error en la transacción de recepción:", error);
+        return res.status(500).json({ error: "Error en el servidor al registrar la recepción" });
+    } finally {
+        client.release();
     }
-
 };
 
 const getDetalleCompraPorFolio = async (req, res) => {
@@ -409,6 +453,191 @@ const getDetalleCompraPorFolio = async (req, res) => {
     } catch (error) {
         console.error('Error al traer detalle de compra: ', error);
         return res.status(500).json({ error: 'Error en el servidor' });
+    }
+};
+
+const registrarRecepcionBatch = async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+        const { clave_operacion, fecha_recepcion, referencia, observaciones, detalles } = req.body;
+        const id_usuario = req.usuario?.id || null; // Extraído del middleware validarJWT
+        const usuario_nombre = req.usuario?.nombre || 'Usuario Almacén';
+
+        if (!detalles || !Array.isArray(detalles) || detalles.length === 0) {
+            return res.status(400).json({ error: 'Debe incluir al menos un artículo para recibir.' });
+        }
+
+        // 1. Verificación de idempotencia (Evita duplicados si el usuario reintenta)
+        const recepcionExistente = await pool.query(
+            'SELECT id FROM recepciones_compra WHERE clave_operacion = $1',
+            [clave_operacion]
+        );
+
+        if (recepcionExistente.rowCount > 0) {
+            return res.json({ 
+                id_recepcion: recepcionExistente.rows[0].id, 
+                mensaje: 'La recepción ya había sido procesada anteriormente.' 
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // 2. Insertar Cabecera en recepciones_compra
+        const insertCabecera = await client.query(
+            `INSERT INTO recepciones_compra 
+                (fecha_recepcion, registrado_en, id_usuario, usuario_nombre, referencia, observaciones, clave_operacion) 
+             VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6) 
+             RETURNING id`,
+            [fecha_recepcion, id_usuario, usuario_nombre, referencia, observaciones, clave_operacion]
+        );
+
+        const idRecepcion = insertCabecera.rows[0].id;
+
+        // 3. Procesar cada ítem del arreglo 'detalles'
+        for (const item of detalles) {
+            const id_compra = parseInt(item.id_compra, 10);
+            const cantidadRecibir = parseInt(item.cantidad, 10);
+
+            if (isNaN(cantidadRecibir) || cantidadRecibir <= 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: `Cantidad inválida para el artículo ID ${id_compra}` });
+            }
+
+            // Consultar el registro actual en compras
+            const compraRes = await client.query(
+                `SELECT c.id, c.id_compra_reporte, c.id_costo, c.total_articulos, 
+                        COALESCE(c.cantidad_recibida, 0) AS cantidad_recibida,
+                        cr.id_centrotrabajo
+                 FROM compras c
+                 INNER JOIN compras_reportes cr ON c.id_compra_reporte = cr.id
+                 WHERE c.id = $1 AND c.esactivo = true FOR UPDATE`,
+                [id_compra]
+            );
+
+            if (compraRes.rowCount === 0) {
+                await client.query('ROLLBACK');
+                return res.status(404).json({ error: `No se encontró el renglón de compra ID ${id_compra}` });
+            }
+
+            const compra = compraRes.rows[0];
+            const nuevaCantidadRecibida = compra.cantidad_recibida + cantidadRecibir;
+
+            if (nuevaCantidadRecibida > compra.total_articulos) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ 
+                    error: `La cantidad a recibir excede el pendiente para la compra ID ${id_compra}` 
+                });
+            }
+
+            const nuevoEstatus = nuevaCantidadRecibida >= compra.total_articulos ? 'Entregada' : 'Incompleta';
+
+            // Insertar Renglón en recepciones_compra_detalle
+            await client.query(
+                `INSERT INTO recepciones_compra_detalle (id_recepcion, id_compra, cantidad) 
+                 VALUES ($1, $2, $3)`,
+                [idRecepcion, id_compra, cantidadRecibir]
+            );
+
+            // Actualizar acumulado en compras
+            await client.query(
+                `UPDATE compras SET cantidad_recibida = $1, estatus = $2 WHERE id = $3`,
+                [nuevaCantidadRecibida, nuevoEstatus, id_compra]
+            );
+
+            // Sumar a las existencias físicas en almacen
+            await client.query(
+                `UPDATE almacen SET existencias = COALESCE(existencias, 0) + $1 
+                 WHERE id_costos = $2 AND id_centrotrabajo = $3`,
+                [cantidadRecibir, compra.id_costo, compra.id_centrotrabajo]
+            );
+
+            // Evaluar el estatus global en compras_reportes
+            const partidasRes = await client.query(
+                'SELECT estatus FROM compras WHERE id_compra_reporte = $1',
+                [compra.id_compra_reporte]
+            );
+
+            const todoEntregado = partidasRes.rows.every(r => r.estatus === 'Entregada');
+            const estatusGeneral = todoEntregado ? 'Entregada' : 'Incompleta';
+
+            await client.query(
+                'UPDATE compras_reportes SET estatus_entrega = $1 WHERE id = $2',
+                [estatusGeneral, compra.id_compra_reporte]
+            );
+        }
+
+        await client.query('COMMIT');
+        return res.json({ id_recepcion: idRecepcion, mensaje: 'Recepción procesada exitosamente' });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error al procesar recepciones batch:', error);
+        return res.status(500).json({ error: 'Error interno en el servidor al registrar la recepción.' });
+    } finally {
+        client.release();
+    }
+};
+
+const getComprasPorFolio = async (req, res) => {
+    const { folio } = req.query;
+    try {
+        const query = `
+            SELECT 
+                c.id,
+                c.id_compra_reporte,
+                c.id_costo,
+                c.total_articulos,
+                COALESCE(c.cantidad_recibida, 0) AS recibido,
+                (c.total_articulos - COALESCE(c.cantidad_recibida, 0)) AS pendiente,
+                c.estatus AS estado,
+                c.esactivo,
+                c.fecha_compra,
+                cr.folio_factura AS folio_compra,
+                cr.id_proveedor,
+                cr.id_centrotrabajo,
+                p.nombre AS proveedor,
+                art.descripcion AS articulo,
+                art.clave,
+                TRUE AS gestion_recepciones
+            FROM compras c
+            INNER JOIN compras_reportes cr ON c.id_compra_reporte = cr.id
+            INNER JOIN costos cos ON c.id_costo = cos.id
+            INNER JOIN cat_articulos art ON cos.id_articulo = art.id
+            LEFT JOIN proveedores p ON cos.id_proveedor = p.id
+            WHERE cr.folio_factura = $1 AND c.esactivo = true
+            ORDER BY c.id ASC;
+        `;
+        const response = await pool.query(query, [folio]);
+        return res.json(response.rows);
+    } catch (error) {
+        console.error('Error en getComprasPorFolio:', error);
+        return res.status(500).json({ error: 'Error al consultar folio' });
+    }
+};
+
+const getHistorialItem = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT 
+                rc.id,
+                rc.fecha_recepcion,
+                rc.registrado_en,
+                rc.referencia,
+                rc.observaciones,
+                rc.usuario_nombre,
+                rcd.cantidad
+            FROM recepciones_compra_detalle rcd
+            INNER JOIN recepciones_compra rc ON rcd.id_recepcion = rc.id
+            WHERE rcd.id_compra = $1
+            ORDER BY rc.fecha_recepcion DESC;
+        `;
+        const response = await pool.query(query, [id]);
+        return res.json(response.rows);
+    } catch (error) {
+        console.error('Error en getHistorialItem:', error);
+        return res.status(500).json({ error: 'Error al consultar historial' });
     }
 };
 
@@ -832,6 +1061,9 @@ module.exports = {
     getexistenciasBajas,
     UsarArticuloPlantel,
     recibirEntregaParcial,
-    getDetalleCompraPorFolio
+    getDetalleCompraPorFolio,
+    registrarRecepcionBatch,
+    getComprasPorFolio,
+    getHistorialItem
 
 }

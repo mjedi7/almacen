@@ -1,67 +1,134 @@
-<h3 style="justify-content: center;">Recargar Stock e historial de compras</h3>
+<h3 style="text-align: center;">Recargar Stock e historial de compras</h3>
 <p>Busque el folio y capture únicamente lo recibido en esta entrega. Cada recepción conserva su fecha y responsable.</p>
 
-	<div class="alert alert-success" *ngIf="mensaje" role="status">{{mensaje}}</div>
+<div class="alert alert-success" *ngIf="mensaje" role="status">{{mensaje}}</div>
+<div class="alert alert-danger" *ngIf="error" role="alert">{{error}}</div>
 
-	<div class="alert alert-danger" *ngIf="error" role="alert">{{error}}</div>
-
-	<form (ngSubmit)="buscar()" class="mb-4">
-	  <label for="folioCompra">Folio de compra</label>
-	  <div class="input-group">
-		<input id="folioCompra" name="folio" class="form-control" [(ngModel)]="folio" required maxlength="200" [disabled]="bloqueado">
-		<button class="btn btn-primary" type="submit" [disabled]="bloqueado">{{consultando ? 'Buscando…' : 'Buscar compra'}}</button>
-	  </div>
-	</form>
+<form (ngSubmit)="buscar()" class="mb-4">
+  <label for="folioCompra">Folio de compra</label>
+  <div class="input-group">
+    <input id="folioCompra" name="folio" class="form-control" [(ngModel)]="folio" required maxlength="200" [disabled]="bloqueado">
+    <button class="btn btn-primary" type="submit" [disabled]="bloqueado">
+      {{consultando ? 'Buscando…' : 'Buscar compra'}}
+    </button>
+  </div>
+</form>
 
 <ng-container *ngIf="compras.length">
   <div class="table-responsive">
     <table class="table table-bordered table-striped">
-      <thead><tr><th>Compra / fecha</th><th>Proveedor</th><th>Artículo</th><th>Comprado</th><th>Recibido</th><th>Pendiente</th><th>Estado</th><th>Recibir ahora</th><th>Historial</th></tr></thead>
-      <tbody><tr *ngFor="let c of compras">
-        <td>#{{c.id}}<br>{{c.fecha_compra | date:'dd/MM/yyyy'}}</td><td>{{c.proveedor}}</td><td>{{c.articulo}}</td>
-        <td>{{c.total_articulos}}</td><td>{{c.recibido === null ? 'Sin desglose' : c.recibido}}</td><td>{{c.pendiente === null ? 'Sin desglose' : c.pendiente}}</td>
-        <td>{{c.esactivo ? c.estado : 'Inactiva'}}</td>
-        <td><input type="number" min="0" step="0.000001" [max]="c.pendiente" [(ngModel)]="c.recibir" class="form-control"
-          [attr.aria-label]="'Recibir ' + c.articulo" [disabled]="bloqueado || !c.gestion_recepciones || !c.esactivo || c.pendiente <= 0"></td>
-        <td><button type="button" class="btn btn-outline-primary btn-sm" (click)="verHistorial(c)" [disabled]="historialCargando">Ver</button></td>
-      </tr></tbody>
+      <thead>
+        <tr>
+          <th>Compra / fecha</th>
+          <th>Proveedor</th>
+          <th>Artículo</th>
+          <th>Comprado</th>
+          <th>Recibido</th>
+          <th>Pendiente</th>
+          <th>Estado</th>
+          <th>Recibir ahora</th>
+          <th>Historial</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of compras; let i = index">
+          <td>#{{c.id}}<br>{{c.fecha_compra | date:'dd/MM/yyyy'}}</td>
+          <td>{{c.proveedor}}</td>
+          <td>{{c.articulo}}</td>
+          <td>{{c.total_articulos}}</td>
+          <td>{{c.recibido === null ? 'Sin desglose' : c.recibido}}</td>
+          <td>{{c.pendiente === null ? 'Sin desglose' : c.pendiente}}</td>
+          <td>{{c.esactivo ? (c.estado || c.estatus) : 'Inactiva'}}</td>
+          <td>
+            <!-- Asignación de name único por renglón y condición de bloqueo limpia -->
+            <input type="number" 
+                   min="0" 
+                   step="1" 
+                   [max]="c.pendiente" 
+                   [name]="'recibir_' + c.id"
+                   [(ngModel)]="c.recibir" 
+                   class="form-control" 
+                   [attr.aria-label]="'Recibir ' + c.articulo"
+                   [disabled]="bloqueado || !c.esactivo || c.pendiente <= 0">
+          </td>
+          <td>
+            <button type="button" class="btn btn-outline-primary btn-sm" (click)="verHistorial(c)" [disabled]="historialCargando">
+              Ver
+            </button>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
-  
+
   <form (ngSubmit)="guardar()">
     <fieldset [disabled]="bloqueado">
       <div class="row">
-        <div class="col-md-4 form-group"><label for="fechaRecepcion">Fecha de recepción</label>
-          <input id="fechaRecepcion" name="fecha" type="date" class="form-control" [(ngModel)]="fecha" required></div>
-        <div class="col-md-8 form-group"><label for="referencia">Remisión o comprobante (opcional)</label>
-          <input id="referencia" name="referencia" class="form-control" [(ngModel)]="referencia" maxlength="200"></div>
+        <div class="col-md-4 form-group">
+          <label for="fechaRecepcion">Fecha de recepción</label>
+          <input id="fechaRecepcion" name="fecha" type="date" class="form-control" [(ngModel)]="fecha" required>
+        </div>
+        <div class="col-md-8 form-group">
+          <label for="referencia">Remisión o comprobante (opcional)</label>
+          <input id="referencia" name="referencia" class="form-control" [(ngModel)]="referencia" maxlength="200">
+        </div>
       </div>
-      <label for="observaciones">Observaciones</label><textarea id="observaciones" name="observaciones" class="form-control mb-3" [(ngModel)]="observaciones" maxlength="2000"></textarea>
+      <label for="observaciones">Observaciones</label>
+      <textarea id="observaciones" name="observaciones" class="form-control mb-3" [(ngModel)]="observaciones" maxlength="2000"></textarea>
     </fieldset>
-    <button class="btn btn-primary" style="justify-content: center;" type="submit" [disabled]="ocupado || consultando">{{ocupado ? 'Guardando…' : 'Guardar recepción'}}</button>
+
+    <div style="display: flex; justify-content: center;">
+      <button class="btn btn-primary" type="submit" [disabled]="ocupado || consultando">
+        {{ocupado ? 'Guardando…' : 'Guardar recepción'}}
+      </button>
+    </div>
   </form>
 </ng-container>
 
 <section *ngIf="seleccionada" class="card mt-4 p-3">
   <h4>Historial — {{seleccionada.articulo}} · compra #{{seleccionada.id}}</h4>
-  
-  <p>Folio: <b>{{seleccionada.folio_compra}}</b> · Factura: {{seleccionada.folio_factura || 'Sin referencia'}}<br>
+
+  <p>
+    Folio: <b>{{seleccionada.folio_compra}}</b> · Factura: {{seleccionada.folio_factura || 'Sin referencia'}}<br>
     Fecha de compra: {{seleccionada.fecha_compra | date:'dd/MM/yyyy'}} · Comprado: {{seleccionada.total_articulos}}<br>
     Registró: {{seleccionada.usuario_registro || 'No disponible en el registro histórico'}}
     <span *ngIf="seleccionada.registrado_en"> · {{seleccionada.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</span>
   </p>
-  
-  <p *ngIf="!seleccionada.gestion_recepciones" class="alert alert-info">Registro anterior al control de entregas. Se conservaron los datos originales; no se pueden deducir sus pendientes ni las fechas de cada entrega.</p>
-  
+
+  <p *ngIf="!seleccionada.gestion_recepciones" class="alert alert-info">
+    Registro anterior al control de entregas. Se conservaron los datos originales; no se pueden deducir sus pendientes ni las fechas de cada entrega.
+  </p>
+
   <p *ngIf="historialCargando">Cargando historial…</p>
-  
-  <div class="table-responsive" *ngIf="historial.length"><table class="table table-bordered">
-    <thead><tr><th>Recepción</th><th>Fecha de entrega</th><th>Registro en SICAI</th><th>Cantidad</th><th>Usuario</th><th>Comprobante</th><th>Observaciones</th></tr></thead>
-    <tbody><tr *ngFor="let r of historial"><td>#{{r.id}}</td><td>{{r.fecha_recepcion | date:'dd/MM/yyyy'}}</td>
-    
-      <td>{{r.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</td><td>{{r.cantidad}}</td><td>{{r.usuario_nombre}}</td><td>{{r.referencia}}</td><td>{{r.observaciones}}</td></tr></tbody>
-  </table></div>
-  
-  <p *ngIf="seleccionada.gestion_recepciones && !historial.length && !historialCargando">Esta compra aún no tiene recepciones.</p>
-  
+
+  <div class="table-responsive" *ngIf="historial.length">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Recepción</th>
+          <th>Fecha de entrega</th>
+          <th>Registro en SICAI</th>
+          <th>Cantidad</th>
+          <th>Usuario</th>
+          <th>Comprobante</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of historial">
+          <td>#{{r.id}}</td>
+          <td>{{r.fecha_recepcion | date:'dd/MM/yyyy'}}</td>
+          <td>{{r.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</td>
+          <td>{{r.cantidad}}</td>
+          <td>{{r.usuario_nombre}}</td>
+          <td>{{r.referencia}}</td>
+          <td>{{r.observaciones}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p *ngIf="seleccionada.gestion_recepciones && !historial.length && !historialCargando">
+    Esta compra aún no tiene recepciones.
+  </p>
 </section>

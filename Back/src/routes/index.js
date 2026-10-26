@@ -2,20 +2,14 @@ const multer = require('multer')
 const { Router } = require('express');
 const router = Router();
 
-const { getAlumnos, registrarStock,recargarStock, transferirArticulosPlantel, getListaArticulosTransferir, eliminarArticulo, confirmarTransferencia, getxistencias, getexistenciasBajas, UsarArticuloPlantel, getSalidas, getexistenciaPlantel, confirmarTransferenciaEnPlantel, } = require('../controllers/index.controller');
+const { getAlumnos, registrarStock,recargarStock, transferirArticulosPlantel, getListaArticulosTransferir, eliminarArticulo, confirmarTransferencia, getxistencias, getexistenciasBajas, UsarArticuloPlantel, getSalidas, getexistenciaPlantel, confirmarTransferenciaEnPlantel, recibirEntregaParcial,getComprasPorFolio, getHistorialItem, registrarRecepcionBatch, getDetalleCompraPorFolio} = require('../controllers/index.controller');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 router.get('/alumnos', [validarJWT], getAlumnos);
 
 
-const recepciones = require('../controllers/recepciones.controller');
-router.post('/registrarStock', recepciones.autorizar, recepciones.registrarCompra);
-router.get('/compras/por-folio', recepciones.autorizar, recepciones.buscar);
-router.get('/compras/:id/recepciones', recepciones.autorizar, recepciones.historial);
-router.post('/compras/recepciones', recepciones.autorizar, recepciones.recibir);
-// El cliente anterior no debe crear compras al recibir pendientes.
-router.post('/recargarStock/:idproducto/:idproveedor', recepciones.autorizar, (req,res) =>
-  res.status(409).json({error:'Actualice la pantalla y reciba los pendientes desde Folio de compra.'}));
+router.post('/registrarStock', registrarStock);
+router.post('/recargarStock/:idproducto/:idproveedor', recargarStock);
 router.post('/TransferirArticulosPlantel',transferirArticulosPlantel);
 router.get('/getListaArticulosTransferir/:folio',getListaArticulosTransferir);
 router.delete('/eliminarArticulo/:idarticulo',eliminarArticulo);
@@ -24,6 +18,10 @@ router.get('/confirmarTransferenciaEnPlantel/:consecutivo',confirmarTransferenci
 
 
 router.get('/getExistencias/:idplantel',getxistencias);
+router.put('/compras/recibir-entrega', recibirEntregaParcial);
+router.get('/compras/por-folio', [validarJWT], getComprasPorFolio);
+router.get('/compras/:id/recepciones', [validarJWT], getHistorialItem);
+router.post('/compras/recepciones', [validarJWT], registrarRecepcionBatch);
 
 router.get('/traerDisponiblePlantel/:idArticulo',getexistenciaPlantel);
 
