@@ -1,241 +1,67 @@
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
-  <h3><b>Recargar Stock</b></h3>
-  <hr>
-</div>
+<h3 style="justify-content: center;">Recargar Stock e historial de compras</h3>
+<p>Busque el folio y capture únicamente lo recibido en esta entrega. Cada recepción conserva su fecha y responsable.</p>
 
-<div class="formulario" style="margin: 0 auto; float:none ;">
-  <form (ngSubmit)="RecargarStock(f)" #f="ngForm" style="width: 100%;">
+	<div class="alert alert-success" *ngIf="mensaje" role="status">{{mensaje}}</div>
 
-    <div class="form-row mt-5" style="margin: 0 auto; width: 100%;">
-      <div class="form-group col-md-4">
-        <label>Partida</label>
-        <select [(ngModel)]="Recargastock.partida" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required #Partida="ngModel">       
-          <option *ngFor="let stock of partidas" [value]="stock.id">
-            {{stock.clave}} -- {{stock.descripcion}}
-          </option>
-        </select>
-        <small *ngIf="Partida.invalid && Partida.touched" class="text-danger">Campo Obligatorio</small>
-      </div>
+	<div class="alert alert-danger" *ngIf="error" role="alert">{{error}}</div>
 
-      <div class="form-group col-md-4 position-relative">
-        <label>Producto</label>
+	<form (ngSubmit)="buscar()" class="mb-4">
+	  <label for="folioCompra">Folio de compra</label>
+	  <div class="input-group">
+		<input id="folioCompra" name="folio" class="form-control" [(ngModel)]="folio" required maxlength="200" [disabled]="bloqueado">
+		<button class="btn btn-primary" type="submit" [disabled]="bloqueado">{{consultando ? 'Buscando…' : 'Buscar compra'}}</button>
+	  </div>
+	</form>
 
-        <div class="input-group">
-          <input type="text"
-                 class="form-control"
-                 placeholder="-- Seleccione o busque un producto --"
-                 [(ngModel)]="terminoBusqueda"
-                 name="BusquedaProducto"
-                 (focus)="abrirDropdown()"
-                 (input)="filtrarProductos()"
-                 [disabled]="!Recargastock.partida"
-                 autocomplete="off"
-                 required>
-          
-          <div class="input-group-append">
-            <button class="btn btn-outline-secondary" 
-                    type="button" 
-                    (click)="alternarDropdown()"
-                    [disabled]="!Recargastock.partida">
-              ▼
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="mostrarDropdown && productosFiltrados.length > 0" 
-             class="dropdown-menu show w-100 shadow" 
-             style="max-height: 250px; overflow-y: auto; z-index: 1050; display: block;">
-          <button type="button" 
-                  class="dropdown-item text-wrap py-2" 
-                  *ngFor="let prod of productosFiltrados"
-                  (mousedown)="$event.preventDefault(); seleccionarProducto(prod)">
-            <strong *ngIf="prod.clave">{{ prod.clave }} - </strong> {{ prod.descripcion }}
-          </button>
-        </div>
-
-        <div *ngIf="mostrarDropdown && productosFiltrados.length === 0" 
-             class="dropdown-menu show w-100 p-2 text-muted" 
-             style="display: block;">
-          <small>No se encontraron productos coincidentes</small>
-        </div>
-
-        <small *ngIf="!Recargastock.producto && terminoBusqueda && !mostrarDropdown" class="text-danger">
-          Debe seleccionar una opción de la lista
-        </small>
-      </div>
-
-      <div class="form-group col-md-4">
-        <label>Proveedor</label>
-        <select [(ngModel)]="direccionSeleccionada" 
-                class="form-control" 
-                name="Proveedor" 
-                (change)="CapturarValor()" 
-                required 
-                #Proveedor="ngModel" 
-                [disabled]="!terminoBusqueda || !Recargastock.producto || proveedores.length === 0"> 
-          <option [ngValue]="null" disabled selected>-- Seleccione un proveedor --</option>
-          <option *ngFor="let proveedor of proveedores" [value]="proveedor.id">
-            {{proveedor.razon_social}}
-          </option>
-        </select>
-        <small *ngIf="Proveedor.invalid && Proveedor.touched" class="text-danger">Campo Obligatorio</small>
-        <small *ngIf="Recargastock.producto && proveedores.length === 0" class="text-muted d-block mt-1">
-          Sin proveedores asignados
-        </small>
-      </div>     
-    </div>
-
-    <div class="form-row">
-      <div class="form-group col-md-2">
-        <label>Folio factura</label>
-        <input [(ngModel)]="Recargastock.folio" type="text" class="form-control" name="Folio" 
-               [attr.disabled]="articuloValido === false ? '' : null" required>
-      </div>
-
-      <div class="form-group col-md-2">
-        <label>Costo unitario</label>
-        <input type="text" class="form-control" name="CostoUnitario" [value]="costo_unitario | currency" 
-               readonly [attr.disabled]="articuloValido === false ? '' : null">
-      </div>
-
-      <div class="form-group col-md-2">
-        <label>Cantidad adquirida</label>
-        <input [(ngModel)]="Recargastock.cantidad" type="number" class="form-control" name="Cantidad" 
-               min="1"
-               (input)="CalcularImporteyTotal()" [attr.disabled]="articuloValido === false ? '' : null" required>
-      </div>
-
-      <div class="form-group col-md-2">
-        <label>Importe</label>
-        <input type="text" [value]="monedaFormateada" class="form-control" readonly>
-      </div>
-
-      <div class="form-group col-md-2">
-        <label>Total de compra</label>
-        <input type="text" [value]="monedaFormateada2" class="form-control" readonly>
-      </div>
+<ng-container *ngIf="compras.length">
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead><tr><th>Compra / fecha</th><th>Proveedor</th><th>Artículo</th><th>Comprado</th><th>Recibido</th><th>Pendiente</th><th>Estado</th><th>Recibir ahora</th><th>Historial</th></tr></thead>
+      <tbody><tr *ngFor="let c of compras">
+        <td>#{{c.id}}<br>{{c.fecha_compra | date:'dd/MM/yyyy'}}</td><td>{{c.proveedor}}</td><td>{{c.articulo}}</td>
+        <td>{{c.total_articulos}}</td><td>{{c.recibido === null ? 'Sin desglose' : c.recibido}}</td><td>{{c.pendiente === null ? 'Sin desglose' : c.pendiente}}</td>
+        <td>{{c.esactivo ? c.estado : 'Inactiva'}}</td>
+        <td><input type="number" min="0" step="0.000001" [max]="c.pendiente" [(ngModel)]="c.recibir" class="form-control"
+          [attr.aria-label]="'Recibir ' + c.articulo" [disabled]="bloqueado || !c.gestion_recepciones || !c.esactivo || c.pendiente <= 0"></td>
+        <td><button type="button" class="btn btn-outline-primary btn-sm" (click)="verHistorial(c)" [disabled]="historialCargando">Ver</button></td>
+      </tr></tbody>
+    </table>
+  </div>
   
-      <div class="form-group col-md-2">
-        <label>Fecha de adquisición</label>
-        <input [(ngModel)]="Recargastock.fechaAd" type="date" class="form-control" name="FechaAdqui" 
-               required [attr.disabled]="articuloValido === false ? '' : null">
+  <form (ngSubmit)="guardar()">
+    <fieldset [disabled]="bloqueado">
+      <div class="row">
+        <div class="col-md-4 form-group"><label for="fechaRecepcion">Fecha de recepción</label>
+          <input id="fechaRecepcion" name="fecha" type="date" class="form-control" [(ngModel)]="fecha" required></div>
+        <div class="col-md-8 form-group"><label for="referencia">Remisión o comprobante (opcional)</label>
+          <input id="referencia" name="referencia" class="form-control" [(ngModel)]="referencia" maxlength="200"></div>
       </div>
-    </div>
-
-    <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
-      <button type="submit" class="btn btn-primary" [disabled]="f.invalid || articuloValido === false">
-        <span class="mdi mdi-content-save"></span> Guardar
-      </button>
-    </div>
+      <label for="observaciones">Observaciones</label><textarea id="observaciones" name="observaciones" class="form-control mb-3" [(ngModel)]="observaciones" maxlength="2000"></textarea>
+    </fieldset>
+    <button class="btn btn-primary" style="justify-content: center;" type="submit" [disabled]="ocupado || consultando">{{ocupado ? 'Guardando…' : 'Guardar recepción'}}</button>
   </form>
-</div>
+</ng-container>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- <div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
-
-    <h3><b>Recargar Stock</b></h3>
-<hr>
-</div>
-
-
-<div class="formulario" style="margin: 0 auto; float:none ;">
-
-<form (ngSubmit)="RecargarStock(f)" #f="ngForm" style="width: 100%;" >
-
-    <div class="form-row mt-5" style="margin: 0 auto; width: 100%;">
-   
-      
-      <div class="form-group col-md-4">
-        <label for="inputPassword4">Partida</label>
-        <select [(ngModel)]="Recargastock.partida" id="areaEmite" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required required ngModel #Partida="ngModel">       
-          <ng-container *ngFor="let stock of  partidas" >
-                <option [value]="stock.id">{{stock.clave}} -- {{stock.descripcion}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
-
-
-      <div class="form-group col-md-4">
-        <label for="inputPassword4">Producto</label>
-        <select [(ngModel)]="Recargastock.producto" id="areaEmite" class="form-control" name="Producto" required ngModel #Producto="ngModel">       
-          <ng-container *ngFor="let producto of productos" >
-                <option [value]="producto.id">{{producto.descripcion}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>
-
-            <div class="form-group col-md-4">
-        <label for="inputPassword4">Proveedor</label>
-        <select [(ngModel)]="Recargastock.proveedor" id="areaEmite" class="form-control" name="Proveedor" [(ngModel)]="direccionSeleccionada" (change)="CapturarValor()"  required ngModel #Proveedor="ngModel">       
-          <ng-container *ngFor="let proveedor of proveedores">
-                <option [value]="proveedor.id">{{proveedor.razon_social}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>     
-</div>
-
-
-    <div class="form-row">
-
-          <div class="form-group col-md-2">
-            <label for="inputAddress">Folio factura</label>
-            <input [(ngModel)]="Recargastock.folio" type="text" class="form-control" name="Folio" id="inputAddress" placeholder="">
-          </div>
-
-           <div class="form-group col-md-2">
-            <label for="inputAddress">Costo unitario</label>
-            <input type="text" class="form-control" name="CostoUnitario" id="inputAddress" value="{{costo_unitario | currency}}" placeholder="" readonly>
-          </div>
-
-       <div class="form-group col-md-2">
-            <label for="inputAddress">Cantidad adquirida</label>
-            <input [(ngModel)]="Recargastock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress" (change)="CalcularImporteyTotal()" placeholder="" required #Cantidad="ngModel">
-            <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
-
-         <div class="form-group col-md-2">
-            <label for="inputAddress">Importe</label>
-            <input type="text"  [value]="monedaFormateada" class="form-control" name="Importe" id="inputAddress" placeholder="" readonly>
-        </div>
-
-         <div class="form-group col-md-2">
-            <label for="inputAddress">Total de compra</label>
-            <input type="text" [value]="monedaFormateada2" class="form-control" name="TotalCompra" id="inputAddress" placeholder="" readonly>
-        </div>
+<section *ngIf="seleccionada" class="card mt-4 p-3">
+  <h4>Historial — {{seleccionada.articulo}} · compra #{{seleccionada.id}}</h4>
+  
+  <p>Folio: <b>{{seleccionada.folio_compra}}</b> · Factura: {{seleccionada.folio_factura || 'Sin referencia'}}<br>
+    Fecha de compra: {{seleccionada.fecha_compra | date:'dd/MM/yyyy'}} · Comprado: {{seleccionada.total_articulos}}<br>
+    Registró: {{seleccionada.usuario_registro || 'No disponible en el registro histórico'}}
+    <span *ngIf="seleccionada.registrado_en"> · {{seleccionada.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+  </p>
+  
+  <p *ngIf="!seleccionada.gestion_recepciones" class="alert alert-info">Registro anterior al control de entregas. Se conservaron los datos originales; no se pueden deducir sus pendientes ni las fechas de cada entrega.</p>
+  
+  <p *ngIf="historialCargando">Cargando historial…</p>
+  
+  <div class="table-responsive" *ngIf="historial.length"><table class="table table-bordered">
+    <thead><tr><th>Recepción</th><th>Fecha de entrega</th><th>Registro en SICAI</th><th>Cantidad</th><th>Usuario</th><th>Comprobante</th><th>Observaciones</th></tr></thead>
+    <tbody><tr *ngFor="let r of historial"><td>#{{r.id}}</td><td>{{r.fecha_recepcion | date:'dd/MM/yyyy'}}</td>
     
-      
-          <div class="form-group col-md-2">
-            <label for="inputAddress">Fecha de adquisición</label>
-            <input [(ngModel)]="Recargastock.fechaAd" type="date" class="form-control" name="FechaAdqui" id="inputAddress" placeholder="" required #FechaAdqui="ngModel">
-            <small *ngIf="FechaAdqui.invalid && FechaAdqui.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-          </div>
-
-    </div>
-
+      <td>{{r.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</td><td>{{r.cantidad}}</td><td>{{r.usuario_nombre}}</td><td>{{r.referencia}}</td><td>{{r.observaciones}}</td></tr></tbody>
+  </table></div>
   
-    <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
-        <button style="padding:10px;margin-right: 10px;"type="submit" class="btn btn-primary">Guardar</button>
-        <button style="padding:10px;" routerLink="/dashboard" type="submit" class="btn btn-danger">Cancelar/Regresar</button> -->
-    <!-- </div>
+  <p *ngIf="seleccionada.gestion_recepciones && !historial.length && !historialCargando">Esta compra aún no tiene recepciones.</p>
   
-</form>
-
-</div> --> 
+</section>

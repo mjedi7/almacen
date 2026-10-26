@@ -41,14 +41,17 @@ const generarReporteSalidasXPartida = async (req, res) => {
         ct.descripcion AS "centro_trabajo",
         ct.codigo AS "centro_codigo",
         pro.razon_social AS "proveedor",
-        com.folio_compra || ' / ' || TO_CHAR(com.fecha_compra, 'TMMon') AS "folio_compra",
-        TO_CHAR(com.fecha_compra, 'DD/MM/YYYY') AS "fecha_compra",
+        com.folio_compra AS "folio_compra",
+        com.fecha_compra AS "fecha_compra",
         SUM(mdg.num_articulos_solicitados * cos.precio_unitario) AS "total_movimiento"
       FROM movimientosdg mdg
         INNER JOIN centro_trabajo ct ON mdg.id_centrotrabajo_transfiere = ct.id
         INNER JOIN costos cos ON cos.id = mdg.id_costos
         INNER JOIN cat_proveedores pro ON pro.id = cos.id_proveedor
-        INNER JOIN compras com ON com.id_costo = cos.id AND com.id_costo = mdg.id_costos
+        LEFT JOIN LATERAL (SELECT
+          string_agg(DISTINCT c.folio_compra, ', ' ORDER BY c.folio_compra) AS folio_compra,
+          string_agg(DISTINCT TO_CHAR(c.fecha_compra,'DD/MM/YYYY'), ', ') AS fecha_compra
+          FROM compras c WHERE c.id_costo=cos.id AND c.esactivo IS TRUE) com ON true
         INNER JOIN cat_articulos art ON art.id = cos.id_articulo
         INNER JOIN cat_partidas par ON par.id = art.id_partidas
       WHERE mdg.fecha::DATE >= TO_DATE($1, 'DD/MM/YYYY')
