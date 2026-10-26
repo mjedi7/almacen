@@ -1,26 +1,40 @@
-<h3 style="justify-content: center;">Recargar Stock e historial de compras</h3>
-<p>Busque el folio y capture únicamente lo recibido en esta entrega. Cada recepción conserva su fecha y responsable.</p>
+	<div class="text-center">
+		<h3 style="justify-content: center;">Recargar Stock e historial de compras</h3>
+		<p>Busque el folio y capture únicamente lo recibido en esta entrega. Cada recepción conserva su fecha y responsable.</p>
+	</div>
 
 	<div class="alert alert-success" *ngIf="mensaje" role="status">{{mensaje}}</div>
 
 	<div class="alert alert-danger" *ngIf="error" role="alert">{{error}}</div>
 
-	<form (ngSubmit)="buscar()" class="mb-4">
-	  <label for="folioCompra">Folio de compra</label>
-	  <div class="input-group">
-		<input id="folioCompra" name="folio" class="form-control" [(ngModel)]="folio" required maxlength="200" [disabled]="bloqueado">
-		<button class="btn btn-primary" type="submit" [disabled]="bloqueado">{{consultando ? 'Buscando…' : 'Buscar compra'}}</button>
+	<div class="row justify-content-center">
+	  <div class="col-md-3">
+		<form (ngSubmit)="buscar()" class="mb-4">
+		  <label for="folioCompra">Folio Interno</label>
+		  <div class="input-group">
+			<input id="folioCompra" name="folio" class="form-control" [(ngModel)]="folio" required maxlength="200" [disabled]="bloqueado">
+			<button class="btn btn-primary" type="submit" [disabled]="bloqueado">{{consultando ? 'Buscando…' : 'Buscar compra'}}</button>
+		  </div>
+		</form>
 	  </div>
-	</form>
+	</div>
 
 <ng-container *ngIf="compras.length">
+  <div class="alert alert-light border mb-3 py-2">
+    <strong>Estatus de entrega:</strong>
+    pendiente si no se ha recibido mercancía; entrega parcial si faltan artículos;
+    entregada cuando se ha recibido toda la cantidad comprada.
+    El estatus se actualiza al guardar cada recepción.
+  </div>
   <div class="table-responsive">
     <table class="table table-bordered table-striped">
-      <thead><tr><th>Compra / fecha</th><th>Proveedor</th><th>Artículo</th><th>Comprado</th><th>Recibido</th><th>Pendiente</th><th>Estado</th><th>Recibir ahora</th><th>Historial</th></tr></thead>
+      <thead><tr><th>Compra / fecha</th><th>Proveedor</th><th>Artículo</th><th>Comprado</th><th>Recibido</th><th>Pendiente</th><th>Estatus de entrega</th><th>Recibir ahora</th><th>Historial</th></tr></thead>
       <tbody><tr *ngFor="let c of compras">
         <td>#{{c.id}}<br>{{c.fecha_compra | date:'dd/MM/yyyy'}}</td><td>{{c.proveedor}}</td><td>{{c.articulo}}</td>
         <td>{{c.total_articulos}}</td><td>{{c.recibido === null ? 'Sin desglose' : c.recibido}}</td><td>{{c.pendiente === null ? 'Sin desglose' : c.pendiente}}</td>
-        <td>{{c.esactivo ? c.estado : 'Inactiva'}}</td>
+        <td class="align-middle">
+          <ng-container *ngTemplateOutlet="estatusCompra; context: { $implicit: c }"></ng-container>
+        </td>
         <td><input type="number" min="0" step="0.000001" [max]="c.pendiente" [(ngModel)]="c.recibir" class="form-control"
           [attr.aria-label]="'Recibir ' + c.articulo" [disabled]="bloqueado || !c.gestion_recepciones || !c.esactivo || c.pendiente <= 0"></td>
         <td><button type="button" class="btn btn-outline-primary btn-sm" (click)="verHistorial(c)" [disabled]="historialCargando">Ver</button></td>
@@ -29,6 +43,7 @@
   </div>
   
   <form (ngSubmit)="guardar()">
+
     <fieldset [disabled]="bloqueado">
       <div class="row">
         <div class="col-md-4 form-group"><label for="fechaRecepcion">Fecha de recepción</label>
@@ -38,30 +53,65 @@
       </div>
       <label for="observaciones">Observaciones</label><textarea id="observaciones" name="observaciones" class="form-control mb-3" [(ngModel)]="observaciones" maxlength="2000"></textarea>
     </fieldset>
-    <button class="btn btn-primary" style="justify-content: center;" type="submit" [disabled]="ocupado || consultando">{{ocupado ? 'Guardando…' : 'Guardar recepción'}}</button>
+	<div class="text-center">
+    <button class="btn btn-primary" type="submit" [disabled]="ocupado || consultando">{{ocupado ? 'Guardando…' : 'Guardar recepción'}}</button>
+    </div>
+    
   </form>
+  
 </ng-container>
 
+<hr>
+
 <section *ngIf="seleccionada" class="card mt-4 p-3">
-  <h4>Historial — {{seleccionada.articulo}} · compra #{{seleccionada.id}}</h4>
+	<div class="text-center">
+	<h4>Historial — {{seleccionada.articulo}} · compra #{{seleccionada.id}}</h4>
+    <div class="mb-3">
+      <span class="mr-2 me-2">Estatus de entrega:</span>
+      <ng-container *ngTemplateOutlet="estatusCompra; context: { $implicit: seleccionada }"></ng-container>
+    </div>
+	</div>
   
-  <p>Folio: <b>{{seleccionada.folio_compra}}</b> · Factura: {{seleccionada.folio_factura || 'Sin referencia'}}<br>
-    Fecha de compra: {{seleccionada.fecha_compra | date:'dd/MM/yyyy'}} · Comprado: {{seleccionada.total_articulos}}<br>
-    Registró: {{seleccionada.usuario_registro || 'No disponible en el registro histórico'}}
-    <span *ngIf="seleccionada.registrado_en"> · {{seleccionada.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</span>
-  </p>
+	  <p>Folio Interno: <b>{{seleccionada.folio_compra}}</b> · Factura: {{seleccionada.folio_factura || 'Sin referencia'}}<br>
+		Fecha de compra: {{seleccionada.fecha_compra | date:'dd/MM/yyyy'}} · Comprado: {{seleccionada.total_articulos}}<br>
+		Registró: {{seleccionada.usuario_registro || 'No disponible en el registro histórico'}}
+		<span *ngIf="seleccionada.registrado_en"> · {{seleccionada.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+	  </p>
   
-  <p *ngIf="!seleccionada.gestion_recepciones" class="alert alert-info">Registro anterior al control de entregas. Se conservaron los datos originales; no se pueden deducir sus pendientes ni las fechas de cada entrega.</p>
+	  <p *ngIf="!seleccionada.gestion_recepciones" class="alert alert-info">Registro anterior al control de entregas. Se conservaron los datos originales; no se pueden deducir sus pendientes ni las fechas de cada entrega.</p>
+	  
+	  <p *ngIf="historialCargando">Cargando historial…</p>
   
-  <p *ngIf="historialCargando">Cargando historial…</p>
+  <div class="table-responsive" *ngIf="historial.length">
+	  
+	  <table class="table table-bordered">
+		<thead><tr><th>Recepción</th><th>Fecha de entrega</th><th>Registro en SICAI</th><th>Cantidad</th><th>Usuario</th><th>Comprobante</th><th>Observaciones</th></tr></thead>
+		
+		<tbody><tr *ngFor="let r of historial"><td>#{{r.id}}</td><td>{{r.fecha_recepcion | date:'dd/MM/yyyy'}}</td>
+		
+		  <td>{{r.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</td><td>{{r.cantidad}}</td><td>{{r.usuario_nombre}}</td><td>{{r.referencia}}</td><td>{{r.observaciones}}</td></tr></tbody>
+	  </table>
+	  
+  </div>
   
-  <div class="table-responsive" *ngIf="historial.length"><table class="table table-bordered">
-    <thead><tr><th>Recepción</th><th>Fecha de entrega</th><th>Registro en SICAI</th><th>Cantidad</th><th>Usuario</th><th>Comprobante</th><th>Observaciones</th></tr></thead>
-    <tbody><tr *ngFor="let r of historial"><td>#{{r.id}}</td><td>{{r.fecha_recepcion | date:'dd/MM/yyyy'}}</td>
-    
-      <td>{{r.registrado_en | date:'dd/MM/yyyy HH:mm:ss'}}</td><td>{{r.cantidad}}</td><td>{{r.usuario_nombre}}</td><td>{{r.referencia}}</td><td>{{r.observaciones}}</td></tr></tbody>
-  </table></div>
-  
-  <p *ngIf="seleccionada.gestion_recepciones && !historial.length && !historialCargando">Esta compra aún no tiene recepciones.</p>
+	<p *ngIf="seleccionada.gestion_recepciones && !historial.length && !historialCargando">Esta compra aún no tiene recepciones.</p>
   
 </section>
+
+<!-- Estado confirmado por el backend; capturar una cantidad aún no lo modifica. -->
+<ng-template #estatusCompra let-compra>
+  <span *ngIf="!compra.esactivo" class="badge badge-secondary bg-secondary text-white px-3 py-2">Inactiva</span>
+  <ng-container *ngIf="compra.esactivo">
+    <span *ngIf="!compra.gestion_recepciones" class="badge badge-secondary bg-secondary text-white px-3 py-2"
+      title="Compra histórica: no se registró el detalle de sus entregas.">Sin desglose</span>
+    <ng-container *ngIf="compra.gestion_recepciones" [ngSwitch]="compra.estado">
+      <span *ngSwitchCase="'Pendiente'" class="badge badge-danger bg-danger text-white px-3 py-2"
+        title="Todavía no se ha recibido mercancía de esta compra.">Pendiente</span>
+      <span *ngSwitchCase="'Parcial'" class="badge badge-warning bg-warning text-dark px-3 py-2"
+        title="Se recibió una parte; aún queda cantidad pendiente.">Entrega parcial</span>
+      <span *ngSwitchCase="'Completa'" class="badge badge-success bg-success text-white px-3 py-2"
+        title="Se recibió toda la cantidad comprada.">Entregada</span>
+      <span *ngSwitchDefault class="badge badge-secondary bg-secondary text-white px-3 py-2">Estado no disponible</span>
+    </ng-container>
+  </ng-container>
+</ng-template>

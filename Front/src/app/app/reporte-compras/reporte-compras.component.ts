@@ -216,13 +216,13 @@ export class ReporteComprasComponent implements OnInit {
     URL.revokeObjectURL(fileURL);
   }
 
-  traerPartidas() {
-    this.traer.http.get(`${this.API_URL}/traerPartidas`)
-      .subscribe((res: any) => {
-        this.partidas = res || [];
-        this.partidas.push({ id: '0', clave: '0', descripcion: 'Todos' });
-      });
-  }
+	traerPartidas() {
+	  this.traer.http.get(`${this.API_URL}/traerPartidas`)
+		.subscribe((res: any) => {
+		  this.partidas = res || [];
+		  this.partidas.unshift({ id: '0', clave: '0', descripcion: 'TODAS' });
+		});
+	}
 
   traerProveedores() {
     this.traer.http.get(`${this.API_URL}/traerProveedores`)
