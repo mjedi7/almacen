@@ -85,6 +85,8 @@ const generarReporteEntradasPartida = async (req, res) => {
       });
     }
 
+    const esCompra = req.body.modo === 'compras';
+    const fuente = esCompra ? 'v_compras_reportes' : 'v_entradas_reportes';
     const consulta = `
       SELECT
         cr.folio_factura,
@@ -98,7 +100,7 @@ const generarReporteEntradasPartida = async (req, res) => {
         COALESCE(cr.impuesto, 0) AS impuesto,
         COALESCE(cr.total, 0) AS total,
         cr.id_partida
-      FROM compras_reportes cr
+      FROM ${fuente} cr
       LEFT JOIN cat_proveedores cp
         ON cp.id = cr.id_proveedor
       WHERE cr.fecha_compra::date >= $1::date
@@ -166,7 +168,7 @@ const generarReporteEntradasPartida = async (req, res) => {
 
     const datosPlantilla = {
       usuario: usuario || 'USUARIO NO IDENTIFICADO',
-      titulo: 'RESUMEN DE COMPRAS',
+      titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
       tipoReporte: 'Por partida',
       partida: {
         id: idPartida,

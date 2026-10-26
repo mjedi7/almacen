@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { claveOperacion } from '../services/clave-operacion';
 import { CurrencyPipe } from '@angular/common';
 import { NgForm } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -12,6 +13,11 @@ export interface almacen {
   producto?: any;
   fechaAd?: any;
   cantidad?: any;
+  cantidad_recibida?: any;
+  fecha_recepcion?: string;
+  folio_factura?: string;
+  referencia?: string;
+  observaciones?: string;
   id_unidad_medida?: any;
   unidad?: string;
   descripcion?: string;
@@ -34,6 +40,9 @@ export interface almacen {
 export class GenerarDocumentoComponent implements OnInit {
 
   API_URL = environment.uri_api;
+  guardando = false;
+  private clave = claveOperacion();
+  envioPendiente: any = null;
 
   myFiles!: Array<any>;
   numidentificador: any;
@@ -63,6 +72,11 @@ export class GenerarDocumentoComponent implements OnInit {
     producto: null,
     fechaAd: null,
     cantidad: null,
+    cantidad_recibida: 0,
+    fecha_recepcion: '',
+    folio_factura: '',
+    referencia: '',
+    observaciones: '',
     id_unidad_medida: null,
     unidad: '',
     descripcion: '',
@@ -145,55 +159,41 @@ export class GenerarDocumentoComponent implements OnInit {
   // ... Mantén el resto de tus métodos (AgregarStock, calculoCompra, etc.) dentro de la clase sin modificarlos ...
 
   AgregarStock(form: NgForm) {
-
-    console.log("--> 1. THIS.STOCK EN ANGULAR:", this.stock);
-    if (form.valid == true && this.stock.cantidad > 0) {
-
-      this.traer.http.post(this.API_URL + `/registrarStock`, this.stock)
-        .subscribe((res: any) => {
-
-          console.log(res);
-
-          if (res == "Save") {
-
-            Swal.fire(
-              'Ok',
-              '¡Los datos fueron guardados!',
-              'success'
-            );
-
-          } else if (res == "Duplicado") {
-
-            Swal.fire(
-              'Artículo Duplicado',
-              'Este artículo ya fue registrado',
-              'error'
-            );
-
-          } else {
-
-            Swal.fire(
-              'Error',
-              '¡No se guardaron los cambios!. Contacte a soporte',
-              'error'
-            );
-
-          }
-
-        });
-
-    } else {
-
-      Swal.fire(
-        'Error al guardar',
-        '¡Revise que los campos tengan información correcta!',
-        'error'
-      );
-
+    if (this.guardando) return;
+    if (!this.envioPendiente) {
+      if (!form.valid || !(Number(this.stock.cantidad) > 0) || this.stock.cantidad_recibida == null ||
+          !Number.isFinite(Number(this.stock.cantidad_recibida)) || Number(this.stock.cantidad_recibida) < 0 ||
+          Number(this.stock.cantidad_recibida) > Number(this.stock.cantidad) ||
+          (Number(this.stock.cantidad_recibida) > 0 && !this.stock.fecha_recepcion)) {
+        Swal.fire('Revise los datos', 'Indique lo comprado y lo recibido; la recepción no puede superar la compra.', 'error');
+        return;
+      }
+      this.envioPendiente = { ...this.stock, clave_operacion: this.clave };
     }
-
+    this.guardando = true;
+    this.traer.http.post<any>(this.API_URL + '/registrarStock', this.envioPendiente,
+      { headers: { Authorization: localStorage.getItem('token') || '' } }).subscribe({
+      next: res => {
+        this.guardando = false;
+        this.envioPendiente = null;
+        this.clave = claveOperacion();
+        this.stock.cantidad = null;
+        this.stock.cantidad_recibida = 0;
+        this.stock.producto = null;
+        this.productoBuscado = '';
+        this.stock.total = null;
+        this.stock.subTotal = null;
+        this.monedaFormateada = '$ 0.00'; this.monedaFormateada2 = '$ 0.00';
+        Swal.fire('Compra registrada', `Compra #${res.id_compra}. Solo lo recibido se sumó a existencias. Puede agregar otro artículo con el mismo folio o consultar sus entregas en Recargar Stock.`, 'success');
+      },
+      error: err => {
+        this.guardando = false;
+        if (err.status >= 400 && err.status < 500) this.envioPendiente = null;
+        Swal.fire('No se confirmó el guardado', err.error?.error ||
+          'Pulse Guardar para reintentar la misma operación sin duplicarla.', 'error');
+      }
+    });
   }
-
 
   opcionSeleccionadaX() {
 

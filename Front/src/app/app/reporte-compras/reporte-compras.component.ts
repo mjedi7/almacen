@@ -14,6 +14,8 @@ import Swal from 'sweetalert2';
 })
 export class ReporteComprasComponent implements OnInit {
 
+  modo = 'entradas';
+
   reporte: reporte_de_compras = {
     fechaIni: null,
     fechaFin: null,
@@ -86,6 +88,7 @@ export class ReporteComprasComponent implements OnInit {
 
     const payload = {
       ...this.reporte,
+      modo: this.modo,
       usuario: usuarioSesion
     };
 
@@ -111,7 +114,7 @@ export class ReporteComprasComponent implements OnInit {
     }).subscribe({
       next: (res: Blob) => {
         Swal.close();
-        this.descargarArchivo(res, nombreArchivo);
+        this.descargarArchivo(res, nombreArchivo.replace('compras', this.modo));
       },
       error: (err) => {
         Swal.close();
@@ -137,6 +140,7 @@ export class ReporteComprasComponent implements OnInit {
 
     const payload = {
       ...this.reporte2,
+      modo: this.modo,
       usuario: usuarioSesion
     };
 
@@ -154,7 +158,7 @@ export class ReporteComprasComponent implements OnInit {
     }).subscribe({
       next: (res: Blob) => {
         Swal.close();
-        this.descargarArchivo(res, 'Reporte_compras_x_proveedor.pdf');
+        this.descargarArchivo(res, `Reporte_${this.modo}_x_proveedor.pdf`);
       },
       error: (err) => {
         Swal.close();

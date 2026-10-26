@@ -324,7 +324,7 @@
               <tr>
                 <td class="lbl">Clave artículo:</td>
                 <td class="val">{{header.clave_completa}}</td>
-                <td class="lbl">Fecha últ. compra:</td>
+                <td class="lbl">Última entrada:</td>
                 <td class="val">{{header.fecha_ult_compra}}</td>
               </tr>
               <tr>
@@ -342,6 +342,16 @@
             </tbody>
           </table>
 
+          <h3>Entradas y recepciones</h3>
+          <table class="table-detalle">
+            <thead><tr><th>Folio compra</th><th>Movimiento</th><th>Fecha</th><th>Cantidad</th><th>Costo unitario</th><th>Importe</th></tr></thead>
+            <tbody>
+              {{#each entradas}}
+              <tr><td>{{folio}}</td><td>{{tipo}}</td><td>{{fecha}}</td><td class="num">{{cantidad}}</td><td class="num">{{costo}}</td><td class="num">{{importe}}</td></tr>
+              {{else}}<tr><td colspan="6">Sin entradas registradas.</td></tr>{{/each}}
+            </tbody>
+          </table>
+          <h3>Salidas registradas</h3>
           <!-- Tabla de movimientos (Kárdex) -->
           <table class="table-detalle" cellspacing="0" cellpadding="0">
             <thead>
@@ -349,7 +359,7 @@
                 <th style="width: 10%;" class="cen">Doc/Folio</th>
                 <th style="width: 27%;">Plantel / Destino</th>
                 <th style="width: 11%;" class="num">Exist. Inicial</th>
-                <th style="width: 11%;" class="num">Ventas Acum.</th>
+                <th style="width: 11%;" class="num">Salida</th>
                 <th style="width: 13%;" class="num">Importe Total</th>
                 <th style="width: 11%;" class="num">Existencia</th>
                 <th style="width: 17%;" class="cen">Fecha</th>
