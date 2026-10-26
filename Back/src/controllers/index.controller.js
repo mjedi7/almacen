@@ -321,15 +321,97 @@ const recibirEntregaParcial = async (req, res) => {
         if(nuevaCantidadRecibida > item.total_articulos) {
             return res.status(400).json({
                 error: `La cantidad total recibida (${nuevaCantidadRecibida}) supera la cantidad pedida (${item.total_articulos}`
-            })
+            });
         }
+
+        const nuevoEstatus = nuevaCantidadRecibida >= item.total_articulos ? 'Entregada' : 'Incompleta';
+
+        await pool.query(
+            'UPDATE compras SET cantidad_recibida = $1, status = $2 WHERE id = $3',
+            [nuevaCantidadRecibida, nuevoEstatus, item.id]
+        );
+
+        await pool.query(
+            'UPDATE almacen SET existencias = existencias + $1, WHERE id_costos = $2 AND id_centrotrabajo = $3',
+            [cantidadLlegada, id_costo, id_centrotrabajo]
+        );
+
+        const todasLasPartidas = await pool.query(
+            'SELECT estatus FROM compras WHERE folio_compra = "$1',
+            [folio_compra]
+        );
+
+        const estatusArray = todasLasPartidas.rows.map(r => r.estatus);
+        let estatusGeneral  = 'Incompleta';
+
+        if(estatusArray.every(est => est === 'Entregada')) {
+            estatusGeneral = 'Entregado'
+        }
+
+        await pool.query(
+            'UPDATE compras_reportes SET estatus_entrega = $1 WHERE folio_factura = $2',
+            [estatusGeneral, folio_compra]
+        )
+
+        return res.json({ 
+            mensaje: "Entrega registrada con éxito", 
+            estatusArticulo: nuevoEstatus, 
+            estatusCompra: estatusGeneral 
+        });
 
 
     }catch(error) {
-
+        console.error("Error al recibir entrega:", error);
+        return res.status(500).json({ error: "Error en el servidor al registrar entrega" });
     }
 
 };
+
+const getDetalleCompraPorFolio = async (req, res) => {
+    const { folio } = req.params;
+
+    try {
+        const query = `
+            SELECT 
+                c.id AS id_compra,
+                c.id_compra_reporte,
+                c.id_costo,
+                c.total_articulos,
+                COALESCE(c.cantidad_recibida, 0) AS cantidad_recibida,
+                (c.total_articulos - COALESCE(c.cantidad_recibida, 0)) AS cantidad_pendiente,
+                c.estatus,
+                cr.folio_factura AS folio_compra,
+                a.descripcion AS nombre_producto,
+                a.clave AS clave_producto,
+                p.nombre AS nombre_proveedor,
+                cos.precio_unitario,
+                alm.id_centrotrabajo
+            FROM compras c
+            INNER JOIN compras_reportes cr ON c.id_compra_reporte = cr.id
+            INNER JOIN costos cos ON c.id_costo = cos.id
+            INNER JOIN cat_articulos a ON cos.id_articulo = a.id
+            LEFT JOIN proveedores p ON cos.id_proveedor = p.id
+            LEFT JOIN almacen alm ON alm.id_costos = cos.id
+            WHERE cr.folio_factura = $1 AND c.esactivo = true
+            ORDER BY c.id ASC;
+        `;
+
+        const response = await pool.query(query, [folio]);
+
+        if (response.rowCount === 0) {
+            return res.status(404).json({
+                msg: 'Folio no encontrado o sin artículos activos'
+            });
+        }
+
+        return res.json(response.rows);
+
+    } catch (error) {
+        console.error('Error al traer detalle de compra: ', error);
+        return res.status(500).json({ error: 'Error en el servidor' });
+    }
+};
+
 
 
 
@@ -748,6 +830,8 @@ module.exports = {
     getexistenciaPlantel,
     getSalidas,
     getexistenciasBajas,
-    UsarArticuloPlantel
+    UsarArticuloPlantel,
+    recibirEntregaParcial,
+    getDetalleCompraPorFolio
 
 }
