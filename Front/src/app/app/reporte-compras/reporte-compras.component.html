@@ -1,16 +1,19 @@
 <div class="card p-3 mb-3">
-  <label for="modoReporte">Contenido del reporte</label>
-  <select id="modoReporte" [(ngModel)]="modo" class="form-control">
+  <label for="modoReporte"><b>Contenido del reporte</b></label>
+
+  <select id="modoReporte" [(ngModel)]="modo" class="form-control form-control-sm" style="max-width: 400px;">
     <option value="entradas">Entradas: mercancía recibida, por fecha de recepción</option>
     <option value="compras">Compras: importe total comprado, por fecha de compra</option>
   </select>
-  <small>Los registros anteriores al control de entregas conservan sus importes y fechas originales.</small>
-</div>
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
 
-  <h3><b>Reporte de {{modo}} </b></h3>
-  <hr>
+  <small class="form-text text-muted">Los registros anteriores al control de entregas conservan sus importes y fechas originales.</small>
 </div>
+
+	<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 1px;">
+
+	  <h3><b>Reporte de {{modo}} </b></h3>
+	  <hr>
+	</div>
 
 <div class="contendor d-flex justify-content-center align-items-center" style="width: 90%;margin: 0 auto;">
 

@@ -3,27 +3,19 @@
   width: 100%;
 }
 
-
 .table-responsive {
   width: 100%;
 }
 
-
 table.dataTable {
   width: 100% !important;
 }
-
 
 table.dataTable td,
 table.dataTable th {
   vertical-align: middle;
 }
 
-
-/*
- * Permitir que las descripciones largas
- * utilicen varias líneas.
- */
 table.dataTable td:nth-child(2) {
   white-space: normal;
   word-break: normal;
@@ -35,3 +27,8 @@ table.dataTable td:nth-child(2) {
   text-align: center;
 }
 
+/* Encabezado de la tabla */
+::ng-deep table.dataTable.table thead th {
+  background-color: #9c0031 !important;
+  color: #ffffff !important;
+}
