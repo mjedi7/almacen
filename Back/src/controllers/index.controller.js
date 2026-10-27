@@ -239,7 +239,6 @@ const registrarStock = async (req, res) => {
         let ultimoID;
 
         if (comprobarDuplicado.rowCount > 0) {
-            // Si ya existe ese costo con ese proveedor, reutilizamos el id_costo
             ultimoID = comprobarDuplicado.rows[0].id;
         } else {
             iva = 16;
@@ -256,45 +255,52 @@ const registrarStock = async (req, res) => {
         );
         var nombreProducto = response1.rows[0]?.descripcion || descripcion;
 
-        // 1. Verificamos si ya existe el registro en almacen para este id_costos y centro de trabajo
         var existeEnAlmacen = await pool.query(
             'SELECT id FROM almacen WHERE id_costos = $1 AND id_centrotrabajo = $2',
             [ultimoID, centro_trabajo]
         );
 
         if (existeEnAlmacen.rowCount === 0) {
-            // Se crea el registro en almacen con existencias en 0 (a la espera de recepciones)
             await pool.query(
                 'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
                 [centro_trabajo, ultimoID, 0, fechaAd, true, unidad, descripcion, idPartida, nombreProducto]
             );
         }
 
-        // 2. Insertamos en compras con cantidad_recibida en 0 y estatus 'Pendiente'
+        // Insertamos en compras
         await pool.query(
             'INSERT INTO compras(id_costo, total_articulos, cantidad_recibida, estatus, fecha_compra, folio_compra, esactivo, id_partidas) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
             [ultimoID, cantidad, 0, 'Pendiente', fechaAd, folio, true, idPartida]
         );
 
-        // 3. Insertamos o verificamos la cabecera en compras_reportes
+        // Intentamos insertar la cabecera en compras_reportes. 
+        // Si el folio ya existe, la base de datos lo rechazará de forma segura gracias al UNIQUE.
         const impuestoReal = (parseFloat(subTotal) * 0.16) || 0;
-        var existeReporte = await pool.query(
-            'SELECT id FROM compras_reportes WHERE folio_factura = $1',
-            [folio]
-        );
-
-        if (existeReporte.rowCount === 0) {
+        
+        try {
             await pool.query(
                 'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida, estatus_entrega) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
                 [folio, proveedor, fechaAd, subTotal, impuestoReal, total, idPartida, 'Pendiente']
             );
+        } catch (dbError) {
+            // Si el error es violación de restricción única (código 23505 en PostgreSQL)
+            if (dbError.code === '23505') {
+                return res.status(400).json({ error: `El folio de compra '${folio}' ya se encuentra registrado en el sistema.` });
+            }
+            throw dbError; // Si es otro error, que lo atrape el catch principal
         }
 
-        return res.json("Save");
+        return res.json({ mensaje: "Save" });
 
     } catch (error) {
         console.error("Error en registrarStock:", error);
-        return res.json("Error");
+        
+        // Doble seguridad por si el error sube al catch principal
+        if (error.code === '23505') {
+            return res.status(400).json({ error: `El folio de compra '${folio}' ya se encuentra registrado en el sistema.` });
+        }
+
+        return res.status(500).json({ error: "Error interno al registrar la compra." });
     }
 };
 

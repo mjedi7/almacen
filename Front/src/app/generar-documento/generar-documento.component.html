@@ -20,6 +20,9 @@
               <small class="form-text text-muted">Identifica la compra y sus entregas posteriores.</small>
               <small *ngIf="Folio.invalid && Folio.touched" class="form-text text-danger">Capture el folio
                 interno.</small>
+              <div class="alert alert-danger" *ngIf="error" role="alert">
+                {{ error }}
+              </div>
             </div>
 
 

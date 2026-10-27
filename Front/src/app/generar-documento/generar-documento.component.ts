@@ -40,6 +40,7 @@ export interface almacen {
 export class GenerarDocumentoComponent implements OnInit {
 
   API_URL = environment.uri_api;
+  error: string = ''
   guardando = false;
   private clave = claveOperacion();
   envioPendiente: any = null;
@@ -134,27 +135,27 @@ export class GenerarDocumentoComponent implements OnInit {
   }
 
   traerUnidadesMedida() {
-  this.unidadMedidaService.listarUnidadesMedida().subscribe({
-    next: (res: any) => {
-      console.log('>>> RESPUESTA CRUDA:', res);
+    this.unidadMedidaService.listarUnidadesMedida().subscribe({
+      next: (res: any) => {
+        console.log('>>> RESPUESTA CRUDA:', res);
 
-      if (Array.isArray(res)) {
-        this.unidadesMedida = res;
-      } else if (res && typeof res === 'object') {
-        // Busca automáticamente la primera propiedad interna que sea un arreglo
-        const keyArray = Object.keys(res).find(k => Array.isArray(res[k]));
-        this.unidadesMedida = keyArray ? res[keyArray] : [];
-      } else {
-        this.unidadesMedida = [];
+        if (Array.isArray(res)) {
+          this.unidadesMedida = res;
+        } else if (res && typeof res === 'object') {
+          // Busca automáticamente la primera propiedad interna que sea un arreglo
+          const keyArray = Object.keys(res).find(k => Array.isArray(res[k]));
+          this.unidadesMedida = keyArray ? res[keyArray] : [];
+        } else {
+          this.unidadesMedida = [];
+        }
+
+        console.log('>>> UNIDADES CARGADAS CON ÉXITO:', this.unidadesMedida);
+      },
+      error: (err) => {
+        console.error('Error al obtener unidades de medida:', err);
       }
-
-      console.log('>>> UNIDADES CARGADAS CON ÉXITO:', this.unidadesMedida);
-    },
-    error: (err) => {
-      console.error('Error al obtener unidades de medida:', err);
-    }
-  });
-}
+    });
+  }
 
   // ... Mantén el resto de tus métodos (AgregarStock, calculoCompra, etc.) dentro de la clase sin modificarlos ...
 
@@ -162,9 +163,9 @@ export class GenerarDocumentoComponent implements OnInit {
     if (this.guardando) return;
     if (!this.envioPendiente) {
       if (!form.valid || !(Number(this.stock.cantidad) > 0) || this.stock.cantidad_recibida == null ||
-          !Number.isFinite(Number(this.stock.cantidad_recibida)) || Number(this.stock.cantidad_recibida) < 0 ||
-          Number(this.stock.cantidad_recibida) > Number(this.stock.cantidad) ||
-          (Number(this.stock.cantidad_recibida) > 0 && !this.stock.fecha_recepcion)) {
+        !Number.isFinite(Number(this.stock.cantidad_recibida)) || Number(this.stock.cantidad_recibida) < 0 ||
+        Number(this.stock.cantidad_recibida) > Number(this.stock.cantidad) ||
+        (Number(this.stock.cantidad_recibida) > 0 && !this.stock.fecha_recepcion)) {
         Swal.fire('Revise los datos', 'Indique lo comprado y lo recibido; la recepción no puede superar la compra.', 'error');
         return;
       }
@@ -173,26 +174,29 @@ export class GenerarDocumentoComponent implements OnInit {
     this.guardando = true;
     this.traer.http.post<any>(this.API_URL + '/registrarStock', this.envioPendiente,
       { headers: { Authorization: localStorage.getItem('token') || '' } }).subscribe({
-      next: res => {
-        this.guardando = false;
-        this.envioPendiente = null;
-        this.clave = claveOperacion();
-        this.stock.cantidad = null;
-        this.stock.cantidad_recibida = 0;
-        this.stock.producto = null;
-        this.productoBuscado = '';
-        this.stock.total = null;
-        this.stock.subTotal = null;
-        this.monedaFormateada = '$ 0.00'; this.monedaFormateada2 = '$ 0.00';
-        Swal.fire('Compra registrada', `Compra #${res.id_compra}. Solo lo recibido se sumó a existencias. Puede agregar otro artículo con el mismo folio o consultar sus entregas en Recargar Stock.`, 'success');
-      },
-      error: err => {
-        this.guardando = false;
-        if (err.status >= 400 && err.status < 500) this.envioPendiente = null;
-        Swal.fire('No se confirmó el guardado', err.error?.error ||
-          'Pulse Guardar para reintentar la misma operación sin duplicarla.', 'error');
-      }
-    });
+        next: res => {
+          this.guardando = false;
+          this.envioPendiente = null;
+          this.clave = claveOperacion();
+          this.stock.cantidad = null;
+          this.stock.cantidad_recibida = 0;
+          this.stock.producto = null;
+          this.productoBuscado = '';
+          this.stock.total = null;
+          this.stock.subTotal = null;
+          this.monedaFormateada = '$ 0.00'; this.monedaFormateada2 = '$ 0.00';
+          Swal.fire('Compra registrada', `Compra #${res.id_compra}. Solo lo recibido se sumó a existencias. Puede agregar otro artículo con el mismo folio o consultar sus entregas en Recargar Stock.`, 'success');
+        },
+        error: err => {
+          this.guardando = false;
+          if (err.status >= 400 && err.status < 500) this.envioPendiente = null;
+
+          // Aquí guardas el mensaje que mandó el backend
+          this.error = err.error?.error || 'No se pudo registrar la compra.';
+
+          Swal.fire('No se confirmó el guardado', this.error, 'error');
+        }
+      });
   }
 
   opcionSeleccionadaX() {
