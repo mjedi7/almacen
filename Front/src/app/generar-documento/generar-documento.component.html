@@ -1,237 +1,259 @@
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
+<div class="container-fluid pt-0 pb-2 px-2">
 
-  <h3><b>Registrar Nueva Compra</b></h3>
-  <hr>
+  <div class="text-center mb-2">
+    <h3 class="mt-0 mb-1">Registrar nueva compra</h3>
+    <p class="text-muted mb-0">Capture la compra y, si corresponde, su primera entrega.</p>
+    <hr>
+  </div>
+
+  <form (ngSubmit)="AgregarStock(f)" #f="ngForm">
+    <fieldset [disabled]="guardando || !!envioPendiente" style="min-width: 0; border: 0; padding: 0; margin: 0;">
+
+      <section class="card mb-2">
+        <div class="card-body p-2">
+          <h4 class="mb-2" style="color: #003366;">1. Datos de la compra</h4>
+
+          <div class="row">
+            <div class="col-12 col-md-6 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="folioInterno">Folio Interno</label>
+              <input [(ngModel)]="stock.folio" type="text" class="form-control" name="Folio" id="folioInterno"
+                placeholder="Capture el folio interno" required #Folio="ngModel">
+              <small class="form-text text-muted">Identifica la compra y sus entregas posteriores.</small>
+              <small *ngIf="Folio.invalid && Folio.touched" class="form-text text-danger">Capture el folio
+                interno.</small>
+              <div class="alert alert-danger" *ngIf="error" role="alert">
+                {{ error }}
+              </div>
+            </div>
+
+
+            <div class="col-12 col-md-3 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="fechaCompra">Fecha de compra</label>
+              <input [(ngModel)]="stock.fechaAd" type="date" class="form-control" name="FechaAdqui" id="fechaCompra"
+                placeholder="" required #FechaAdqui="ngModel">
+              <small *ngIf="FechaAdqui.invalid && FechaAdqui.touched"
+                class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+            </div>
+            <div class="col-12 col-md-3 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="facturaCompra">Folio de factura (opcional)</label>
+              <input id="facturaCompra" name="folioFactura" class="form-control" maxlength="200"
+                [(ngModel)]="stock.folio_factura">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mb-2">
+        <div class="card-body p-2">
+          <h4 class="mb-2" style="color: #003366;">2. Artículo e importes</h4>
+          <div class="row">
+            <div class="col-12 col-lg-4 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="inputPartida">Partida</label>
+              <select [(ngModel)]="stock.partida" id="inputPartida" class="form-control" name="Partida"
+                (change)="opcionSeleccionadaX()" required #Partida="ngModel">
+                <option [ngValue]="null" disabled>Selecciona una partida</option>
+                <ng-container *ngFor="let item of partidas">
+                  <option [value]="item.id">{{item.clave}} -- {{item.descripcion}}</option>
+                </ng-container>
+              </select>
+              <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+            </div>
+            
+            <div class="col-12 col-lg-8 mb-2">
+              <div style="position: relative;">
+                <label class="font-weight-bold fw-semibold mb-1" for="inputProducto">Producto</label>
+                <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
+                  [(ngModel)]="productoBuscado" (input)="filtrarProductos()" [ngModelOptions]="{standalone: true}"
+                  placeholder="Escribe el nombre del artículo" required ngModel #Producto="ngModel" />
+                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
+                  obligatorio</small>
+                <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
+                        position: absolute;
+                        z-index: 1000;
+                        left: 0; right: 0; margin: 0;
+                        max-height: 280px;
+                        overflow-y: auto;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                        background-color: white;
+                        border: 1px solid #ccc;
+              ">
+                  <li class="list-group-item list-group-item-action" role="button" tabindex="0"
+                    *ngFor="let producto of productosFiltrados" (click)="seleccionarProducto(producto)"
+                    (keydown.enter)="seleccionarProducto(producto)"
+                    (keydown.space)="$event.preventDefault(); seleccionarProducto(producto)">
+                    {{ producto.descripcion }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+
+            <div class="col-12 col-md-4 col-lg-2 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="cantidadComprada">Cantidad comprada</label>
+
+                <!-- <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="cantidadComprada" min="0.000001" step="0.000001" (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel"> -->
+                <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="cantidadComprada" min="1" step="1" (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel">
+              
+              <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="id_unidad_medida">Unidad</label>
+              <select [(ngModel)]="stock.id_unidad_medida" id="id_unidad_medida" class="form-control"
+                name="id_unidad_medida" required #unidad="ngModel">
+                <option [ngValue]="null" disabled>Selecciona una opción</option>
+                <option *ngFor="let item of (unidadesMedida || [])"
+                  [ngValue]="item.id_unidad_medida || item.id || item.id_unidad">
+                  {{ item.nombre_medida || item.unidad_medida || item.nombre }}
+                </option>
+              </select>
+              <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">
+                Campo obligatorio
+              </small>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="costoUnitario">Costo unitario</label>
+              <input [(ngModel)]="stock.costo" type="text" class="form-control" name="Costo" id="costoUnitario"
+                (change)="calculoCompra()" placeholder="" required #Costo="ngModel">
+              <small *ngIf="Costo.invalid && Costo.touched" class="form-text text-danger animated fadeIn">Campo
+                obligatorio</small>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="subtotalCompra">Subtotal</label>
+              <input type="text" class="form-control" name="subTotal" id="subtotalCompra" [value]="monedaFormateada2"
+                (change)="calculoCompra()" placeholder="" required readonly>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-1 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="ivaCompra">IVA</label>
+              <input [(ngModel)]="stock.iva" type="text" class="form-control" name="Iva" id="ivaCompra" placeholder=""
+                readonly #Iva="ngModel">
+              <small *ngIf="Iva.invalid && Iva.touched" class="form-text text-danger animated fadeIn">Campo
+                obligatorio</small>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-3 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="totalCompra">Total de compra</label>
+              <input type="text" class="form-control font-weight-bold fw-bold" name="Total" id="totalCompra"
+                [value]="monedaFormateada" placeholder="" required readonly>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12 col-md-12 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="comentarioCompra">Descripción y/o comentario</label>
+              
+				<!-- <input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="comentarioCompra" placeholder="" required #Comentario="ngModel"> -->
+				<input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="comentarioCompra" placeholder="" #Comentario="ngModel">
+              
+              <small *ngIf="Comentario.invalid && Comentario.touched" class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+              
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mb-2">
+        <div class="card-body p-2">
+          <h4 class="mb-2"  style="color: #003366;">3. Proveedor</h4>
+          <div class="row">
+            <div class="col-12 col-md-8 col-lg-5 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="inputProveedor">Proveedor</label>
+              <select [(ngModel)]="direccionSeleccionada" id="inputProveedor" class="form-control" name="Proveedor"
+                (change)="CapturarValor()" required #Proveedor="ngModel">
+                <option [ngValue]="null" disabled>Selecciona un proveedor</option>
+                <ng-container *ngFor="let prov of proveedores">
+                  <option [value]="prov.id">{{prov.razon_social}}</option>
+                </ng-container>
+              </select>
+
+              <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo
+                obligatorio</small>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="telefonoProveedor">Teléfono</label>
+              <input [(ngModel)]="stock.telefono" type="text" class="form-control" name="Telefono"
+                id="telefonoProveedor" placeholder="" readonly #Telefono="ngModel">
+              <small *ngIf="Telefono.invalid && Telefono.touched" class="form-text text-danger animated fadeIn">Campo
+                obligatorio</small>
+            </div>
+
+            <div class="col-12 col-md-12 col-lg-5 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="direccionProveedor">Dirección</label>
+              <input [(ngModel)]="stock.direccion" type="text" class="form-control" name="Dirreccion"
+                id="direccionProveedor" placeholder="" readonly #Direccion="ngModel">
+              <small *ngIf="Direccion.invalid && Direccion.touched" class="form-text text-danger animated fadeIn">Campo
+                obligatorio</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mb-2">
+        <div class="card-body p-2">
+          <h4 class="mb-2" style="color: #003366;">4. Recepción inicial</h4>
+          <div class="alert alert-info py-2 px-3 mb-2">
+            <p class="mb-1">La cantidad comprada determina el importe. <strong>Solo la cantidad recibida aumenta las
+                existencias.</strong></p>
+            <p class="mb-0">Si aún no recibió mercancía, indique 0. Para otra compra del mismo artículo, use un folio
+              interno diferente.</p>
+          </div>
+
+          <div class="row">
+            <div class="col-12 col-md-6 col-xl-4 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="recibidaInicial">Cantidad recibida inicialmente</label>
+              <!-- <input id="recibidaInicial" name="cantidadRecibida" class="form-control" type="number" min="0" step="0.000001" [max]="stock.cantidad" [(ngModel)]="stock.cantidad_recibida" required> -->
+              <input id="recibidaInicial" name="cantidadRecibida" class="form-control" type="number" min="0" step="1" [max]="stock.cantidad" [(ngModel)]="stock.cantidad_recibida" required>              
+              <small>Use 0 si todavía no se ha recibido mercancía.</small>
+            </div>
+
+            <div class="col-12 col-md-6 col-xl-4 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="fechaInicial">Fecha de recepción inicial</label>
+              <input id="fechaInicial" name="fechaRecepcion" class="form-control" type="date" [min]="stock.fechaAd"
+                [(ngModel)]="stock.fecha_recepcion" [required]="stock.cantidad_recibida > 0">
+            </div>
+
+            <div class="col-12 col-md-12 col-xl-4 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="referenciaInicial">Remisión o comprobante
+                (opcional)</label>
+              <input id="referenciaInicial" name="referenciaInicial" class="form-control" maxlength="200"
+                [(ngModel)]="stock.referencia">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12 col-md-12 mb-2">
+              <label class="font-weight-bold fw-semibold mb-1" for="observacionesInicial">Observaciones de
+                recepción</label>
+              <textarea id="observacionesInicial" name="observacionesInicial" rows="2" class="form-control"
+                maxlength="2000" [(ngModel)]="stock.observaciones"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="row mb-2" *ngIf="deptosmultipleEnvio.length > 0">
+        <div class="col-12 col-md-6 mb-2" *ngFor="let multiple of deptosmultipleEnvio; let i=index">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault{{i}}">
+            <label class="form-check-label" for="flexCheckDefault{{i}}">{{multiple.nombre_completo}}</label>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="d-flex border-top pt-2 pb-1" style="justify-content: center">
+      <button type="submit" class="btn btn-primary px-4 py-2" [disabled]="guardando">
+        <span class="mdi mdi-content-save" aria-hidden="true"></span>
+        {{guardando ? 'Guardando…' : 'Guardar compra'}}
+      </button>
+    </div>
+
+  </form>
+
 </div>
-
-
-<form (ngSubmit)="AgregarStock(f)" #f="ngForm">
-
-  <div class="form-row mt-5">
-
-
-    <!--<div class="form-group col-md-3">
-        <label for="inputPassword4">Partida</label>
-        <select [(ngModel)]="stock.partida" id="areaEmite" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required ngModel #Partida="ngModel">       
-          <ng-container *ngFor="let stock of  partidas" >
-                <option [value]="stock.id">{{stock.clave}} -- {{stock.descripcion}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>-->
-
-    <div class="form-group col-md-3">
-      <label for="inputPartida">Partida</label>
-      <select [(ngModel)]="stock.partida" id="inputPartida" class="form-control" name="Partida"
-        (change)="opcionSeleccionadaX()" required #Partida="ngModel">
-        <option [ngValue]="null" disabled selected>Selecciona una partida</option>
-        <ng-container *ngFor="let item of partidas">
-          <option [value]="item.id">{{item.clave}} -- {{item.descripcion}}</option>
-        </ng-container>
-      </select>
-      <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-
-    <!-- <div class="form-group col-md-3">
-        <label for="inputPassword4">Producto</label>
-        <select [(ngModel)]="stock.producto" id="areaEmite" class="form-control" name="Producto" required required ngModel #Producto="ngModel">       
-          <ng-container *ngFor="let producto of productos" >
-                <option [value]="producto.id">{{producto.descripcion}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div>  -->
-
-
-    <!-- Inicia -->
-
-    <div class="form-group col-md-3" style="position: relative;">
-      <label for="inputProducto">Producto</label>
-      <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
-        [(ngModel)]="productoBuscado" (input)="filtrarProductos()" [ngModelOptions]="{standalone: true}"
-        placeholder="Escribe el nombre del artículo" required ngModel #Producto="ngModel" />
-      <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-      <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
-                position: absolute;
-                z-index: 1000;
-                width: 100%;
-                max-height: 400px;
-                overflow-y: auto;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                background-color: white;
-                border: 1px solid #ccc;
-            ">
-        <li class="list-group-item list-group-item-action" *ngFor="let producto of productosFiltrados"
-          (click)="seleccionarProducto(producto)">
-          {{ producto.descripcion }}
-        </li>
-      </ul>
-    </div>
-
-
-    <!-- Fin -->
-
-
-
-
-
-
-
-
-    <div class="form-group col-md-2">
-      <label for="inputAddress">Fecha de adquisición</label>
-      <input [(ngModel)]="stock.fechaAd" type="date" class="form-control" name="FechaAdqui" id="inputAddress"
-        placeholder="" required #FechaAdqui="ngModel">
-      <small *ngIf="FechaAdqui.invalid && FechaAdqui.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-
-
-    <div class="form-group col-md-2">
-      <label for="inputAddress">Cantidad adquirida</label>
-      <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="inputAddress" min="1"
-        (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel">
-      <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-
-    <div class="form-group col-md-2">
-      <label for="id_unidad_medida">Unidad</label>
-      <select [(ngModel)]="stock.id_unidad_medida" id="id_unidad_medida" class="form-control" name="id_unidad_medida"
-        required #unidad="ngModel">
-        <option [ngValue]="null" disabled selected>Selecciona una opción</option>
-        <option *ngFor="let item of (unidadesMedida || [])"
-          [ngValue]="item.id_unidad_medida || item.id || item.id_unidad">
-          {{ item.nombre_medida || item.unidad_medida || item.nombre }}
-        </option>
-      </select>
-
-      <small *ngIf="unidad.invalid && unidad.touched" class="form-text text-danger animated fadeIn">
-        Campo Obligatorio
-      </small>
-    </div>
-
-  </div>
-
-  <div class="form-row">
-
-
-    <div class="form-group col-md-3">
-      <label for="inputAddress">Descripción y/o comentario</label>
-      <input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="inputAddress"
-        placeholder="" required required #Comentario="ngModel">
-      <small *ngIf="Comentario.invalid && Comentario.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-    <!--<div class="form-group col-md-3">
-      <label for="inputPassword4">Proveedor</label>
-      <select [(ngModel)]="stock.proveedor" id="areaEmite" class="form-control" name="Proveedor"
-        [(ngModel)]="direccionSeleccionada" (change)="CapturarValor()" required ngModel #Proveedor="ngModel">
-        <ng-container *ngFor="let proveedor of proveedores">
-          <option [value]="proveedor.id">{{proveedor.razon_social}}</option>
-        </ng-container>
-      </select>
-      <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>-->
-
-    <div class="form-group col-md-3">
-      <label for="inputProveedor">Proveedor</label>
-      <select [(ngModel)]="direccionSeleccionada" id="inputProveedor" class="form-control" name="Proveedor"
-        (change)="CapturarValor()" required #Proveedor="ngModel">
-        <option [ngValue]="null" disabled selected>Selecciona un proveedor</option>
-        <ng-container *ngFor="let prov of proveedores">
-          <option [value]="prov.id">{{prov.razon_social}}</option>
-        </ng-container>
-      </select>
-      <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-    <div class="form-group col-md-3">
-      <label for="inputAddress">Teléfono</label>
-      <input [(ngModel)]="stock.telefono" type="text" class="form-control" name="Telefono" id="inputAddress"
-        placeholder="" readonly #Telefono="ngModel">
-      <small *ngIf="Telefono.invalid && Telefono.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-
-    <div class="form-group col-md-3">
-      <label for="inputAddress">Dirección</label>
-      <input [(ngModel)]="stock.direccion" type="text" class="form-control" name="Dirreccion" id="inputAddress"
-        placeholder="" readonly #Direccion="ngModel">
-      <small *ngIf="Direccion.invalid && Direccion.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-
-    <div class="form-group col-md-2">
-      <label for="inputAddress">Costo unitario</label>
-      <input [(ngModel)]="stock.costo" type="text" class="form-control" name="Costo" id="inputAddress"
-        (change)="calculoCompra()" placeholder="" required #Costo="ngModel">
-      <small *ngIf="Costo.invalid && Costo.touched" class="form-text text-danger animated fadeIn">Campo
-        Obligatorio</small>
-    </div>
-
-    <div class="form-group col-md-2">
-      <label for="inputAddress">Importe</label>
-      <input type="text" class="form-control" name="subTotal" id="inputAddress" [value]="monedaFormateada2"
-        (change)="calculoCompra()" placeholder="" required readonly>
-
-    </div>
-
-    <div class="form-group col-md-2">
-      <label for="inputAddress">IVA</label>
-      <input [(ngModel)]="stock.iva" type="text" class="form-control" name="Iva" id="inputAddress" placeholder=""
-        readonly #Iva="ngModel">
-      <small *ngIf="Iva.invalid && Iva.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-    </div>
-
-    <div class="form-group col-md-3">
-      <label for="inputAddress">Total de compra</label>
-      <input type="text" class="form-control" name="Total" id="inputAddress" [value]="monedaFormateada" placeholder=""
-        required readonly>
-
-    </div>
-
-    <div class="form-group col-md-3">
-      <label for="inputAddress">Folio de compra</label>
-      <input [(ngModel)]="stock.folio" type="text" class="form-control" name="Folio" id="inputAddress" placeholder=""
-        required>
-    </div>
-
-  </div>
-
-
-  <!-- CHECKBOX -->
-
-  <div class="form-row mt-3">
-
-    <ng-container *ngFor="let multiple of deptosmultipleEnvio; let i=index">
-
-      <input class="form-check-input form-group col-md-2" type="checkbox" value="" id="flexCheckDefault{{i}}">
-      <label class="form-check-label" for="flexCheckDefault{{i}}" style="padding-right: 10px;">
-        <p style="font-size: 14px;">{{multiple.nombre_completo}}</p>
-      </label>
-
-    </ng-container>
-
-  </div>
-
-  <!-- END CHECKBOX -->
-
-
-  <div class="boton mt-5" style="margin: 0 auto;text-align: center;">
-    <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-primary"><span
-        class="mdi mdi-content-save"></span> Guardar</button>
-    <!-- <button style="padding:10px;" routerLink="/dashboard" type="submit" class="btn btn-danger">Cancelar/Regresar</button> -->
-  </div>
-
-</form>

@@ -2,7 +2,7 @@ const multer = require('multer')
 const { Router } = require('express');
 const router = Router();
 
-const { getAlumnos, registrarStock,recargarStock, transferirArticulosPlantel, getListaArticulosTransferir, eliminarArticulo, confirmarTransferencia, getxistencias, getexistenciasBajas, UsarArticuloPlantel, getSalidas, getexistenciaPlantel, confirmarTransferenciaEnPlantel, } = require('../controllers/index.controller');
+const { getAlumnos, registrarStock,recargarStock, transferirArticulosPlantel, getListaArticulosTransferir, eliminarArticulo, confirmarTransferencia, getxistencias, getexistenciasBajas, UsarArticuloPlantel, getSalidas, getexistenciaPlantel, confirmarTransferenciaEnPlantel, recibirEntregaParcial,getComprasPorFolio, getHistorialItem, registrarRecepcionBatch, getDetalleCompraPorFolio} = require('../controllers/index.controller');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 router.get('/alumnos', [validarJWT], getAlumnos);
@@ -18,6 +18,10 @@ router.get('/confirmarTransferenciaEnPlantel/:consecutivo',confirmarTransferenci
 
 
 router.get('/getExistencias/:idplantel',getxistencias);
+router.put('/compras/recibir-entrega', recibirEntregaParcial);
+router.get('/compras/por-folio', [validarJWT], getComprasPorFolio);
+router.get('/compras/:id/recepciones', [validarJWT], getHistorialItem);
+router.post('/compras/recepciones', [validarJWT], registrarRecepcionBatch);
 
 router.get('/traerDisponiblePlantel/:idArticulo',getexistenciaPlantel);
 
