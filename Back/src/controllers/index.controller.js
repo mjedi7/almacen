@@ -601,8 +601,7 @@ const getComprasPorFolio = async (req, res) => {
                 c.fecha_compra,
                 cr.folio_factura AS folio_compra,
                 cr.id_proveedor,
-                cr.id_centrotrabajo,
-                p.nombre AS proveedor,
+                p.razon_social AS proveedor,
                 art.descripcion AS articulo,
                 art.clave,
                 TRUE AS gestion_recepciones
@@ -610,7 +609,7 @@ const getComprasPorFolio = async (req, res) => {
             INNER JOIN compras_reportes cr ON c.id_compra_reporte = cr.id
             INNER JOIN costos cos ON c.id_costo = cos.id
             INNER JOIN cat_articulos art ON cos.id_articulo = art.id
-            LEFT JOIN proveedores p ON cos.id_proveedor = p.id
+            LEFT JOIN cat_proveedores p ON cr.id_proveedor = p.id
             WHERE cr.folio_factura = $1 AND c.esactivo = true
             ORDER BY c.id ASC;
         `;
