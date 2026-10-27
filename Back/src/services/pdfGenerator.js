@@ -70,11 +70,13 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     // Detección: ¿El reporte lleva footer institucional o solo header?
     const nombreMin = templateName.toLowerCase();
 
-    // Detecta reportes de partida y de proveedor
+    // Reportes que LLEVAN pie institucional (cenefa y corazón)
     const llevaPie = nombreMin.includes('partida') ||
       nombreMin.includes('proveedor') ||
-      nombreMin.includes('reporteentradas');
+      nombreMin.includes('reporteentradas') ||
+      nombreMin.includes('kardex');
 
+    // Si no lleva pie institucional, usa reportes-solo-header.css
     const archivoCss = llevaPie ? cssConPiePath : cssSoloHeaderPath;
 
     if (fs.existsSync(archivoCss)) {
