@@ -15,22 +15,24 @@
         <th style="text-align: right;">Costo Unitario</th>
         <th style="text-align: center;">Existencia</th> 
         <th>Proveedor</th> 
-        <!-- <th>Telefono Proveedor</th> -->
       </tr>
     </thead>
     <tbody style="font-size: 15px;">
-      <tr *ngFor="let existencia of existenciasBajas">          
+      <tr *ngFor="let existencia of existenciasBajas" 
+          [style.background-color]="existencia.colorFondo">          
         <td>{{ existencia.partida }}</td>
-        <td style="width: 450px; text-transform: lowercase;">{{ existencia.descripcion }}</td>
+        <td style="width: 450px; text-transform: lowercase;">
+          {{ existencia.descripcion }}
+          <span *ngIf="existencia.tieneDiferenteCosto" class="badge bg-secondary text-white ms-2" style="font-size: 10px;">
+            Precio Variable
+          </span>
+        </td>
         <td style="text-align: right; font-weight: 600;">
           {{ (existencia.costo || 0) | currency:'USD':'$' }}
         </td>
         <td style="text-align: center; width: 50px;">{{ existencia.existencias }}</td>  
         <td>{{ existencia.proveedor }}</td> 
-        <!-- <td>{{ existencia.telefono }}</td> -->
       </tr>
     </tbody>
   </table>
 </div>
-
-
