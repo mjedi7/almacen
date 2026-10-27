@@ -3,6 +3,7 @@
   <div class="text-center mb-2">
     <h3 class="mt-0 mb-1">Registrar nueva compra</h3>
     <p class="text-muted mb-0">Capture la compra y, si corresponde, su primera entrega.</p>
+    <hr>
   </div>
 
   <form (ngSubmit)="AgregarStock(f)" #f="ngForm">
@@ -10,7 +11,7 @@
 
       <section class="card mb-2">
         <div class="card-body p-2">
-          <h4 class="mb-2">1. Datos de la compra</h4>
+          <h4 class="mb-2" style="color: #003366;">1. Datos de la compra</h4>
 
           <div class="row">
             <div class="col-12 col-md-6 mb-2">
@@ -44,7 +45,7 @@
 
       <section class="card mb-2">
         <div class="card-body p-2">
-          <h4 class="mb-2">2. Artículo e importes</h4>
+          <h4 class="mb-2" style="color: #003366;">2. Artículo e importes</h4>
           <div class="row">
             <div class="col-12 col-lg-4 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="inputPartida">Partida</label>
@@ -55,9 +56,9 @@
                   <option [value]="item.id">{{item.clave}} -- {{item.descripcion}}</option>
                 </ng-container>
               </select>
-              <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo
-                obligatorio</small>
+              <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo obligatorio</small>
             </div>
+            
             <div class="col-12 col-lg-8 mb-2">
               <div style="position: relative;">
                 <label class="font-weight-bold fw-semibold mb-1" for="inputProducto">Producto</label>
@@ -67,15 +68,15 @@
                 <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
                   obligatorio</small>
                 <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
-                position: absolute;
-                z-index: 1000;
-                left: 0; right: 0; margin: 0;
-                max-height: 280px;
-                overflow-y: auto;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                background-color: white;
-                border: 1px solid #ccc;
-            ">
+                        position: absolute;
+                        z-index: 1000;
+                        left: 0; right: 0; margin: 0;
+                        max-height: 280px;
+                        overflow-y: auto;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                        background-color: white;
+                        border: 1px solid #ccc;
+              ">
                   <li class="list-group-item list-group-item-action" role="button" tabindex="0"
                     *ngFor="let producto of productosFiltrados" (click)="seleccionarProducto(producto)"
                     (keydown.enter)="seleccionarProducto(producto)"
@@ -87,14 +88,17 @@
             </div>
           </div>
           <div class="row">
+
             <div class="col-12 col-md-4 col-lg-2 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="cantidadComprada">Cantidad comprada</label>
-              <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad"
-                id="cantidadComprada" min="0.000001" step="0.000001" (change)="calculoCompra()" placeholder="" required
-                #Cantidad="ngModel">
-              <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo
-                obligatorio</small>
+
+                <!-- <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="cantidadComprada" min="0.000001" step="0.000001" (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel"> -->
+                <input [(ngModel)]="stock.cantidad" type="number" class="form-control" name="Cantidad" id="cantidadComprada" min="1" step="1" (change)="calculoCompra()" placeholder="" required #Cantidad="ngModel">
+              
+              <small *ngIf="Cantidad.invalid && Cantidad.touched" class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+
             </div>
+
             <div class="col-12 col-md-4 col-lg-2 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="id_unidad_medida">Unidad</label>
               <select [(ngModel)]="stock.id_unidad_medida" id="id_unidad_medida" class="form-control"
@@ -109,6 +113,7 @@
                 Campo obligatorio
               </small>
             </div>
+
             <div class="col-12 col-md-4 col-lg-2 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="costoUnitario">Costo unitario</label>
               <input [(ngModel)]="stock.costo" type="text" class="form-control" name="Costo" id="costoUnitario"
@@ -116,11 +121,13 @@
               <small *ngIf="Costo.invalid && Costo.touched" class="form-text text-danger animated fadeIn">Campo
                 obligatorio</small>
             </div>
+
             <div class="col-12 col-md-4 col-lg-2 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="subtotalCompra">Subtotal</label>
               <input type="text" class="form-control" name="subTotal" id="subtotalCompra" [value]="monedaFormateada2"
                 (change)="calculoCompra()" placeholder="" required readonly>
             </div>
+
             <div class="col-12 col-md-4 col-lg-1 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="ivaCompra">IVA</label>
               <input [(ngModel)]="stock.iva" type="text" class="form-control" name="Iva" id="ivaCompra" placeholder=""
@@ -128,26 +135,31 @@
               <small *ngIf="Iva.invalid && Iva.touched" class="form-text text-danger animated fadeIn">Campo
                 obligatorio</small>
             </div>
+
             <div class="col-12 col-md-4 col-lg-3 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="totalCompra">Total de compra</label>
               <input type="text" class="form-control font-weight-bold fw-bold" name="Total" id="totalCompra"
                 [value]="monedaFormateada" placeholder="" required readonly>
             </div>
           </div>
+
           <div class="row">
             <div class="col-12 col-md-12 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="comentarioCompra">Descripción y/o comentario</label>
-              <input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario"
-                id="comentarioCompra" placeholder="" required #Comentario="ngModel">
-              <small *ngIf="Comentario.invalid && Comentario.touched"
-                class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+              
+				<!-- <input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="comentarioCompra" placeholder="" required #Comentario="ngModel"> -->
+				<input [(ngModel)]="stock.descripcion" type="text" class="form-control" name="Comentario" id="comentarioCompra" placeholder="" #Comentario="ngModel">
+              
+              <small *ngIf="Comentario.invalid && Comentario.touched" class="form-text text-danger animated fadeIn">Campo obligatorio</small>
+              
             </div>
           </div>
         </div>
       </section>
+
       <section class="card mb-2">
         <div class="card-body p-2">
-          <h4 class="mb-2">3. Proveedor</h4>
+          <h4 class="mb-2"  style="color: #003366;">3. Proveedor</h4>
           <div class="row">
             <div class="col-12 col-md-8 col-lg-5 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="inputProveedor">Proveedor</label>
@@ -158,9 +170,11 @@
                   <option [value]="prov.id">{{prov.razon_social}}</option>
                 </ng-container>
               </select>
+
               <small *ngIf="Proveedor.invalid && Proveedor.touched" class="form-text text-danger animated fadeIn">Campo
                 obligatorio</small>
             </div>
+
             <div class="col-12 col-md-4 col-lg-2 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="telefonoProveedor">Teléfono</label>
               <input [(ngModel)]="stock.telefono" type="text" class="form-control" name="Telefono"
@@ -168,6 +182,7 @@
               <small *ngIf="Telefono.invalid && Telefono.touched" class="form-text text-danger animated fadeIn">Campo
                 obligatorio</small>
             </div>
+
             <div class="col-12 col-md-12 col-lg-5 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="direccionProveedor">Dirección</label>
               <input [(ngModel)]="stock.direccion" type="text" class="form-control" name="Dirreccion"
@@ -178,28 +193,31 @@
           </div>
         </div>
       </section>
+
       <section class="card mb-2">
         <div class="card-body p-2">
-          <h4 class="mb-2">4. Recepción inicial</h4>
+          <h4 class="mb-2" style="color: #003366;">4. Recepción inicial</h4>
           <div class="alert alert-info py-2 px-3 mb-2">
             <p class="mb-1">La cantidad comprada determina el importe. <strong>Solo la cantidad recibida aumenta las
                 existencias.</strong></p>
             <p class="mb-0">Si aún no recibió mercancía, indique 0. Para otra compra del mismo artículo, use un folio
               interno diferente.</p>
           </div>
+
           <div class="row">
             <div class="col-12 col-md-6 col-xl-4 mb-2">
-              <label class="font-weight-bold fw-semibold mb-1" for="recibidaInicial">Cantidad recibida
-                inicialmente</label>
-              <input id="recibidaInicial" name="cantidadRecibida" class="form-control" type="number" min="0"
-                step="0.000001" [max]="stock.cantidad" [(ngModel)]="stock.cantidad_recibida" required>
+              <label class="font-weight-bold fw-semibold mb-1" for="recibidaInicial">Cantidad recibida inicialmente</label>
+              <!-- <input id="recibidaInicial" name="cantidadRecibida" class="form-control" type="number" min="0" step="0.000001" [max]="stock.cantidad" [(ngModel)]="stock.cantidad_recibida" required> -->
+              <input id="recibidaInicial" name="cantidadRecibida" class="form-control" type="number" min="0" step="1" [max]="stock.cantidad" [(ngModel)]="stock.cantidad_recibida" required>              
               <small>Use 0 si todavía no se ha recibido mercancía.</small>
             </div>
+
             <div class="col-12 col-md-6 col-xl-4 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="fechaInicial">Fecha de recepción inicial</label>
               <input id="fechaInicial" name="fechaRecepcion" class="form-control" type="date" [min]="stock.fechaAd"
                 [(ngModel)]="stock.fecha_recepcion" [required]="stock.cantidad_recibida > 0">
             </div>
+
             <div class="col-12 col-md-12 col-xl-4 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="referenciaInicial">Remisión o comprobante
                 (opcional)</label>
@@ -207,6 +225,7 @@
                 [(ngModel)]="stock.referencia">
             </div>
           </div>
+
           <div class="row">
             <div class="col-12 col-md-12 mb-2">
               <label class="font-weight-bold fw-semibold mb-1" for="observacionesInicial">Observaciones de
@@ -217,6 +236,7 @@
           </div>
         </div>
       </section>
+
       <div class="row mb-2" *ngIf="deptosmultipleEnvio.length > 0">
         <div class="col-12 col-md-6 mb-2" *ngFor="let multiple of deptosmultipleEnvio; let i=index">
           <div class="form-check">
@@ -235,4 +255,5 @@
     </div>
 
   </form>
+
 </div>
