@@ -123,6 +123,31 @@
                     </ul>
                 </li>
 
+                <!-- REGISTRO -->
+                <ng-container *ngIf="verRegistro">
+                    <li *ngFor="let item7 of menuItems7">
+                        <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
+                            style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
+                            <i class="mdi mdi-clipboard" style="color: #FFFFFF;"></i>
+                            <span class="hide-menu" style="color: #FFFFFF;">
+                                {{ item7.titulo }}
+                                <span class="label label-rouded pull-right"
+                                    style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
+                                    {{ item7.submenu.length }}
+                                </span>
+                            </span>
+                        </a>
+                        <ul aria-expanded="false" class="collapse" style="background-color: #134B2C;">
+                            <li *ngFor="let subMenuItem of item7.submenu">
+                                <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
+                                    style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
+                                    • {{ subMenuItem.titulo }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ng-container>
+
                 <!-- REPORTES -->
                 <ng-container *ngIf="verReportes">
                     <li *ngFor="let item44 of menuItems44">

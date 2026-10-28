@@ -17,6 +17,7 @@ export class SidebarComponent implements OnInit {
   menuItems4B: any[];
   menuItems55: any[];
   menuItems6: any[];
+  menuItems7: any[];
   menuItems5: any[];
   menuItems10: any[];
 
@@ -38,6 +39,7 @@ export class SidebarComponent implements OnInit {
   vertransferencias: boolean = false;
   verReportes: boolean = false;
   verArticulos: boolean = false;
+  verRegistro: boolean = false;
   muestraUsuarios: boolean = false;
 
   constructor(
@@ -53,6 +55,7 @@ export class SidebarComponent implements OnInit {
     this.menuItems55 = sidebarService.menu55;
     this.menuItems5 = sidebarService.menu5;
     this.menuItems6 = sidebarService.menu6;
+    this.menuItems7 = sidebarService.menu7;
     this.menuItems10 = sidebarService.menu10;
   }
 
@@ -92,6 +95,9 @@ export class SidebarComponent implements OnInit {
       if (this.menuItems55?.[0]?.submenu?.[1]) {
         this.menuItems55[0].submenu[1].mostrar = true;
       }
+
+      // Registro (solo tipo 0 y 1)
+      this.verRegistro = true;
 
       // Movimientos
       this.movimientos = false;
@@ -145,6 +151,9 @@ export class SidebarComponent implements OnInit {
       if (this.menuItems55?.[0]?.submenu?.[0]) {
         this.menuItems55[0].submenu[0].mostrar = false;
       }
+
+      // Registro
+      this.verRegistro = false;
     }
   }
 }

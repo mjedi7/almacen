@@ -1,110 +1,391 @@
-<div class="formulario">
 
-  <div class="Titulo" style="text-align: center;"> <h3>Mis existencias</h3></div>
+<div class="formulario">
+  <div class="Titulo" style="text-align: center;">
+    <h3>Mis existencias</h3>
+  </div>
   <hr>
 
-  <div class="form-row mt-5">
+  <!-- Tres categorías en horizontal -->
+  <div class="row mt-4">
 
-    <div class="form-group col-md-3" style="padding-left:120px;">
-        <label for="inputPassword4">Plantel</label>
-        <select [(ngModel)]="opcionSeleccionado" id="areaEmite" class="form-control" name="Plantel" (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel">       
-          <ng-container *ngFor="let plantel of planteles" >
-                <option [value]="plantel.id">{{plantel.descripcion}}</option>
+    <!-- PLANTELES -->
+    <div class="form-group col-md-4 col-sm-12">
+      <label>Planteles</label>
+
+      <button
+        type="button"
+        class="selector-btn"
+        [disabled]="categoriaActiva !== null && categoriaActiva !== 'Planteles'"
+        (click)="toggleMenu('Planteles')">
+
+        <span>
+          <ng-container *ngIf="categoriaActiva === 'Planteles'; else textoPlantel">
+            {{ centroSeleccionado?.codigo | number:'2.0-0' }} — {{ centroSeleccionado?.descripcion }}
           </ng-container>
-          </select>
-          <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+
+          <ng-template #textoPlantel>
+            Seleccionar plantel...
+          </ng-template>
+        </span>
+
+        <span>▾</span>
+      </button>
+
+      <div class="selector-menu" *ngIf="menuPlantelesAbierto">
+        <input
+          type="text"
+          class="form-control selector-busqueda"
+          placeholder="Buscar por número o nombre..."
+          [(ngModel)]="busquedaPlantelDropdown"
+          name="buscarPlantelDropdown">
+
+        <button
+          type="button"
+          class="selector-opcion"
+          *ngFor="let p of plantelesVisibles"
+          (click)="seleccionarCentro(p, 'Planteles')">
+
+          {{ p.codigo | number:'2.0-0' }} — {{ p.descripcion }}
+        </button>
+
+        <div
+          class="selector-vacio"
+          *ngIf="plantelesVisibles.length === 0">
+          No se encontraron planteles.
+        </div>
+      </div>
     </div>
 
-    <div class="form-group col-md-3" style="padding-left:80px;">
-        <label for="inputPassword4">Descargar Inventario</label> <br>
-        <button class="btn btn-success" (click)="reporteGneral()"><span class="mdi mdi-file-pdf" style="color: brown;"></span> .PDF</button>
+    <!-- DIRECCIONES GENERALES -->
+    <div class="form-group col-md-4 col-sm-12">
+      <label>Dirección general</label>
+
+      <button
+        type="button"
+        class="selector-btn"
+        [disabled]="categoriaActiva !== null && categoriaActiva !== 'Direcciones generales'"
+        (click)="toggleMenu('Direcciones generales')">
+
+        <span>
+          <ng-container *ngIf="categoriaActiva === 'Direcciones generales'; else textoDireccion">
+            {{ centroSeleccionado?.descripcion }}
+          </ng-container>
+
+          <ng-template #textoDireccion>
+            Seleccionar dirección...
+          </ng-template>
+        </span>
+
+        <span>▾</span>
+      </button>
+
+      <div class="selector-menu" *ngIf="menuDireccionesAbierto">
+        <input
+          type="text"
+          class="form-control selector-busqueda"
+          placeholder="Buscar dirección..."
+          [(ngModel)]="busquedaDireccionDropdown"
+          name="buscarDireccionDropdown">
+
+        <button
+          type="button"
+          class="selector-opcion"
+          *ngFor="let p of direccionesVisibles"
+          (click)="seleccionarCentro(p, 'Direcciones generales')">
+
+          {{ p.descripcion }}
+        </button>
+
+        <div
+          class="selector-vacio"
+          *ngIf="direccionesVisibles.length === 0">
+          No se encontraron direcciones.
+        </div>
+      </div>
     </div>
 
-    <div class="form-group col-md-2">
-        <label for="inputPassword4">Formato requisición</label> <br>
-        <button class="btn btn-danger" (click)="descargarFormato()"><span class="mdi mdi-file-pdf" style="color: rgb(226, 222, 222);"></span> .PDF</button>
+    <!-- OTROS -->
+    <div class="form-group col-md-4 col-sm-12">
+      <label>Otros</label>
+
+      <button
+        type="button"
+        class="selector-btn"
+        [disabled]="categoriaActiva !== null && categoriaActiva !== 'Otros'"
+        (click)="toggleMenu('Otros')">
+
+        <span>
+          <ng-container *ngIf="categoriaActiva === 'Otros'; else textoOtros">
+            {{ centroSeleccionado?.descripcion }}
+          </ng-container>
+
+          <ng-template #textoOtros>
+            Seleccionar unidad...
+          </ng-template>
+        </span>
+
+        <span>▾</span>
+      </button>
+
+      <div class="selector-menu" *ngIf="menuOtrosAbierto">
+        <input
+          type="text"
+          class="form-control selector-busqueda"
+          placeholder="Buscar unidad..."
+          [(ngModel)]="busquedaOtroDropdown"
+          name="buscarOtroDropdown">
+
+        <button
+          type="button"
+          class="selector-opcion"
+          *ngFor="let p of otrosVisibles"
+          (click)="seleccionarCentro(p, 'Otros')">
+
+          {{ p.descripcion }}
+        </button>
+
+        <div
+          class="selector-vacio"
+          *ngIf="otrosVisibles.length === 0">
+          No se encontraron unidades.
+        </div>
+      </div>
     </div>
-     
+
   </div>
 
+  <!-- Botón para cambiar de categoría -->
+  <div class="row mb-3" *ngIf="categoriaActiva !== null">
+  <div class="col-12 contenedor-cambiar-seleccion">
+    <button
+      type="button"
+      class="btn-cambiar-seleccion"
+      (click)="limpiarSeleccion()">
+      Cambiar selección
+    </button>
+  </div>
 </div>
 
-<!-- lista de productos a surtir -->
 
-<div class="mt-2" style="width: 85%;margin: 0 auto;" >
+  <!-- Botones de descarga -->
+  <div class="row mt-3 mb-3">
+    <div class="col-md-4 col-sm-12 mb-2">
+      <label>Descargar Inventario</label>
+      <br>
 
-    <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
-        <thead>
-            <tr style="color:#000">
-                <!-- <th style="text-align:center;width:auto">Num.</th> -->
-                <th style="text-align:left;width:auto">Partida</th>
-                <th style="text-align:left;width:auto">Artículo</th>
-                <th style="text-align:center;width:30px">Existencia</th> 
-                <th *ngIf="botonUtilizaArticulo" style="text-align:center;width: 80px;">Utilizar artículo</th>    
-            </tr>
-        </thead>
-        <tbody style="font-size: 15px;">
-            <tr *ngFor="let existencia of existencias">
-                <!-- <td style="text-align:center;"></td> -->
-                <td style="text-align:left;">{{existencia.partida}}</td>
-                <td style="text-transform:capitalize">{{existencia.descripcion}}</td>
-                <td style="text-align:center;">{{existencia.existencias}}</td>     
-                <td *ngIf="botonUtilizaArticulo" style="text-align:center;">
-                    <button class="btn btn-light" title="usar artículo" data-toggle="modal" data-target="#exampleModal" (click)="PasarCantidadDisponible(existencia.existencias,existencia.id_costos)"><i class="mdi mdi-poll" style="color: brown;"></i></button>
-                    <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"></button> -->
-                </td>                          
-            </tr>
-        </tbody>
-    </table>
-   
+      <button
+        type="button"
+        class="btn btn-success"
+        (click)="reporteGneral()">
+
+        <span class="mdi mdi-file-pdf" style="color: brown;"></span>
+        .PDF
+      </button>
+    </div>
+
+    
+<div class="col-md-4 col-sm-12 mb-2">
+  <label>Descargar Inventario</label>
+  <br>
+
+  <button
+    type="button"
+    class="btn btn-success"
+    [disabled]="!verSeleccion || existencias.length === 0"
+    (click)="descargarExcel()">
+
+    <span class="mdi mdi-file-excel" style="color: white;"></span>
+    .EXCEL
+  </button>
 </div>
 
-<!-- MODAL -->
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="col-md-4 col-sm-12 mb-2">
+      <label>Formato requisición</label>
+      <br>
+
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="descargarFormato()">
+
+        <span class="mdi mdi-file-pdf" style="color: rgb(226, 222, 222);"></span>
+        .PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- LISTA DE PRODUCTOS A SURTIR -->
+<div class="mt-2" style="width: 85%; margin: 0 auto;">
+
+  <table
+    id="articulos"
+    datatable
+    [dtOptions]="dtOptions"
+    [dtTrigger]="dtTrigger"
+    class="table"
+    style="width: 100%;">
+
+    <thead>
+      <tr style="color: #000;">
+        <th style="text-align: left; width: auto;">Partida</th>
+        <th style="text-align: left; width: auto;">Artículo</th>
+        <th style="text-align: center; width: 30px;">Existencia</th>
+
+        <th
+          *ngIf="botonUtilizaArticulo"
+          style="text-align: center; width: 80px;">
+          Utilizar artículo
+        </th>
+      </tr>
+    </thead>
+
+    <tbody style="font-size: 15px;">
+      <tr *ngFor="let existencia of existencias">
+        <td style="text-align: left;">
+          {{ existencia.partida }}
+        </td>
+
+        <td style="text-transform: capitalize;">
+          {{ existencia.descripcion }}
+        </td>
+
+        <td style="text-align: center;">
+          {{ existencia.existencias }}
+        </td>
+
+        <td *ngIf="botonUtilizaArticulo" style="text-align: center;">
+          <button
+            type="button"
+            class="btn btn-light"
+            title="usar artículo"
+            data-toggle="modal"
+            data-target="#exampleModal"
+            (click)="PasarCantidadDisponible(existencia.existencias, existencia.id_costos)">
+
+            <i class="mdi mdi-poll" style="color: brown;"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL: USAR ARTÍCULO -->
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+
   <div class="modal-dialog" role="document">
     <div class="modal-content">
+
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Usar Artículo</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Usar Artículo
+        </h5>
+
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close">
+
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+
       <div class="modal-body">
+        <form (ngSubmit)="AsignarArticulo(f)" #f="ngForm">
 
-        <form (ngSubmit)="AsignarArticulo(f)" #f="ngForm" >
-          
           <div class="form-group">
-            <label  for="autoriza-name" class="col-form-label">Nombre de quien autoriza:</label>
-            <input [(ngModel)]=" UsarArticulo.nombreAutoriza" type="text" name="nomAutoriza" readonly class="form-control" id="autoriza-name">
-          </div>
+            <label for="autoriza-name" class="col-form-label">
+              Nombre de quien autoriza:
+            </label>
 
-           <div class="form-group">
-            <label for="autoriza-name" class="col-form-label">Nombre de quien solicita:</label>
-            <input [(ngModel)]=" UsarArticulo.nombreSolicita" type="text" name="nomSolicita" class="form-control" id="autoriza-name">
-          </div>
-
-           <div class="form-group">
-            <label for="cantidad-name" class="col-form-label">Cantidad Disponible:</label>
-            <input [(ngModel)]=" UsarArticulo.cantidadDisponible" type="number" name="cantidadDisponible" readonly class="form-control" id="cantidad-name">
+            <input
+              [(ngModel)]="UsarArticulo.nombreAutoriza"
+              type="text"
+              name="nomAutoriza"
+              readonly
+              class="form-control"
+              id="autoriza-name">
           </div>
 
           <div class="form-group">
-            <label for="cantidad-name" class="col-form-label">Cantidad a utilizar:</label>
-            <input [(ngModel)]=" UsarArticulo.cantidadAUtilizar" type="number" name="cantidadUtilizar" class="form-control" id="cantidad-name">
+            <label for="solicita-name" class="col-form-label">
+              Nombre de quien solicita:
+            </label>
+
+            <input
+              [(ngModel)]="UsarArticulo.nombreSolicita"
+              type="text"
+              name="nomSolicita"
+              class="form-control"
+              id="solicita-name">
           </div>
 
-           <div class="form-group">
-            <label for="cantidad-name" class="col-form-label">Observación (opcional):</label>
-            <input [(ngModel)]=" UsarArticulo.observacion" type="text" name="observacion" class="form-control" id="cantidad-name">
+          <div class="form-group">
+            <label for="cantidad-disponible" class="col-form-label">
+              Cantidad disponible:
+            </label>
+
+            <input
+              [(ngModel)]="UsarArticulo.cantidadDisponible"
+              type="number"
+              name="cantidadDisponible"
+              readonly
+              class="form-control"
+              id="cantidad-disponible">
           </div>
 
-           <div class="form-group">
-            <label for="cantidad-name" class="col-form-label">Fecha de autorización:</label>
-            <input [(ngModel)]=" UsarArticulo.fecha" type="text" name="fecha" readonly class="form-control" id="cantidad-name">
+          <div class="form-group">
+            <label for="cantidad-utilizar" class="col-form-label">
+              Cantidad a utilizar:
+            </label>
+
+            <input
+              [(ngModel)]="UsarArticulo.cantidadAUtilizar"
+              type="number"
+              name="cantidadUtilizar"
+              class="form-control"
+              id="cantidad-utilizar">
           </div>
 
-          <button class="btn btn-success">Autorizar</button>
+          <div class="form-group">
+            <label for="observacion" class="col-form-label">
+              Observación (opcional):
+            </label>
+
+            <input
+              [(ngModel)]="UsarArticulo.observacion"
+              type="text"
+              name="observacion"
+              class="form-control"
+              id="observacion">
+          </div>
+
+          <div class="form-group">
+            <label for="fecha-autorizacion" class="col-form-label">
+              Fecha de autorización:
+            </label>
+
+            <input
+              [(ngModel)]="UsarArticulo.fecha"
+              type="text"
+              name="fecha"
+              readonly
+              class="form-control"
+              id="fecha-autorizacion">
+          </div>
+
+          <button type="submit" class="btn btn-success">
+            Autorizar
+          </button>
 
         </form>
       </div>

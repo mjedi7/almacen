@@ -95,11 +95,23 @@ export class SidebarService {
       titulo: 'Artículos',
       icono: 'mdi mdi-gauge',
       submenu: [
-        { titulo: 'Agregar artículo', url: 'agregar-articulo', mostrar: true },
         { titulo: 'Artículos bajo stock', url: 'bajo-stock', mostrar: true },
         { titulo: 'Listar artículos por Partida', url: 'listar-articulos-partida', mostrar: true }
       ]
     },
+  ];
+
+  // REGISTRO (solo id_tipo_usuario 0 y 1)
+  menu7: any[] = [
+    {
+      titulo: 'Registro',
+      icono: 'mdi mdi-gauge',
+      submenu: [
+        { titulo: 'Registrar Nuevo Artículo', url: 'agregar-articulo', mostrar: true },
+        { titulo: 'Registrar Nuevo Proveedor', url: 'registrar-proveedor', mostrar: true },
+        { titulo: 'Registrar Nueva Partida', url: 'registrar-partida', mostrar: true }
+      ]
+    }
   ];
 
   // REPORTES
