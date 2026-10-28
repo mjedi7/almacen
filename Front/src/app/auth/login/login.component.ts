@@ -54,6 +54,8 @@ export class LoginComponent implements OnInit {
         let datos=JSON.parse(localStorage.getItem('datos')!);
 
         if(res=="NoEncontrado"){
+          console.log('--- RESPUESTA EXACTA DEL SERVIDOR ---');
+          console.log(typeof res, res); // Ver tipo de dato y contenido real
           
           Swal.fire(
                     '¡Error de autenticación!',

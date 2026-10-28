@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "types" :["datatables.net","jquery"],
     "baseUrl": "./",
     "paths": {
       "src/*": ["src/*"]

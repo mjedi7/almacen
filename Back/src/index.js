@@ -10,7 +10,7 @@ const { generarReporteSalidasXPartida } = require('./controllers/reporteSalidasP
 const { reporteKardex } = require('./controllers/reporteKardex.controller'); // <--- AÑADE ESTA LÍNEA
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3010;
 
 // Configuración de la conexión a la base de datos
 const pool = new Pool({
