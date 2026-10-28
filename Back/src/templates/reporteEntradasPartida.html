@@ -67,9 +67,9 @@
           <td class="text-center">{{this.folioFactura}}</td>
           <td class="text-left">{{this.proveedor}}</td>
           <td class="text-center">{{this.fechaCompra}}</td>
-          <td class="text-right nowrap">${{this.importe}}</td>
-          <td class="text-right nowrap">${{this.impuesto}}</td>
-          <td class="text-right nowrap font-bold">${{this.total}}</td>
+          <td class="text-right nowrap">{{this.importe}}</td>
+          <td class="text-right nowrap">{{this.impuesto}}</td>
+          <td class="text-right nowrap font-bold">{{this.total}}</td>
         </tr>
         {{/each}}
       {{else}}
@@ -96,15 +96,15 @@
       <tbody>
         <tr>
           <td class="text-right font-bold">Subtotal:</td>
-          <td class="text-right nowrap">${{totales.subtotal}}</td>
+          <td class="text-right nowrap">{{totales.subtotal}}</td>
         </tr>
         <tr>
           <td class="text-right font-bold">I.V.A.:</td>
-          <td class="text-right nowrap">${{totales.iva}}</td>
+          <td class="text-right nowrap">{{totales.iva}}</td>
         </tr>
         <tr class="totals-table__total">
           <td class="text-right font-bold">Total:</td>
-          <td class="text-right nowrap font-bold">${{totales.total}}</td>
+          <td class="text-right nowrap font-bold">{{totales.total}}</td>
         </tr>
       </tbody>
     </table>

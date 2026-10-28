@@ -1,70 +1,230 @@
 @page {
   size: letter portrait;
-  margin: 15mm 15mm 15mm 15mm; /* Margen inferior estándar */
+  margin: 12mm 14mm 22mm 14mm; /* Margen superior limpio para que el thead respire */
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-body {
+/* Regresamos body al flujo normal de bloque (sin flex) */
+body.report {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8.5pt;
+  color: #000;
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
   width: 100%;
-  color: #333333;
-  font-size: 11px;
-  line-height: 1.3;
-  background-color: #ffffff;
 }
 
-.header-container {
+/* Banner superior */
+.report-banner {
   width: 100%;
   text-align: center;
+  margin-bottom: 6px;
+}
+
+.report-banner img {
+  width: 100%;
+  height: auto !important;
+  max-width: 90%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Títulos institucionales */
+.report-heading {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.report-institution {
+  font-size: 11pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.report-name {
+  font-size: 11pt;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.report-title {
+  font-size: 10pt;
+  font-weight: bold;
+}
+
+/* Tablas principales */
+table.table-header,
+table.table-detalle {
+  width: 100%;
+  border-collapse: collapse !important;
+  border: 1px solid #000 !important;
+}
+
+table.table-header {
   margin-bottom: 12px;
 }
 
-.header-logos {
-  width: 100%;
-  max-height: 60px;
-  object-fit: contain;
-  margin-bottom: 8px;
+table.table-header th,
+table.table-detalle th {
+  background-color: #e3eefa !important; /* Azul tenue institucional */
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  padding: 4.5px 5px;
+  font-size: 8.5pt;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: middle;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
 }
 
-.titulo-institucion {
-  font-size: 11px;
-  font-weight: 700;
+table.table-detalle {
+  margin-bottom: 0;
+  page-break-inside: auto !important;
+}
+
+/* Garantiza que la cabecera se repita limpiamente sin empalmarse */
+table.table-detalle thead {
+  display: table-header-group !important;
+}
+
+table.table-detalle tbody {
+  display: table-row-group !important;
+}
+
+table.table-detalle tr {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
+table.table-header th,
+table.table-detalle th {
+  background-color: #ffffff;
+  border: 1px solid #000 !important;
+  padding: 5px 4px;
+  font-size: 9pt;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: middle;
+}
+
+table.table-header td,
+table.table-detalle td {
+  border: 1px solid #000 !important;
+  padding: 3.5px 6px;
+  font-size: 8pt;
+  vertical-align: middle;
+}
+
+/* Primera letra en mayúscula */
+table.table-detalle td.text-left::first-letter {
   text-transform: uppercase;
 }
 
-.titulo-reporte {
-  font-size: 14px;
-  font-weight: 800;
-  margin-top: 2px;
+.report-section {
+  margin-bottom: 14px;
 }
 
-.tabla-reporte {
-  width: 100%;
-  border-collapse: collapse;
-  page-break-inside: auto;
+/* Alineaciones */
+.cen { text-align: center; }
+.num { text-align: right; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.font-bold { font-weight: bold; }
+.nowrap { white-space: nowrap; }
+
+.empty-state {
+  text-align: center;
+  font-style: italic;
+  font-size: 8.5pt;
+  color: #555;
+  padding: 14px !important;
 }
 
-.tabla-reporte thead {
-  display: table-header-group;
+/* ========================================================
+   SECCIÓN DE TOTALES FINAL
+   ======================================================== */
+table.totales-contenedor {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: none !important;
+  margin-top: 18px;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
-.tabla-reporte tr {
-  page-break-inside: avoid;
+table.totales-contenedor td {
+  border: none !important;
+  padding: 0 !important;
 }
 
-.tabla-reporte th, 
-.tabla-reporte td {
-  border: 1px solid #222222;
-  padding: 4px 6px;
-  font-size: 9.5px;
+td.totales-col-izquierda {
+  width: 58% !important;
+  vertical-align: top !important;
+  font-size: 9.5pt;
+  line-height: 1.5;
 }
 
-.tabla-reporte th {
-  background-color: #f2f2f2;
+.totales-conteos__fila {
+  margin-top: 4px;
+}
+
+td.totales-col-derecha {
+  width: 42% !important;
+  vertical-align: bottom !important;
+  padding-top: 35px !important; /* Baja el bloque de importes sin romper la página */
+}
+
+table.tabla-desglose {
+  width: 100% !important;
+  max-width: 250px !important;
+  border-collapse: collapse !important;
+  border: none !important;
+  margin-left: auto !important;
+}
+
+table.tabla-desglose td {
+  border: none !important;
+  font-size: 9pt;
+  vertical-align: middle;
+}
+
+.tabla-desglose__etiqueta {
+  text-align: right;
   font-weight: bold;
+  padding: 2px 8px !important;
+  width: 45%;
+}
+
+.tabla-desglose__valor {
+  text-align: right;
+  white-space: nowrap;
+  padding: 2px 0 !important;
+  width: 55%;
+}
+
+tr.tabla-desglose__fila-total {
+  border-top: 1.5px solid #000 !important;
+}
+
+.tabla-desglose__etiqueta-total {
+  text-align: right;
+  font-weight: bold;
+  padding: 4px 8px 2px 0 !important;
+}
+
+.tabla-desglose__valor-total {
+  text-align: right;
+  font-weight: bold;
+  white-space: nowrap;
+  padding: 4px 0 2px 0 !important;
 }

@@ -3,205 +3,214 @@
 
 <head>
   <meta charset="UTF-8">
+  <title>Existencias y Costos Actuales</title>
+  <style>
+    @page {
+      size: letter portrait;
+      /* 18mm abajo reserva el espacio para el pie y activa el salto automático a la hoja 2 */
+      margin: 10mm 12mm 18mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.report {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8pt;
+      color: #000;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Banner institucional superior */
+    .report-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .report-banner img {
+      width: 100%;
+      height: auto !important;
+      max-width: 88%;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Encabezados institucionales */
+    .report-heading {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .report-heading__institution {
+      font-size: 9pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .report-heading__title {
+      font-size: 10.5pt;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+
+    .report-heading__subtitle {
+      font-size: 9.5pt;
+      font-weight: bold;
+    }
+
+    /* Tablas con bordes negros sólidos en todas las celdas */
+    table.report-table {
+      width: 100%;
+      border-collapse: collapse !important;
+      border: 1.5px solid #000 !important;
+      margin-bottom: 8px;
+      page-break-inside: auto;
+    }
+
+    table.report-table thead {
+      display: table-header-group !important; /* Repite la cabecera en cada página */
+    }
+
+    table.report-table tr {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    table.report-table th {
+      background-color: #ffffff;
+      border: 1px solid #000 !important;
+      padding: 3.5px 5px;
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    table.report-table td {
+      border: 1px solid #000 !important; /* Dibuja cada celda de la cuadrícula */
+      padding: 2.5px 5px;
+      font-size: 8pt;
+      vertical-align: middle;
+    }
+
+    /* Alineaciones */
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-bold { font-weight: bold; }
+    .nowrap { white-space: nowrap; }
+
+    .empty-state {
+      text-align: center;
+      font-style: italic;
+      font-size: 8.5pt;
+      color: #555;
+      padding: 14px !important;
+    }
+
+    /* Pie: Usuario a la izquierda y número de página al extremo derecho */
+    .footer-simple {
+      position: fixed;
+      bottom: -11mm;
+      left: 0;
+      right: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 8pt;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #000;
+    }
+  </style>
 </head>
 
-<body class="report report--compact page-portrait">
+<body class="report">
 
+  <!-- Banner superior -->
   {{#if bannerBase64}}
-  <div class="report-banner report-banner--compact">
-    <img
-      src="{{bannerBase64}}"
-      alt="Banner institucional"
-    >
+  <div class="report-banner">
+    <img src="{{bannerBase64}}" alt="Banner institucional">
   </div>
   {{/if}}
 
+  <!-- Encabezado -->
   <header class="report-heading">
     <p class="report-heading__institution">
       Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
     </p>
-
     <h1 class="report-heading__title">
-      {{titulo}}
+      EXISTENCIAS Y COSTOS ACTUALES
     </h1>
+    <p class="report-heading__subtitle">
+      Almacén General
+    </p>
   </header>
 
-  <!-- Información general -->
-  <table class="report-meta">
-
-    <colgroup>
-      <col class="w-12">
-      <col class="w-38">
-      <col class="w-12">
-      <col class="w-38">
-    </colgroup>
-
-    <tbody>
-      <tr>
-        <td class="report-meta__label">
-          Documentos:
-        </td>
-
-        <td>
-          {{documentos}}
-        </td>
-
-        <td class="report-meta__label">
-          Proveedores:
-        </td>
-
-        <td>
-          {{proveedores}}
-        </td>
-      </tr>
-
-      <tr>
-        <td class="report-meta__label">
-          Período:
-        </td>
-
-        <td colspan="3">
-          Del {{fechaInicio}} al {{fechaFin}}
-        </td>
-      </tr>
-    </tbody>
-
-  </table>
-
-  <!-- Registros -->
-  <table class="report-table report-table--fixed report-table--soft">
-
-    <colgroup>
-      <col class="w-14">
-      <col class="w-34">
-      <col class="w-12">
-      <col class="w-third">
-      <col class="w-third">
-      <col class="w-third">
-    </colgroup>
-
+  <!-- Ficha superior de criterios -->
+  <table class="report-table" style="margin-bottom: 8px;">
     <thead>
       <tr>
-        <th>Folio Factura</th>
-        <th>Proveedor</th>
-        <th>Fecha</th>
-        <th>Importe</th>
-        <th>Impuesto</th>
-        <th>Total</th>
+        <th style="width: 12%;">Partidas</th>
+        <th style="width: 58%;">Nombre Partida</th>
+        <th style="width: 15%;">Productos</th>
+        <th style="width: 15%;">Proveedores</th>
       </tr>
     </thead>
-
     <tbody>
-
-      {{#if hayRegistros}}
-
-        {{#each registros}}
-        <tr>
-          <td class="text-center">
-            {{this.folioFactura}}
-          </td>
-
-          <td>
-            {{this.proveedor}}
-          </td>
-
-          <td class="text-center">
-            {{this.fechaCompra}}
-          </td>
-
-          <td class="text-right nowrap">
-            {{this.importe}}
-          </td>
-
-          <td class="text-right nowrap">
-            {{this.impuesto}}
-          </td>
-
-          <td class="text-right nowrap">
-            {{this.total}}
-          </td>
-        </tr>
-        {{/each}}
-
-      {{else}}
-
-        <tr>
-          <td colspan="6" class="empty-state p-20">
-            No se encontraron compras dentro del período seleccionado.
-          </td>
-        </tr>
-
-      {{/if}}
-
+      <tr>
+        <td class="text-center font-bold">{{#if partida.clave}}{{partida.clave}}{{else}}21101{{/if}}</td>
+        <td class="text-left">{{#if partida.descripcion}}{{partida.descripcion}}{{else}}Material y Útiles de Oficina{{/if}}</td>
+        <td class="text-center">{{#if filtroProductos}}{{filtroProductos}}{{else}}Todos{{/if}}</td>
+        <td class="text-center">{{#if filtroProveedores}}{{filtroProveedores}}{{else}}Todos{{/if}}</td>
+      </tr>
     </tbody>
-
   </table>
 
-  <!-- Resumen -->
-  <div class="report-results">
-
-    <div class="report-count">
-      Registros impresos:
-      <strong>{{totalRegistros}}</strong>
-    </div>
-
-    <table class="totals-table">
-      <tbody>
+  <!-- Tabla principal de Existencias -->
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th style="width: 18%;">Clave</th>
+        <th style="width: 44%;">Artículo</th>
+        <th style="width: 12%; text-align: right;">Costo</th>
+        <th style="width: 10%; text-align: center;">Existencia</th>
+        <th style="width: 16%; text-align: right;">Costo total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if hayRegistros}}
+        {{#each registros}}
         <tr>
-          <td class="w-50 text-right font-bold">
-            Subtotal:
-          </td>
-
-          <td class="w-50 text-right nowrap">
-            {{totales.subtotal}}
-          </td>
+          <td class="text-center">{{this.clave}}</td>
+          <td class="text-left">{{this.articulo}}</td>
+          <td class="text-right nowrap">$ {{this.costo}}</td>
+          <td class="text-center font-bold">{{this.existencia}}</td>
+          <td class="text-right nowrap">$ {{this.costoTotal}}</td>
         </tr>
-
+        {{/each}}
+      {{else}}
         <tr>
-          <td class="text-right font-bold">
-            I.V.A.:
-          </td>
-
-          <td class="text-right nowrap">
-            {{totales.iva}}
+          <td colspan="5" class="empty-state">
+            No se encontraron registros para los criterios seleccionados.
           </td>
         </tr>
+      {{/if}}
+    </tbody>
+  </table>
 
-        <tr class="totals-table__total">
-          <td class="text-right font-bold">
-            Total:
-          </td>
-
-          <td class="text-right nowrap">
-            {{totales.total}}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-  </div>
-
-  <!-- Información inferior -->
-  <footer class="document-footer">
-    <div class="document-footer__content">
-      <div>
-        Reporte de entradas de todas las partidas
-      </div>
-
-      <div class="text-right">
-        Fecha del reporte: {{fechaReporte}}
-      </div>
-    </div>
+  <!-- Pie con Usuario y Número de Página horizontal -->
+  <footer class="footer-simple">
+    <div><strong>Usuario:</strong> {{usuarioPie}}</div>
+    <div>Pág. 1</div>
   </footer>
-
-  {{#if pieBase64}}
-  <div class="institutional-footer">
-    <img
-      src="{{pieBase64}}"
-      alt="Pie institucional"
-    >
-  </div>
-  {{/if}}
 
 </body>
 

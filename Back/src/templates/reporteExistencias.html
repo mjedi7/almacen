@@ -4,178 +4,133 @@
 <head>
   <meta charset="UTF-8">
   <title>Existencias y Costos Actuales</title>
-  <style>
-    /* Asegurar que las claves y números no salten de línea */
-    .table-detalle td.cen,
-    .table-detalle td.num {
-      white-space: nowrap;
-    }
-
-    /* Espacio superior para que el banner nunca se corte */
-    .report-banner {
-      margin-top: 3mm;
-      margin-bottom: 6px;
-    }
-
-    .report-banner img {
-      max-height: 85px;
-      object-fit: contain;
-    }
-  </style>
 </head>
 
-<body class="report report--normal">
+<body class="report">
 
-  <table class="report-shell">
+  <!-- Banner superior institucional -->
+  {{#if bannerBase64}}
+  <div class="report-banner">
+    <img src="{{bannerBase64}}" alt="Banner Institucional">
+  </div>
+  {{/if}}
 
-    <!-- Encabezado repetible -->
-    <thead>
-      <tr>
-        <td>
-          <header class="report-header">
+  <!-- Encabezado -->
+  <header class="report-heading">
+    <div class="report-institution">
+      COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+    </div>
+    <div class="report-name">
+      EXISTENCIAS Y COSTOS ACTUALES
+    </div>
+    <div class="report-title">
+      {{#if tituloAlmacen}}{{tituloAlmacen}}{{else}}Almacén General{{/if}}
+    </div>
+  </header>
 
-            {{#if bannerBase64}}
-            <div class="report-banner">
-              <img src="{{bannerBase64}}" alt="Banner Institucional">
-            </div>
-            {{/if}}
+  <!-- Partidas y Artículos -->
+  {{#each gruposPartidas}}
+  <section class="report-section">
 
-            <div class="report-institution">
-              COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
-            </div>
+    <!-- 1. Ficha superior de la Partida -->
+    <table class="table-header">
+      <thead>
+        <tr>
+          <th style="width: 12%;">Partida</th>
+          <th style="width: 58%;">Nombre Partida</th>
+          <th style="width: 15%;">Productos</th>
+          <th style="width: 15%;">Proveedores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="text-center font-bold">{{this.clave}}</td>
+          <td class="text-left" style="padding-left: 8px;">{{this.descripcion}}</td>
+          <td class="text-center">Todos</td>
+          <td class="text-center">Todos</td>
+        </tr>
+      </tbody>
+    </table>
 
-            <div class="report-name">
-              EXISTENCIAS Y COSTOS ACTUALES
-            </div>
+    <!-- 2. Detalle de Artículos -->
+    <table class="table-detalle">
+      <thead>
+        <tr>
+          <th style="width: 17%;">Clave</th>
+          <th style="width: 47%;">Artículo</th>
+          <th style="width: 11%;">Costo</th>
+          <th style="width: 10%;">Existencia</th>
+          <th style="width: 15%;">Costo total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if this.articulos.length}}
+          {{#each this.articulos}}
+          <tr>
+            <td class="cen nowrap">{{this.clave}}</td>
+            <td class="text-left">{{this.articulo}}</td>
+            <td class="num nowrap">$ {{this.costo}}</td>
+            <td class="cen font-bold">{{this.existencia}}</td>
+            <td class="num nowrap">$ {{this.costo_total}}</td>
+          </tr>
+          {{/each}}
+        {{else}}
+          <tr>
+            <td colspan="5" class="empty-state">
+              No hay artículos registrados para esta partida.
+            </td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
 
-            <div class="report-title">
-              {{#if tituloAlmacen}}{{tituloAlmacen}}{{else}}Almacén General{{/if}}
-            </div>
+  </section>
+  {{/each}}
 
-          </header>
-        </td>
-      </tr>
-    </thead>
-
-    <!-- Espaciador reservado para que la tabla corte antes del pie -->
-    <tfoot>
-      <tr>
-        <td style="height: 20mm; border: none; background: transparent;"></td>
-      </tr>
-    </tfoot>
-
+  <!-- Resumen de totales -->
+  {{#if granTotal}}
+  <table class="totales-contenedor">
     <tbody>
-
-      {{#each gruposPartidas}}
-      <tr class="page-row {{#if @last}}page-row--last{{/if}}">
-        <td>
-
-          <section class="report-section" style="margin-bottom: 20px;">
-
-            <!-- 1. Cuadro superior de la partida bien estructurado -->
-            <table class="table-header" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000;">
-              <thead>
-                <tr>
-                  <th style="width: 14%; text-align: center;">Partida</th>
-                  <th style="width: 56%; text-align: center;">Nombre Partida</th>
-                  <th style="width: 15%; text-align: center;">Productos</th>
-                  <th style="width: 15%; text-align: center;">Proveedores</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="text-center">{{this.clave}}</td>
-                  <td class="text-left" style="padding-left: 8px;">{{this.descripcion}}</td>
-                  <td class="text-center">Todos</td>
-                  <td class="text-center">Todos</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- Separador físico garantizado entre ambos cuadros -->
-            <div style="height: 14px; width: 100%;"></div>
-
-            <!-- 2. Artículos de la partida con mayúscula inicial -->
-            <table class="table-detalle" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1.5px solid #000;">
-              <thead>
-                <tr>
-                  <th style="width: 22%; text-align: center;">Clave</th>
-                  <th style="width: 43%; text-align: center;">Artículo</th>
-                  <th style="width: 11%; text-align: center;">Costo</th>
-                  <th style="width: 10%; text-align: center;">Existencia</th>
-                  <th style="width: 14%; text-align: center;">Costo total</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {{#if this.articulos.length}}
-                {{#each this.articulos}}
-                <tr>
-                  <td class="cen" style="white-space: nowrap;">{{this.clave}}</td>
-                  <td class="text-left">{{primeraMayuscula this.articulo}}</td>
-                  <td class="num" style="white-space: nowrap;">$ {{this.costo}}</td>
-                  <td class="cen font-bold">{{this.existencia}}</td>
-                  <td class="num" style="white-space: nowrap;">$ {{this.costo_total}}</td>
-                </tr>
-                {{/each}}
-                {{else}}
-                <tr>
-                  <td colspan="5" class="empty-state">
-                    No hay artículos registrados para esta partida.
-                  </td>
-                </tr>
-                {{/if}}
-              </tbody>
-            </table>
-
-          </section>
-
+      <tr>
+        <!-- Conteos arriba a la izquierda -->
+        <td class="totales-col-izquierda">
+          <div>
+            <strong>Existencias totales de artículos:</strong> &nbsp; {{existenciasTotales}}
+          </div>
+          <div class="totales-conteos__fila">
+            <strong>Total de registros impresos:</strong> &nbsp; {{totalRegistrosImpresos}}
+          </div>
         </td>
-      </tr>
-      {{/each}}
 
-      <!-- Totales finales -->
-      <tr class="no-break">
-        <td>
-
-          <table class="report-summary" style="width: 100%; margin-top: 10px;">
+        <!-- Desglose de totales pegado a la derecha -->
+        <td class="totales-col-derecha">
+          <table class="tabla-desglose">
             <tbody>
               <tr>
-                <td style="width: 60%; vertical-align: top;">
-                  <div>
-                    <b>Existencias totales de artículos:</b>
-                    &nbsp; {{existenciasTotales}}
-                  </div>
-
-                  <div style="margin-top: 4px;">
-                    <b>Total de registros impresos:</b>
-                    &nbsp; {{totalRegistrosImpresos}}
-                  </div>
+                <td class="tabla-desglose__etiqueta">Subtotal:</td>
+                <td class="tabla-desglose__valor">
+                  ${{#if totales.subtotal}}{{totales.subtotal}}{{else if subtotal}}{{subtotal}}{{else}}{{granTotal}}{{/if}}
                 </td>
-
-                <td style="width: 20%; text-align: right; font-weight: bold; vertical-align: top;">
-                  Total
+              </tr>
+              <tr>
+                <td class="tabla-desglose__etiqueta">I.V.A.:</td>
+                <td class="tabla-desglose__valor">
+                  ${{#if totales.iva}}{{totales.iva}}{{else if iva}}{{iva}}{{else}}0.00{{/if}}
                 </td>
-
-                <td style="width: 20%; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">
-                  $ {{granTotal}}
+              </tr>
+              <tr class="tabla-desglose__fila-total">
+                <td class="tabla-desglose__etiqueta-total">Total:</td>
+                <td class="tabla-desglose__valor-total">
+                  ${{#if totales.total}}{{totales.total}}{{else}}{{granTotal}}{{/if}}
                 </td>
               </tr>
             </tbody>
           </table>
-
         </td>
       </tr>
-
     </tbody>
-
   </table>
-
-  <!-- Pie con Usuario y Número de Página -->
-  <div class="pie-fijo-datos" style="bottom: 8mm;">
-    <div><b>Usuario:</b> {{usuarioPie}}</div>
-    <div class="num-pagina"></div>
-  </div>
+  {{/if}}
 
 </body>
 

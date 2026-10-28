@@ -67,16 +67,21 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    // Detección: ¿El reporte lleva footer institucional o solo header?
-    const nombreMin = templateName.toLowerCase();
+    // 1. Detección unificada: ¿Es solo header o lleva pie institucional?
+    const nombreMin = templateName.toLowerCase().trim();
 
-    // Reportes que LLEVAN pie institucional (cenefa y corazón)
-    const llevaPie = nombreMin.includes('partida') ||
+    const esSoloHeader = nombreMin.includes('existencia') || 
+                         nombreMin.includes('costo') || 
+                         nombreMin.includes('todas');
+
+    const llevaPie = !esSoloHeader && (
+      nombreMin.includes('partida') ||
       nombreMin.includes('proveedor') ||
       nombreMin.includes('reporteentradas') ||
-      nombreMin.includes('kardex');
+      nombreMin.includes('kardex')
+    );
 
-    // Si no lleva pie institucional, usa reportes-solo-header.css
+    // 2. Inyección de CSS según el tipo de reporte
     const archivoCss = llevaPie ? cssConPiePath : cssSoloHeaderPath;
 
     if (fs.existsSync(archivoCss)) {
@@ -99,11 +104,36 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
+    // 3. Opciones de PDF armonizadas
     const defaultOptions = {
       printBackground: true,
-      displayHeaderFooter: false,
-      margin: { top: '0px', bottom: '0px', left: '0px', right: '0px' },
-      preferCSSPageSize: true,
+      displayHeaderFooter: esSoloHeader,
+      headerTemplate: '<span></span>',
+      footerTemplate: `
+        <div style="
+          width: 100%;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7pt;
+          color: #000;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-left: 14mm;
+          padding-right: 14mm;
+          box-sizing: border-box;
+        ">
+          <div>
+            <strong>Usuario:</strong> ${usuarioPie}
+          </div>
+          <div>
+            Pág. <span class="pageNumber"></span>
+          </div>
+        </div>
+      `,
+      margin: esSoloHeader
+        ? { top: '12mm', bottom: '22mm', left: '0px', right: '0px' }
+        : { top: '0px', bottom: '0px', left: '0px', right: '0px' },
+      preferCSSPageSize: !esSoloHeader,
       ...pdfOptions
     };
 
