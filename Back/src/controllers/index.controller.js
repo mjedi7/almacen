@@ -214,7 +214,10 @@ const registrarStock = async (req, res) => {
         partida,
         producto,
         fechaAd,
-        cantidad,
+        cantidad,          // Cantidad total comprada
+        cantidad_recibida, // Cantidad recibida inicialmente (del formulario)
+        fecha_recepcion,   // Fecha de recepción inicial opcional
+        observaciones,     // Observaciones de recepción
         unidad,
         descripcion,
         proveedor,
@@ -225,19 +228,40 @@ const registrarStock = async (req, res) => {
         total,
         folio,
         centro_trabajo,
-        subTotal
+        subTotal,
+        id_almacen         // ID del almacén
     } = req.body;
 
     var idPartida = partida || req.body.id_partidas;
+    var cantidadInicial = parseFloat(cantidad_recibida) || 0;
 
     try {
+        // 1. Manejamos la cabecera en compras_reportes
+        const impuestoReal = (parseFloat(subTotal) * 0.16) || 0;
+        let idCompraReporte;
+
+        const estatusGeneralInicial = cantidadInicial >= cantidad ? 'Entregada' : (cantidadInicial > 0 ? 'Parcial' : 'Pendiente');
+
+        try {
+            const responseReporte = await pool.query(
+                'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida, estatus_entrega) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;',
+                [folio, proveedor, fechaAd, subTotal, impuestoReal, total, idPartida, estatusGeneralInicial]
+            );
+            idCompraReporte = responseReporte.rows[0].id;
+        } catch (dbError) {
+            if (dbError.code === '23505') {
+                return res.status(400).json({ error: `El folio de compra '${folio}' ya se encuentra registrado en el sistema.` });
+            }
+            throw dbError;
+        }
+
+        // 2. Gestionamos los costos
         var comprobarDuplicado = await pool.query(
             'SELECT * FROM costos WHERE id_articulo = $1 AND id_proveedor = $2 AND precio_unitario = $3',
             [producto, proveedor, costo]
         );
 
         let ultimoID;
-
         if (comprobarDuplicado.rowCount > 0) {
             ultimoID = comprobarDuplicado.rows[0].id;
         } else {
@@ -260,42 +284,59 @@ const registrarStock = async (req, res) => {
             [ultimoID, centro_trabajo]
         );
 
+        let idAlmacenDestino = id_almacen;
         if (existeEnAlmacen.rowCount === 0) {
-            await pool.query(
-                'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+            var insertAlmacen = await pool.query(
+                'INSERT INTO almacen(id_centrotrabajo, id_costos, existencias, fecha_adquisicion, esactivo, unidad, descripcion, id_partida, nombre_producto) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id;',
                 [centro_trabajo, ultimoID, 0, fechaAd, true, unidad, descripcion, idPartida, nombreProducto]
             );
+            idAlmacenDestino = insertAlmacen.rows[0].id;
+        } else {
+            idAlmacenDestino = idAlmacenDestino || existeEnAlmacen.rows[0].id;
         }
 
-        // Insertamos en compras
-        await pool.query(
-            'INSERT INTO compras(id_costo, total_articulos, cantidad_recibida, estatus, fecha_compra, folio_compra, esactivo, id_partidas) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-            [ultimoID, cantidad, 0, 'Pendiente', fechaAd, folio, true, idPartida]
-        );
+        // Definimos el estatus exacto reconocido por el frontend: 'Entregada', 'Parcial' o 'Pendiente'
+        const estatusCompra = cantidadInicial >= cantidad ? 'Entregada' : (cantidadInicial > 0 ? 'Parcial' : 'Pendiente');
 
-        // Intentamos insertar la cabecera en compras_reportes. 
-        // Si el folio ya existe, la base de datos lo rechazará de forma segura gracias al UNIQUE.
-        const impuestoReal = (parseFloat(subTotal) * 0.16) || 0;
-        
-        try {
-            await pool.query(
-                'INSERT INTO compras_reportes (folio_factura, id_proveedor, fecha_compra, importe, impuesto, total, id_partida, estatus_entrega) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-                [folio, proveedor, fechaAd, subTotal, impuestoReal, total, idPartida, 'Pendiente']
+        // 3. Insertamos en compras respetando la cantidad recibida inicial, el estatus y el id_almacen
+        var responseCompra = await pool.query(
+            'INSERT INTO compras(id_costo, total_articulos, cantidad_recibida, estatus, fecha_compra, folio_compra, esactivo, id_partidas, id_compra_reporte, id_almacen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;',
+            [ultimoID, cantidad, cantidadInicial, estatusCompra, fechaAd, folio, true, idPartida, idCompraReporte, idAlmacenDestino]
+        );
+        var idCompraCreada = responseCompra.rows[0].id;
+
+        // 4. SI HAY CANTIDAD RECIBIDA INICIALMENTE, REGISTRAMOS EL DETALLE DE RECEPCIÓN Y ACTUALIZAMOS STOCK
+        if (cantidadInicial > 0) {
+            var idUsuarioActual = req.usuario?.id || req.body.id_usuario || 67;
+            var nombreUsuarioActual = req.usuario?.nombre || req.body.usuario_nombre || 'Sistema';
+
+            // Insertamos cabecera de recepción usando gen_random_uuid() para 'clave_operacion'
+            var resCabecera = await pool.query(
+                `INSERT INTO recepciones_compra (
+                    fecha_recepcion, registrado_en, id_usuario, usuario_nombre, referencia, observaciones, solicitud_original, clave_operacion
+                ) VALUES (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2, $3, $4, $5, gen_random_uuid()) RETURNING id`,
+                [idUsuarioActual, nombreUsuarioActual, folio, observaciones || 'Recepción inicial de compra', folio]
             );
-        } catch (dbError) {
-            // Si el error es violación de restricción única (código 23505 en PostgreSQL)
-            if (dbError.code === '23505') {
-                return res.status(400).json({ error: `El folio de compra '${folio}' ya se encuentra registrado en el sistema.` });
-            }
-            throw dbError; // Si es otro error, que lo atrape el catch principal
+            var idRecepcion = resCabecera.rows[0].id;
+
+            // Insertamos el detalle de la recepción
+            await pool.query(
+                `INSERT INTO recepciones_compra_detalle (id_recepcion, id_compra, cantidad) VALUES ($1, $2, $3)`,
+                [idRecepcion, idCompraCreada, cantidadInicial]
+            );
+
+            // Incrementamos el stock real en 'almacen'
+            await pool.query(
+                `UPDATE almacen SET existencias = COALESCE(existencias, 0) + $1 WHERE id = $2`,
+                [cantidadInicial, idAlmacenDestino]
+            );
         }
 
         return res.json({ mensaje: "Save" });
 
     } catch (error) {
         console.error("Error en registrarStock:", error);
-        
-        // Doble seguridad por si el error sube al catch principal
+
         if (error.code === '23505') {
             return res.status(400).json({ error: `El folio de compra '${folio}' ya se encuentra registrado en el sistema.` });
         }
@@ -308,15 +349,15 @@ const recibirEntregaParcial = async (req, res) => {
     const client = await pool.connect();
 
     try {
-        const { 
-            folio_compra, 
+        const {
+            folio_compra,
             id_compra, // ID del registro específico en la tabla 'compras'
-            cantidad_recibida_ahora, 
-            id_centrotrabajo, 
-            id_usuario, 
-            usuario_nombre, 
-            referencia, 
-            observaciones 
+            cantidad_recibida_ahora,
+            id_centrotrabajo,
+            id_usuario,
+            usuario_nombre,
+            referencia,
+            observaciones
         } = req.body;
 
         const cantidadLlegada = parseInt(cantidad_recibida_ahora, 10);
@@ -347,8 +388,8 @@ const recibirEntregaParcial = async (req, res) => {
 
         if (nuevaCantidadRecibida > item.total_articulos) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ 
-                error: `La cantidad total (${nuevaCantidadRecibida}) supera la cantidad pedida (${item.total_articulos})` 
+            return res.status(400).json({
+                error: `La cantidad total (${nuevaCantidadRecibida}) supera la cantidad pedida (${item.total_articulos})`
             });
         }
 
@@ -401,11 +442,11 @@ const recibirEntregaParcial = async (req, res) => {
         // Confirmamos los cambios
         await client.query('COMMIT');
 
-        return res.json({ 
-            mensaje: "Recepción registrada correctamente", 
+        return res.json({
+            mensaje: "Recepción registrada correctamente",
             id_recepcion: idRecepcion,
-            estatusArticulo: nuevoEstatus, 
-            estatusGeneral 
+            estatusArticulo: nuevoEstatus,
+            estatusGeneral
         });
 
     } catch (error) {
@@ -463,11 +504,12 @@ const getDetalleCompraPorFolio = async (req, res) => {
 };
 
 const registrarRecepcionBatch = async (req, res) => {
+    console.log("REQ.USUARIO EN EL CONTROLADOR:", req.usuario);
     const client = await pool.connect();
 
     try {
         const { clave_operacion, fecha_recepcion, referencia, observaciones, detalles } = req.body;
-        const id_usuario = req.usuario?.id || null; // Extraído del middleware validarJWT
+        const id_usuario = req.usuario?.id_usuario || req.usuario?.id;
         const usuario_nombre = req.usuario?.nombre || 'Usuario Almacén';
 
         if (!detalles || !Array.isArray(detalles) || detalles.length === 0) {
@@ -481,21 +523,29 @@ const registrarRecepcionBatch = async (req, res) => {
         );
 
         if (recepcionExistente.rowCount > 0) {
-            return res.json({ 
-                id_recepcion: recepcionExistente.rows[0].id, 
-                mensaje: 'La recepción ya había sido procesada anteriormente.' 
+            return res.json({
+                id_recepcion: recepcionExistente.rows[0].id,
+                mensaje: 'La recepción ya había sido procesada anteriormente.'
             });
         }
 
         await client.query('BEGIN');
 
-        // 2. Insertar Cabecera en recepciones_compra
+        // 2. Insertar Cabecera en recepciones_compra (8 columnas y 8 valores exactos)
         const insertCabecera = await client.query(
             `INSERT INTO recepciones_compra 
-                (fecha_recepcion, registrado_en, id_usuario, usuario_nombre, referencia, observaciones, clave_operacion) 
-             VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6) 
+                (fecha_recepcion, registrado_en, id_usuario, usuario_nombre, referencia, observaciones, clave_operacion, solicitud_original) 
+             VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6, $7) 
              RETURNING id`,
-            [fecha_recepcion, id_usuario, usuario_nombre, referencia, observaciones, clave_operacion]
+            [
+                fecha_recepcion, 
+                id_usuario, 
+                usuario_nombre, 
+                referencia, 
+                observaciones, 
+                clave_operacion, 
+                req.body // $7 corresponde al jsonb de solicitud_original
+            ]
         );
 
         const idRecepcion = insertCabecera.rows[0].id;
@@ -510,17 +560,15 @@ const registrarRecepcionBatch = async (req, res) => {
                 return res.status(400).json({ error: `Cantidad inválida para el artículo ID ${id_compra}` });
             }
 
-            // Consultar el registro actual en compras
+            // Consultar el registro actual en compras sin la columna fantasma
             const compraRes = await client.query(
                 `SELECT c.id, c.id_compra_reporte, c.id_costo, c.total_articulos, 
-                        COALESCE(c.cantidad_recibida, 0) AS cantidad_recibida,
-                        cr.id_centrotrabajo
+                        COALESCE(c.cantidad_recibida, 0) AS cantidad_recibida
                  FROM compras c
                  INNER JOIN compras_reportes cr ON c.id_compra_reporte = cr.id
                  WHERE c.id = $1 AND c.esactivo = true FOR UPDATE`,
                 [id_compra]
             );
-
             if (compraRes.rowCount === 0) {
                 await client.query('ROLLBACK');
                 return res.status(404).json({ error: `No se encontró el renglón de compra ID ${id_compra}` });
@@ -531,8 +579,8 @@ const registrarRecepcionBatch = async (req, res) => {
 
             if (nuevaCantidadRecibida > compra.total_articulos) {
                 await client.query('ROLLBACK');
-                return res.status(400).json({ 
-                    error: `La cantidad a recibir excede el pendiente para la compra ID ${id_compra}` 
+                return res.status(400).json({
+                    error: `La cantidad a recibir excede el pendiente para la compra ID ${id_compra}`
                 });
             }
 
