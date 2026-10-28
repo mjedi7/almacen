@@ -113,16 +113,20 @@
   <ng-container *ngIf="compra.esactivo">
     <span *ngIf="!compra.gestion_recepciones" class="badge badge-secondary bg-secondary text-white px-3 py-2"
       title="Compra histórica: no se registró el detalle de sus entregas.">Sin desglose</span>
-    <ng-container *ngIf="compra.gestion_recepciones" [ngSwitch]="compra.estado">
-      <span *ngSwitchCase="'Pendiente'" class="badge badge-danger bg-danger text-white px-3 py-2"
-        title="Todavía no se ha recibido mercancía de esta compra.">Pendiente</span>
-      <span *ngSwitchCase="'Parcial'" class="badge badge-warning bg-warning text-dark px-3 py-2"
-        title="Se recibió una parte; aún queda cantidad pendiente.">Entrega parcial</span>
-      <span *ngSwitchCase="'Completa'" class="badge badge-success bg-success text-white px-3 py-2"
-        title="Se recibió toda la cantidad comprada.">Entregada</span>
-      <span *ngSwitchDefault class="badge badge-secondary bg-secondary text-white px-3 py-2">Estado no disponible</span>
+    
+    <!-- Evaluamos con un operador seguro o cadenas múltiples -->
+    <ng-container *ngIf="compra.gestion_recepciones">
+      <span *ngIf="compra.estado === 'Pendiente' || compra.estado === 'pendiente'" class="badge badge-danger bg-danger text-white px-3 py-2">Pendiente</span>
+      <span *ngIf="compra.estado === 'Parcial' || compra.estado === 'parcial' || compra.estado === 'Incompleta' || compra.estado === 'incompleta'" class="badge badge-warning bg-warning text-dark px-3 py-2">Entrega parcial</span>
+      <span *ngIf="compra.estado === 'Entregada' || compra.estado === 'entregada' || compra.estado === 'Completa' || compra.estado === 'completa'" class="badge badge-success bg-success text-white px-3 py-2">Entregada</span>
+      
+      <!-- Si de plano llega algo rarísimo, aquí lo imprimimos para verlo -->
+      <span *ngIf="!['Pendiente', 'pendiente', 'Parcial', 'parcial', 'Incompleta', 'incompleta', 'Entregada', 'entregada', 'Completa', 'completa'].includes(compra.estado)" 
+            class="badge badge-secondary bg-secondary text-white px-3 py-2" 
+            [title]="'Valor desconocido: ' + compra.estado">
+        {{ compra.estado || 'Sin estado' }}
+      </span>
     </ng-container>
   </ng-container>
 </ng-template>
-
 </div>
