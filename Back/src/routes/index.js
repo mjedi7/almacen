@@ -21,7 +21,7 @@ router.get('/getExistencias/:idplantel',getxistencias);
 router.put('/compras/recibir-entrega', recibirEntregaParcial);
 router.get('/compras/por-folio', [validarJWT], getComprasPorFolio);
 router.get('/compras/:id/recepciones', [validarJWT], getHistorialItem);
-router.post('/compras/recepciones', [validarJWT], registrarRecepcionBatch);
+router.post('/compras/recepciones', validarJWT, registrarRecepcionBatch);
 
 router.get('/traerDisponiblePlantel/:idArticulo',getexistenciaPlantel);
 
