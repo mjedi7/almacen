@@ -233,33 +233,57 @@ const datosCostosArticulo = async(req, res) => {
     }
 };
 
-const traerPlanteles = async(req, res) => {
 
-    plantel=req.params.plantel
+const traerPlanteles = async (req, res) => {
+  const plantel = Number(req.params.plantel);
 
-      if(plantel==47){
-
-         const response = await pool.query('SELECT id,descripcion FROM centro_trabajo');
-         res.status(200).json(response.rows);
-
-    }else{
-
-         const response = await pool.query('SELECT id,descripcion FROM centro_trabajo where id='+plantel);
-    res.status(200).json(response.rows);
-
+  try {
+    if (!Number.isInteger(plantel) || plantel < 1 || plantel > 47) {
+      return res.status(400).json({
+        mensaje: 'Identificador de centro de trabajo no válido'
+      });
     }
 
-   
-    
+    let response;
+
+    if (plantel === 47) {
+      response = await pool.query(`
+        SELECT id, codigo, descripcion
+        FROM centro_trabajo
+      `);
+    } else {
+      response = await pool.query(`
+        SELECT id, codigo, descripcion
+        FROM centro_trabajo
+        WHERE id = $1
+      `, [plantel]);
+    }
+
+    return res.status(200).json(response.rows);
+
+  } catch (error) {
+    console.error('Error al traer planteles:', error);
+    return res.status(500).json({
+      mensaje: 'Error al consultar los centros de trabajo'
+    });
+  }
 };
 
+const traerPlanteles2 = async (req, res) => {
+  try {
+    const response = await pool.query(`
+      SELECT id, codigo, descripcion
+      FROM centro_trabajo
+    `);
 
+    return res.status(200).json(response.rows);
 
-const traerPlanteles2 = async(req, res) => {
-
-         const response = await pool.query('SELECT id,descripcion FROM centro_trabajo');
-         res.status(200).json(response.rows);
-    
+  } catch (error) {
+    console.error('Error al traer todos los planteles:', error);
+    return res.status(500).json({
+      mensaje: 'Error al consultar los centros de trabajo'
+    });
+  }
 };
 
 
