@@ -30,8 +30,9 @@ const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
     LIMIT 1
   `;
 
+  // Aplicamos la lógica PEPS ordenando cronológicamente por fecha ascendente
   const queryArticulos = `
-    SELECT   
+    SELECT  
       movimientosdg.folio_transferencia AS folio,
       movimientosdg.fecha,
       cat_partidas.clave || '-' || cat_articulos.clave AS clave_completa,
@@ -46,8 +47,9 @@ const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
       INNER JOIN cat_partidas ON cat_partidas.id = cat_articulos.id_partidas
     WHERE movimientosdg.folio_transferencia = $1 
       AND movimientosdg.id_centrotrabajo_transfiere = $2
-    ORDER BY cat_partidas.clave ASC, cat_articulos.clave ASC
+    ORDER BY movimientosdg.fecha ASC, cat_partidas.clave ASC, cat_articulos.clave ASC
   `;
+  
   const [resEncabezado, resFecha, resArticulos] = await Promise.all([
     pool.query(queryEncabezado, [idPlantel]),
     pool.query(queryFecha, [idPlantel, folio]),
@@ -100,8 +102,8 @@ const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
 };
 
 const ListaArticulosSurtidos = async (req, res) => {
-  const idPlantel = parseInt(req.params.plantel, 10);
   const folio = parseInt(req.params.folio, 10);
+  const idPlantel = parseInt(req.params.plantel, 10);
 
   try {
     const dataReporte = await obtenerDatosReporteSurtido(idPlantel, folio, true);
@@ -112,7 +114,8 @@ const ListaArticulosSurtidos = async (req, res) => {
       fs.mkdirSync(folderPath, { recursive: true });
     }
 
-    const filePath = path.join(folderPath, `Transferencia_Con_Montos-${Date.now()}.pdf`);
+    // Usamos el número de folio para evitar conflictos de sobreescritura
+    const filePath = path.join(folderPath, `Transferencia_${folio}_Con_Montos.pdf`);
     fs.writeFileSync(filePath, pdfBuffer);
 
     console.log('PDF con montos guardado en:', filePath);
@@ -124,8 +127,9 @@ const ListaArticulosSurtidos = async (req, res) => {
 };
 
 const ListaArticulosSurtidosSinMontos = async (req, res) => {
-  const idPlantel = parseInt(req.params.plantel, 10);
+  
   const folio = parseInt(req.params.folio, 10);
+  const idPlantel = parseInt(req.params.plantel, 10);
 
   try {
     const dataReporte = await obtenerDatosReporteSurtido(idPlantel, folio, false);
@@ -136,7 +140,8 @@ const ListaArticulosSurtidosSinMontos = async (req, res) => {
       fs.mkdirSync(folderPath, { recursive: true });
     }
 
-    const filePath = path.join(folderPath, `Transferencia_Sin_Montos-${Date.now()}.pdf`);
+    // Usamos el número de folio para evitar conflictos de sobreescritura
+    const filePath = path.join(folderPath, `Transferencia_${folio}_Sin_Montos.pdf`);
     fs.writeFileSync(filePath, pdfBuffer);
 
     console.log('PDF sin montos guardado en:', filePath);
