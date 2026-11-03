@@ -1,7 +1,7 @@
-# **Sistema de Control de Almacén e Inventarios (SICAI)\
+# Sistema de Control de Almacén e Inventarios (SICAI)
 Departamento de Recursos Materiales y Servicios Generales** del **Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz (CECYTEV)**.
 
-Sistema diseñado para la gestión, control y automatización de los inventarios del **Departamento de Recursos Materiales y Servicios Generales** del **Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz (CECYTEV)**.
+Sistema diseñado para la gestión, control y automatización de los inventarios del **Departamento de Recursos Materiales y Servicios Generales** del **Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz (CECyTEV)**.
 
 ## 📋 Tabla de Contenidos
 
