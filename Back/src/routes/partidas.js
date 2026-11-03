@@ -1,7 +1,8 @@
-
-const {Router} = require('express');
+const { Router } = require('express');
 const router = Router();
-const {listarPartidas} = require ('../controllers/partidas.controller');
+const { listarPartidas, crearPartida } = require('../controllers/partidas.controller');
 
 router.get('/', listarPartidas);
+router.post('/', crearPartida);
+
 module.exports = router;

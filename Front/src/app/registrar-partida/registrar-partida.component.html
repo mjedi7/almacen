@@ -1,9 +1,139 @@
-<div class="container">
+<div class="container-fluid px-4">
+  <!-- TÍTULO -->
+  <div class="text-center" style="margin-top: 30px;">
+    <h3><b>Registrar Nueva Partida Presupuestal</b></h3>
+    <p class="text-muted">Gestión y alta de partidas del catálogo institucional (CECyTEV)</p>
+    <hr>
+  </div>
 
-	<div class="text-center mb-2">
-		<h3><b>Registrar Nueva Partida</b></h3>
-		<p>Aquí se registrará una nueva partida</p>
-		<hr>
-	</div>
+  <div class="row">
+    <!-- FORMULARIO DE REGISTRO (COLUMNA IZQUIERDA / SUPERIOR) -->
+    <div class="col-lg-5 mb-4">
+      <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+          <h5 class="card-title mb-0">
+            <i class="fa fa-folder-plus me-2"></i> Datos de la Partida
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <form #f="ngForm" (ngSubmit)="guardarPartida(f)">
+            <!-- Clave de Partida -->
+            <div class="form-group mb-3">
+              <label for="clave" class="form-label"><b>Clave Presupuestal <span class="text-danger">*</span></b></label>
+              <input
+                type="text"
+                id="clave"
+                name="clave"
+                class="form-control"
+                placeholder="Ejemplo: 21101, 21401, 22104"
+                [(ngModel)]="partidaNueva.clave"
+                required
+                autocomplete="off"
+                #claveCtrl="ngModel"
+              />
+              <small *ngIf="f.submitted && claveCtrl.invalid" class="text-danger">
+                La clave presupuestal es obligatoria.
+              </small>
+            </div>
 
+            <!-- Descripción de la Partida -->
+            <div class="form-group mb-3">
+              <label for="descripcion" class="form-label"><b>Descripción de la Partida <span class="text-danger">*</span></b></label>
+              <textarea
+                id="descripcion"
+                name="descripcion"
+                class="form-control"
+                rows="4"
+                placeholder="Ejemplo: Materiales, útiles y equipos menores de oficina..."
+                [(ngModel)]="partidaNueva.descripcion"
+                required
+                #descCtrl="ngModel"
+              ></textarea>
+              <small *ngIf="f.submitted && descCtrl.invalid" class="text-danger">
+                La descripción de la partida es obligatoria.
+              </small>
+            </div>
+
+            <!-- Estatus Activo -->
+            <div class="form-check form-switch mb-4">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="esactivo"
+                name="esactivo"
+                [(ngModel)]="partidaNueva.esactivo"
+              />
+              <label class="form-check-label" for="esactivo">Partida Activa para compras y asignaciones</label>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="d-grid gap-2">
+              <button
+                type="submit"
+                class="btn btn-success btn-lg shadow-sm"
+                [disabled]="guardando"
+              >
+                <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i *ngIf="!guardando" class="fa fa-save me-2"></i>
+                {{ guardando ? 'Guardando Partida...' : 'Guardar Partida' }}
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="f.resetForm({ esactivo: true })"
+                [disabled]="guardando"
+              >
+                <i class="fa fa-eraser me-2"></i> Limpiar Campos
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE PARTIDAS REGISTRADAS (COLUMNA DERECHA) -->
+    <div class="col-lg-7 mb-4">
+      <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="fa fa-list me-2"></i> Partidas Registradas en Catálogo
+          </h5>
+          <span class="badge bg-light text-dark">{{ partidas.length }} registros</span>
+        </div>
+        <div class="card-body p-3">
+          <div *ngIf="cargandoLista" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Cargando catálogo de partidas...</p>
+          </div>
+
+          <div class="table-responsive" [hidden]="cargandoLista">
+            <table
+              datatable
+              [dtOptions]="dtOptions"
+              [dtTrigger]="dtTrigger"
+              class="table table-striped table-bordered table-hover align-middle w-100"
+            >
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 25%;">Clave</th>
+                  <th style="width: 55%;">Descripción</th>
+                  <th style="width: 20%;" class="text-center">Estatus</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of partidas">
+                  <td class="fw-bold text-primary">{{ p.clave }}</td>
+                  <td>{{ p.descripcion }}</td>
+                  <td class="text-center">
+                    <span class="badge bg-success">Activa</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
