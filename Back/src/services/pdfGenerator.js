@@ -67,12 +67,13 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    // 1. Detección unificada: ¿Es solo header o lleva pie institucional?
+    // 1. Detección unificada: salidas, existencia, costo y todas usan reporte-solo-header
     const nombreMin = templateName.toLowerCase().trim();
 
     const esSoloHeader = nombreMin.includes('existencia') || 
                          nombreMin.includes('costo') || 
-                         nombreMin.includes('todas');
+                         nombreMin.includes('todas') ||
+                         nombreMin.includes('salida'); // <-- AÑADIDO: ahora entra aquí
 
     const llevaPie = !esSoloHeader && (
       nombreMin.includes('partida') ||
@@ -136,6 +137,12 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       preferCSSPageSize: !esSoloHeader,
       ...pdfOptions
     };
+
+    console.log('--- GENERANDO PDF ---');
+    console.log('Plantilla recibida:', templateName);
+    console.log('Ruta completa HTML:', templatePath);
+    console.log('CSS que se cargará:', archivoCss);
+    console.log('¿Es solo header?:', esSoloHeader);
 
     const pdfBuffer = await page.pdf(defaultOptions);
     return pdfBuffer;
