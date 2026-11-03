@@ -32,8 +32,8 @@ router.post('/reporte/salidas-partida', generarReporteSalidasXPartida);
 router.get('/reporte/general-plantel/:idPlantel', ReporteGeneralPorPlantel);
 
 // Surtido a planteles
-router.get('/reporte/surtido/:folio/:plantel', ListaArticulosSurtidos);
-router.get('/reporte/surtido-sin-montos/:folio/:plantel', ListaArticulosSurtidosSinMontos);
+router.get('/formatoListaArticulosSurtidos/:folio/:plantel', ListaArticulosSurtidos);
+router.get('/formatoListaArticulosSurtidosSinMontos/:folio/:plantel', ListaArticulosSurtidosSinMontos);
 
 // Entradas / Compras
 router.post('/reporte/compras-todas', generarReporteEntradasTodas);
