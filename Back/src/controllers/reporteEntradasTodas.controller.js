@@ -61,7 +61,12 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
  */
 const generarReporteEntradasTodas = async (req, res) => {
   try {
-  
+
+    console.log(
+      'Authorization recibido:',
+      req.header('Authorization')
+    );
+
     const {
       fechaIni,
       fechaFin,
@@ -130,9 +135,9 @@ const generarReporteEntradasTodas = async (req, res) => {
       proveedor: registro.razon_social,
       fechaCompra: registro.fecha_compra
         ? new Date(registro.fecha_compra).toLocaleDateString(
-            'es-MX',
-            { timeZone: 'UTC' }
-          )
+          'es-MX',
+          { timeZone: 'UTC' }
+        )
         : '',
       importe: formatearMoneda(registro.importe),
       impuesto: formatearMoneda(registro.impuesto),
@@ -163,13 +168,7 @@ const generarReporteEntradasTodas = async (req, res) => {
       {
         format: 'Letter',
         printBackground: true,
-        landscape: false,
-        margin: {
-          top: '12mm',
-          bottom: '17mm',
-          left: '10mm',
-          right: '10mm'
-        }
+        landscape: false
       }
     );
 

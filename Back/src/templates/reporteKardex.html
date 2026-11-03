@@ -4,316 +4,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Kárdex de Almacén</title>
-  <style>
-    /* Neutraliza los márgenes CSS externos para respetar la configuración de Puppeteer */
-    @page {
-      size: letter portrait;
-      margin: 0;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0 12mm;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 10pt;
-      color: #000;
-      background: #fff;
-      counter-reset: pagina;
-    }
-
-    /* Tabla envolvente principal que repite encabezado en cada página */
-    .main-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: none;
-    }
-
-    .main-table>thead {
-      display: table-header-group;
-    }
-
-    .main-table>tbody {
-      display: table-row-group;
-    }
-
-    .main-table>tbody>tr>td {
-      border: none;
-      padding: 0;
-    }
-
-    /* Membrete y títulos institucionales */
-    .header-container {
-      width: 100%;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-
-    .header-banner {
-      width: 100%;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .header-banner img {
-      max-width: 100%;
-      height: 110px;
-      object-fit: contain;
-    }
-
-    .sub-header-title {
-      font-size: 10pt;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 2px;
-      letter-spacing: 0.3px;
-      text-align: center;
-    }
-
-    .report-name {
-      font-size: 10pt;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 4px;
-      letter-spacing: 0.3px;
-      text-align: center;
-    }
-
-    .main-title {
-      font-size: 11pt;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 6px;
-      text-align: center;
-    }
-
-    /* Cuadro de metadatos del artículo */
-    .table-header {
-      width: 100%;
-      border-collapse: collapse !important;
-      border: 1.5px solid #000;
-      margin-bottom: 10px !important;
-      page-break-inside: avoid;
-    }
-
-    .table-header th {
-      background-color: #f7faff;
-      border: 1px solid #000;
-      padding: 4px 6px;
-      font-size: 10pt;
-      font-weight: bold;
-      text-align: left;
-    }
-
-    .table-header td {
-      border: 1px solid #000;
-      padding: 4px 6px;
-      font-size: 10pt;
-    }
-
-    .table-header .lbl {
-      background-color: #f7faff;
-      font-weight: bold;
-      width: 18%;
-    }
-
-    .table-header .val {
-      background-color: #fff;
-      width: 32%;
-    }
-
-    /* Tabla detalle de movimientos */
-    .table-detalle {
-      width: 100%;
-      border-collapse: collapse !important;
-      border-spacing: 0 !important;
-      border: 1.5px solid #000;
-    }
-
-    .table-detalle thead {
-      display: table-header-group;
-    }
-
-    .table-detalle tr {
-      page-break-inside: avoid;
-    }
-
-    .table-detalle th {
-      background-color: #f7faff;
-      border: 1px solid #000;
-      padding: 4px;
-      font-size: 10pt;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .table-detalle td {
-      border: 1px solid #000;
-      padding: 3.5px 5px;
-      font-size: 10pt;
-    }
-
-    .cen {
-      text-align: center;
-    }
-
-    .num {
-      text-align: right;
-    }
-
-    /* Totales finales */
-    .tabla-totales-pie {
-      width: 100%;
-      border-collapse: collapse;
-      border: none;
-      margin-top: 14px;
-      page-break-inside: avoid;
-      font-size: 10pt;
-    }
-
-    .tabla-totales-pie td {
-      border: none;
-      padding: 4px 5px;
-      vertical-align: top;
-    }
-
-    /* Contenedor fijo de lado a lado */
-    .pie-fijo-completo {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      text-align: center;
-      z-index: 1000;
-      line-height: 0;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Contenedor que empuja los totales al extremo derecho */
-    .totales-derecha-contenedor {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 100mm;
-      page-break-inside: avoid;
-    }
-
-    .totales-caja {
-      min-width: 200px;
-      font-size: 10pt;
-      justify-content: end;
-    }
-
-    .totales-fila {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .totales-fila .lbl {
-      font-weight: bold;
-      padding-right: 15px;
-    }
-
-    .totales-fila .val {
-      text-align: right;
-      font-family: inherit;
-    }
-
-    /* Datos del reporte alineados al margen exacto de la tabla (12mm) */
-    .pie-fijo-datos {
-      position: absolute;
-      left: 12mm;
-      /* Alineado al borde izquierdo de la tabla */
-      right: 12mm;
-      /* Alineado al borde derecho de la tabla */
-      bottom: 24mm;
-      /* Altura suficiente para quedar arriba del pie institucional */
-      box-sizing: border-box;
-      padding: 0;
-      margin: 0;
-      font-size: 10pt;
-      line-height: normal;
-      color: #000;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      z-index: 1002;
-    }
-
-    /* Envoltura relativa para la imagen y el número de página */
-    .pie-contenedor-img {
-      position: relative;
-      width: 100%;
-      line-height: 0;
-    }
-
-    /* Imagen institucional */
-    .pie-contenedor-img img {
-      width: 100%;
-      height: auto;
-      max-height: 35mm;
-      object-fit: contain;
-      object-position: bottom center;
-      display: block;
-      margin: 0 auto;
-      vertical-align: bottom;
-    }
-
-    /* Número de página posicionado al lado inferior derecho de la imagen */
-    .pie-contenedor-img .num-pagina {
-      position: absolute;
-      right: 10mm;
-      /* Alineado con el margen de 12mm de la hoja */
-      bottom: 4mm;
-      /* Altura respecto a la base del papel */
-      font-size: 8pt;
-      line-height: normal;
-      color: #000;
-      font-weight: bold;
-      z-index: 1001;
-    }
-
-    .pie-contenedor-img .num-pagina::after {
-      counter-increment: pagina;
-      content: "Pág. " counter(pagina);
-    }
-  </style>
 </head>
 
 <body class="report">
 
-  <table class="main-table">
-    <!-- Encabezado repetible institucional -->
-    <thead>
-      <tr>
-        <td>
-          <div class="header-container">
-            {{#if bannerBase64}}
-            <div class="header-banner">
-              <img src="{{bannerBase64}}" alt="Banner Institucional">
-            </div>
-            {{/if}}
-            <div class="sub-header-title">COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ</div>
-            <div class="report-name">DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
-            </div>
-            <div class="main-title">KÁRDEX DE ALMACÉN</div>
-          </div>
-        </td>
-      </tr>
-    </thead>
+  <!-- Banner superior -->
+  {{#if bannerBase64}}
+  <div class="report-banner">
+    <img src="{{bannerBase64}}" alt="Banner Institucional">
+  </div>
+  {{/if}}
 
-    <!-- Contenido del Kárdex -->
+  <!-- Encabezado institucional del Kárdex -->
+  <header class="report-heading">
+    <p class="report-heading__institution">
+      Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
+    </p>
+    <p class="font-bold" style="font-size: 9pt; margin: 0 0 2px 0;">
+      DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    </p>
+    <h1 class="report-heading__title">
+      KÁRDEX DE ALMACÉN
+    </h1>
+  </header>
+
+  <!-- Ficha técnica del Artículo -->
+  <table class="report-meta" style="margin-bottom: 12px;">
     <tbody>
       <tr>
-        <td>
+        <!-- Columna Izquierda (Fila 1) -->
+        <td class="report-meta__label nowrap" style="width: 16%;">Descripción:</td>
+        <td style="width: 44%;">{{header.nom_articulo}}</td>
 
+<<<<<<< HEAD
           <!-- Cuadro de datos del artículo -->
           <table class="table-header">
             <tbody>
@@ -403,24 +126,72 @@
           </div>
 
         </td>
+=======
+        <!-- Columna Derecha (Fila 1) -->
+        <td class="report-meta__label nowrap" style="width: 18%; text-align: left;">Clave artículo:</td>
+        <td style="width: 22%; text-align: left;">{{header.clave_completa}}</td>
+      </tr>
+      <tr>
+        <!-- Columna Izquierda (Fila 2): Unidad medida en un solo renglón -->
+        <td class="report-meta__label nowrap" style="width: 16%;">Unidad medida:</td>
+        <td style="width: 44%;">{{header.unidad_medida}}</td>
+
+        <!-- Columna Derecha (Fila 2) -->
+        <td class="report-meta__label nowrap" style="width: 18%; text-align: left;">Fecha últ. compra:</td>
+        <td style="width: 22%; text-align: left;">{{header.fecha_ult_compra}}</td>
+>>>>>>> julia
       </tr>
     </tbody>
   </table>
 
-  <!-- Pie institucional completo (correctamente ubicado al final del body) -->
-  <div class="pie-fijo-completo">
-    <div class="pie-fijo-datos">
-      <div><b>Usuario:</b> {{usuarioPie}}</div>
-      <div><b>Fecha:</b> {{fechaPie}}</div>
-    </div>
+  <!-- Tabla de Movimientos de Kárdex -->
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th style="width: 12%;">Doc/Folio</th>
+        <th style="width: 28%;">Plantel / Destino</th>
+        <th style="width: 12%; text-align: right;">Exist. Inicial</th>
+        <th style="width: 12%; text-align: right;">Ventas Acum.</th>
+        <th style="width: 12%; text-align: right;">Importe Total</th>
+        <th style="width: 12%; text-align: right;">Existencia</th>
+        <th style="width: 12%;">Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if movimientos.length}}
+      {{#each movimientos}}
+      <tr>
+        <td class="text-center">{{this.folio}}</td>
+        <td class="text-left">{{this.plantel_destino}}</td>
+        <td class="text-right">{{this.existencia_inicial}}</td>
+        <td class="text-right">{{this.ventas_acumuladas}}</td>
+        <td class="text-right nowrap">${{this.importe_total}}</td>
+        <td class="text-right font-bold">{{this.existencia}}</td>
+        <td class="text-center">{{this.fecha}}</td>
+      </tr>
+      {{/each}}
+      {{else}}
+      <tr>
+        <td colspan="7" class="empty-state">
+          No hay movimientos registrados para este criterio.
+        </td>
+      </tr>
+      {{/if}}
+    </tbody>
+  </table>
 
-    {{#if pieBase64}}
-    <div class="pie-contenedor-img">
-      <img src="{{pieBase64}}" alt="Pie Institucional">
-      <div class="num-pagina"></div>
-    </div>
-    {{/if}}
+  <!-- Resumen de Totales al centro -->
+  <div style="margin-top: 14px; text-align: left; font-size: 9.5pt; line-height: 1.5; page-break-inside: avoid;">
+    <div><strong>Total Entradas:</strong> {{totales.entradas}}</div>
+    <div><strong>Total Salidas:</strong> {{totales.salidas}}</div>
   </div>
+
+  <!-- Membrete oficial pegado al fondo -->
+  {{#if pieBase64}}
+  <div class="institutional-footer">
+    <img src="{{pieBase64}}" alt="Pie institucional">
+  </div>
+  {{/if}}
 
 </body>
 

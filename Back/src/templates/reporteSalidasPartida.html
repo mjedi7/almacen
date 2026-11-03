@@ -5,144 +5,302 @@
   <meta charset="UTF-8">
   <title>Salidas por Partida Presupuestal</title>
   <style>
-    /* Asegura la visualización del contador de página */
-    .num-pagina::after {
-      counter-increment: pagina;
-      content: "Pág. " counter(pagina);
+    @page {
+      size: letter portrait;
+      margin: 12mm 14mm 22mm 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.report {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8.5pt;
+      color: #000;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      width: 100%;
+    }
+
+    /* Banner superior */
+    .report-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .report-banner img {
+      width: 100%;
+      height: auto !important;
+      max-width: 90%;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Encabezados institucionales */
+    .report-heading {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .report-institution {
+      font-size: 10.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .report-name {
+      font-size: 10.5pt;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+
+    .report-department {
+      font-size: 9.5pt;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .report-period {
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    /* Tablas con bordes negros sólidos y encabezados sombreados */
+    table.table-detalle {
+      width: 100%;
+      border-collapse: collapse !important;
+      border: 1px solid #000000 !important;
+      margin-bottom: 0;
+      page-break-inside: auto !important;
+    }
+
+    table.table-detalle thead {
+      display: table-header-group !important;
+    }
+
+    table.table-detalle tbody {
+      display: table-row-group !important;
+    }
+
+    table.table-detalle tr {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    table.table-detalle th {
+      background-color: #f0f4f8 !important; /* Azul tenue institucional */
+      color: #000000 !important;
+      border: 1px solid #000000 !important;
+      padding: 4.5px 6px;
+      font-size: 8.5pt;
+      font-weight: bold;
+      vertical-align: middle;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    table.table-detalle td {
+      border: 1px solid #000000 !important;
+      padding: 3.5px 6px;
+      font-size: 8pt;
+      vertical-align: middle;
+    }
+
+    /* Primera letra en mayúscula */
+    table.table-detalle td.text-left::first-letter {
+      text-transform: uppercase;
+    }
+
+    .report-section {
+      margin-bottom: 18px;
+    }
+
+    /* Alineaciones */
+    .cen { text-align: center; }
+    .num { text-align: right; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-bold { font-weight: bold; }
+    .nowrap { white-space: nowrap; }
+
+    .empty-state {
+      text-align: center;
+      font-style: italic;
+      font-size: 8.5pt;
+      color: #555;
+      padding: 14px !important;
+    }
+
+    /* Contenedor de totales alineado a la derecha */
+    .totales-derecha-contenedor {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    table.tabla-desglose {
+      width: 100%;
+      max-width: 260px;
+      border-collapse: collapse !important;
+      border: none !important;
+      margin-left: auto !important;
+    }
+
+    table.tabla-desglose td {
+      border: none !important;
+      font-size: 9pt;
+      vertical-align: middle;
+    }
+
+    .tabla-desglose__etiqueta {
+      text-align: right;
+      font-weight: bold;
+      padding: 2.5px 10px 2.5px 0 !important;
+      width: 50%;
+    }
+
+    .tabla-desglose__valor {
+      text-align: right;
+      white-space: nowrap;
+      padding: 2.5px 0 !important;
+      width: 50%;
+    }
+
+    /* Línea negra sólida antes del Total */
+    tr.tabla-desglose__fila-total {
+      border-top: 1.5px solid #000000 !important;
+    }
+
+    .tabla-desglose__etiqueta-total {
+      text-align: right;
+      font-weight: bold;
+      padding: 5px 10px 2px 0 !important;
+    }
+
+    .tabla-desglose__valor-total {
+      text-align: right;
+      font-weight: bold;
+      white-space: nowrap;
+      padding: 5px 0 2px 0 !important;
     }
   </style>
 </head>
 
-<body class="report report--normal">
+<body class="report">
 
-  <table class="report-shell">
-
-    <!-- Encabezado que se repite en cada página -->
-    <thead>
-      <tr>
-        <td>
-          <header class="report-header" style="margin-bottom: 18px;">
-            {{#if bannerBase64}}
-            <div class="report-banner">
-              <img src="{{bannerBase64}}" alt="Banner Institucional">
-            </div>
-            {{/if}}
-
-            <div class="report-institution">
-              COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
-            </div>
-            <div class="report-name">
-              DIRECCIÓN ADMINISTRATIVA
-            </div>
-            <div class="report-department">
-              DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
-            </div>
-
-            <!-- Período compatible con {{periodo}} o con {{periodoInicio}} / {{periodoFin}} -->
-            <div class="report-period"
-              style="margin-top: 10px; font-size: 10pt; font-weight: bold; color: #000; text-transform: uppercase;">
-              {{#if periodo}}
-              RESUMEN DE MOVIMIENTOS DE ALMACÉN {{periodo}}
-              {{else}}
-              RESUMEN DE MOVIMIENTOS DE ALMACÉN DEL <u>{{periodoInicio}}</u> AL <u>{{periodoFin}}</u>
-              {{/if}}
-            </div>
-          </header>
-        </td>
-      </tr>
-    </thead>
-
-    <!-- Cuerpo del reporte -->
-    <tbody>
-      {{#each gruposPartidas}}
-      <tr class="page-row {{#if @last}}page-row--last{{/if}}">
-        <td>
-
-          <section class="report-section" style="margin-bottom: 25px;">
-
-            <!-- Etiqueta de la partida -->
-            <div style="font-weight: bold; font-size: 9.5pt; margin-bottom: 10px;">
-              PARTIDA: {{this.clave}} {{#if this.descripcion}}- {{this.descripcion}}{{/if}}
-            </div>
-
-            <!-- Título de sección centrado -->
-            <div
-              style="font-weight: bold; font-size: 10.5pt; text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">
-              SALIDAS DE ALMACÉN
-            </div>
-
-            <!-- Tabla de movimientos (4 columnas) -->
-            <table class="report-table" cellspacing="0" cellpadding="0">
-              <thead>
-                <tr>
-                  <th style="width: 32%; text-align: center;">PLANTEL / ÁREA</th>
-                  <th style="width: 34%; text-align: center;">PROVEEDOR</th>
-                  <th style="width: 17%; text-align: center;">FOLIO FACTURA</th>
-                  <th style="width: 17%; text-align: right;">TOTAL SIN IVA</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {{#if this.movimientos.length}}
-                {{#each this.movimientos}}
-                <tr>
-                  <td class="text-left">{{this.centro_trabajo}}</td>
-                  <td class="text-left">{{this.proveedor}}</td>
-                  <td class="text-center">{{this.folio_compra}}</td>
-                  <td class="text-right">$ {{this.monto}}</td>
-                </tr>
-                {{/each}}
-                {{else}}
-                <tr>
-                  <td colspan="4" class="empty-state">
-                    No se encontraron salidas registradas para esta partida.
-                  </td>
-                </tr>
-                {{/if}}
-              </tbody>
-            </table>
-
-            <!-- Bloque de totales alineado a la derecha -->
-            <div class="totales-derecha-contenedor" style="margin-top: 12px;">
-              <div class="totales-caja" style="min-width: 180px;">
-                <div class="totales-fila">
-                  <span class="lbl">Subtotal</span>
-                  <span class="val">$ {{#if this.subtotalTexto}}{{this.subtotalTexto}}{{else if
-                    this.subtotal}}{{this.subtotal}}{{else}}{{../granTotal}}{{/if}}</span>
-                </div>
-                {{#if this.ivaTexto}}
-                <div class="totales-fila">
-                  <span class="lbl">I.V.A.</span>
-                  <span class="val">$ {{this.ivaTexto}}</span>
-                </div>
-                {{else if this.iva}}
-                <div class="totales-fila">
-                  <span class="lbl">I.V.A.</span>
-                  <span class="val">$ {{this.iva}}</span>
-                </div>
-                {{/if}}
-                <div class="totales-fila font-bold" style="font-size: 10pt;">
-                  <span class="lbl">Total</span>
-                  <span class="val">$ {{#if this.totalTexto}}{{this.totalTexto}}{{else if
-                    this.total}}{{this.total}}{{else}}{{../granTotal}}{{/if}}</span>
-                </div>
-              </div>
-            </div>
-
-          </section>
-
-        </td>
-      </tr>
-      {{/each}}
-    </tbody>
-
-  </table>
-
-  <!-- Pie con Usuario a la izquierda y Número de Página a la derecha -->
-  <div class="pie-fijo-datos" style="bottom: 8mm;">
-    <div><b>Usuario:</b> {{usuarioPie}}</div>
-    <div class="num-pagina"></div>
+  <!-- Banner superior institucional -->
+  {{#if bannerBase64}}
+  <div class="report-banner">
+    <img src="{{bannerBase64}}" alt="Banner Institucional">
   </div>
+  {{/if}}
+
+  <!-- Encabezado general -->
+  <header class="report-heading">
+    <div class="report-institution">
+      COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+    </div>
+    <div class="report-name">
+      DIRECCIÓN ADMINISTRATIVA
+    </div>
+    <div class="report-department">
+      DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+    </div>
+
+    <!-- Período de movimientos -->
+    <div class="report-period">
+      {{#if periodo}}
+        RESUMEN DE SALIDAS DE ALMACÉN {{periodo}}
+      {{else}}
+        RESUMEN DE SALIDAS DE ALMACÉN DEL <u>{{periodoInicio}}</u> AL <u>{{periodoFin}}</u>
+      {{/if}}
+    </div>
+  </header>
+
+  <!-- Partidas y Movimientos -->
+  {{#each gruposPartidas}}
+  <section class="report-section">
+
+    <!-- Ficha de la partida -->
+    <div style="font-weight: bold; font-size: 9pt; margin-bottom: 6px;">
+      PARTIDA: {{this.clave}} {{#if this.descripcion}}- {{this.descripcion}}{{/if}}
+    </div>
+
+    <!-- Tabla con cuadrícula y sombreado -->
+    <table class="table-detalle">
+      <thead>
+        <tr>
+          <th style="width: 32%; text-align: center;">PLANTEL / ÁREA</th>
+          <th style="width: 34%; text-align: center;">PROVEEDOR</th>
+          <th style="width: 17%; text-align: center;">FOLIO</th>
+          <th style="width: 17%; text-align: right;">TOTAL SIN IVA</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if this.movimientos.length}}
+          {{#each this.movimientos}}
+          <tr>
+            <td class="text-left">{{this.centro_trabajo}}</td>
+            <td class="text-left">{{this.proveedor}}</td>
+            <td class="cen nowrap">{{this.folio_compra}}</td>
+            <td class="num nowrap">$ {{this.monto}}</td>
+          </tr>
+          {{/each}}
+        {{else}}
+          <tr>
+            <td colspan="4" class="empty-state">
+              No se encontraron salidas registradas para esta partida.
+            </td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
+
+    <!-- Bloque de totales alineado a la derecha con línea previa al total -->
+    <div class="totales-derecha-contenedor">
+      <table class="tabla-desglose">
+        <tbody>
+          <tr>
+            <td class="tabla-desglose__etiqueta">Subtotal:</td>
+            <td class="tabla-desglose__valor">
+              ${{#if this.subtotalTexto}}{{this.subtotalTexto}}{{else if this.subtotal}}{{this.subtotal}}{{else}}{{../granTotal}}{{/if}}
+            </td>
+          </tr>
+          {{#if this.ivaTexto}}
+          <tr>
+            <td class="tabla-desglose__etiqueta">I.V.A.:</td>
+            <td class="tabla-desglose__valor">${{this.ivaTexto}}</td>
+          </tr>
+          {{else if this.iva}}
+          <tr>
+            <td class="tabla-desglose__etiqueta">I.V.A.:</td>
+            <td class="tabla-desglose__valor">${{this.iva}}</td>
+          </tr>
+          {{/if}}
+          <tr class="tabla-desglose__fila-total">
+            <td class="tabla-desglose__etiqueta-total">Total:</td>
+            <td class="tabla-desglose__valor-total">
+              ${{#if this.totalTexto}}{{this.totalTexto}}{{else if this.total}}{{this.total}}{{else}}{{../granTotal}}{{/if}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+  {{/each}}
 
 </body>
 

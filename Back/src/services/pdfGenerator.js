@@ -3,43 +3,32 @@ const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
 
-/**
- * Convierte una imagen local a Base64 para incorporarla directamente
- * en el HTML o en las opciones del reporte.
- */
 const imgToBase64 = (filePath) => {
-  if (!fs.existsSync(filePath)) {
-    return null;
-  }
-
+  if (!fs.existsSync(filePath)) return null;
   const ext = path.extname(filePath).replace('.', '').toLowerCase();
   const bitmap = fs.readFileSync(filePath);
   const mimeType = ext === 'svg' ? 'svg+xml' : ext;
-
   return `data:image/${mimeType};base64,${bitmap.toString('base64')}`;
 };
 
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
-/**
- * Hoja de estilos compartida para los reportes generales.
- */
-const estilosPath = path.join(__dirname, '../templates/css/reportes.css');
+// Rutas de ambos CSS
+const cssConPiePath = path.join(__dirname, '../templates/css/reportes-con-pie.css');
+const cssSoloHeaderPath = path.join(__dirname, '../templates/css/reportes-solo-header.css');
 
 async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
 
   try {
     const templatePath = path.join(__dirname, `../templates/${templateName}`);
-
     if (!fs.existsSync(templatePath)) {
       throw new Error(`No se encontró la plantilla en: ${templatePath}`);
     }
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
 
-    // Registrar los helpers ANTES de compilar
     handlebars.registerHelper('primeraMayuscula', function (str) {
       if (!str) return '';
       const texto = String(str).trim();
@@ -48,19 +37,11 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
     const compiledTemplate = handlebars.compile(templateHtml);
 
-    handlebars.registerHelper('primeraMayuscula', function (str) {
-  if (!str) return '';
-  const texto = String(str).trim();
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-});
-
-    // Conversión de recursos estáticos a Base64
     const bannerBase64 = imgToBase64(bannerPath);
     const pieBase64 = imgToBase64(piePath);
 
     const usuarioPie =
-      (data && (data.usuario || data.nombreUsuario || data.user)) ||
-      'ADMINISTRADOR';
+      (data && (data.usuario || data.nombreUsuario || data.user)) || 'ADMINISTRADOR';
 
     const fechaPie =
       (data && (data.fechaImpresion || data.fechaReporte)) ||
@@ -80,45 +61,42 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
     browser = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox'
-      ]
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
+    await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    await page.setContent(htmlFinal, {
-      waitUntil: 'networkidle0'
-    });
+    // 1. Detección unificada: salidas, existencia, costo y todas usan reporte-solo-header
+    const nombreMin = templateName.toLowerCase().trim();
 
-    // Excluir plantillas con diseño propio
-    const nombreMin = templateName.toLowerCase();
-    const esExcluido = nombreMin.includes('kardex') || 
-                       nombreMin.includes('entradaspartida') ||
-                       nombreMin.includes('entradasproveedor');
-                       
-    const omitirEstilos = pdfOptions.usarEstilosCompartidos === false || esExcluido;
+    const esSoloHeader = nombreMin.includes('existencia') || 
+                         nombreMin.includes('costo') || 
+                         nombreMin.includes('todas') ||
+                         nombreMin.includes('salida'); // <-- AÑADIDO: ahora entra aquí
 
-    if (!omitirEstilos && fs.existsSync(estilosPath)) {
-      await page.addStyleTag({
-        path: estilosPath
-      });
+    const llevaPie = !esSoloHeader && (
+      nombreMin.includes('partida') ||
+      nombreMin.includes('proveedor') ||
+      nombreMin.includes('reporteentradas') ||
+      nombreMin.includes('kardex')
+    );
+
+    // 2. Inyección de CSS según el tipo de reporte
+    const archivoCss = llevaPie ? cssConPiePath : cssSoloHeaderPath;
+
+    if (fs.existsSync(archivoCss)) {
+      await page.addStyleTag({ path: archivoCss });
     }
 
-    // Forzar renderizado en modo impresión
     await page.emulateMediaType('print');
 
-    // Esperar a que las imágenes terminen de cargar completamente
+    // Esperar imágenes
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
-
       await Promise.all(
         imagenes.map((imagen) => {
-          if (imagen.complete) {
-            return Promise.resolve();
-          }
-
+          if (imagen.complete) return Promise.resolve();
           return new Promise((resolve) => {
             imagen.addEventListener('load', resolve);
             imagen.addEventListener('error', resolve);
@@ -127,24 +105,48 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
+    // 3. Opciones de PDF armonizadas
     const defaultOptions = {
       printBackground: true,
-      displayHeaderFooter: false,
-      margin: {
-        top: '12mm',
-        bottom: '38mm',
-        left: '0px',
-        right: '0px'
-      },
-      width: '8.5in',
-      height: '11in',
-      preferCSSPageSize: false,
-      ...pdfOptions // Las opciones personalizadas sobreescriben los valores por defecto si se mandan
+      displayHeaderFooter: esSoloHeader,
+      headerTemplate: '<span></span>',
+      footerTemplate: `
+        <div style="
+          width: 100%;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 7pt;
+          color: #000;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-left: 14mm;
+          padding-right: 14mm;
+          box-sizing: border-box;
+        ">
+          <div>
+            <strong>Usuario:</strong> ${usuarioPie}
+          </div>
+          <div>
+            Pág. <span class="pageNumber"></span>
+          </div>
+        </div>
+      `,
+      margin: esSoloHeader
+        ? { top: '12mm', bottom: '22mm', left: '0px', right: '0px' }
+        : { top: '0px', bottom: '0px', left: '0px', right: '0px' },
+      preferCSSPageSize: !esSoloHeader,
+      ...pdfOptions
     };
 
-    const pdfBuffer = await page.pdf(defaultOptions);
+    console.log('--- GENERANDO PDF ---');
+    console.log('Plantilla recibida:', templateName);
+    console.log('Ruta completa HTML:', templatePath);
+    console.log('CSS que se cargará:', archivoCss);
+    console.log('¿Es solo header?:', esSoloHeader);
 
+    const pdfBuffer = await page.pdf(defaultOptions);
     return pdfBuffer;
+
   } catch (error) {
     console.error(`Error al generar el PDF ${templateName}:`, error);
     throw error;
