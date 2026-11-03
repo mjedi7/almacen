@@ -1,7 +1,12 @@
-<div class="card p-3 mb-3">
+<div class="titulo" style="margin: 0 auto; text-align: center; margin-top: 40px;">
+  <h3><b>Reportes compras/entradas</b></h3>
+    <hr style="width: 80%;">
+</div>
+
+<div class="card p-3 mb-3 ml-5" style="width: 90%; margin: 0 auto; background-color: #f8f9fa; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
   <label for="modoReporte"><b>Contenido del reporte</b></label>
 
-  <select id="modoReporte" [(ngModel)]="modo" class="form-control form-control-sm" style="max-width: 400px;">
+  <select id="modoReporte" [(ngModel)]="modo" class="form-control form-control-sm fw-bold" style="max-width: 400px;">
     <option value="entradas">Entradas: mercancía recibida, por fecha de recepción</option>
     <option value="compras">Compras: importe total comprado, por fecha de compra</option>
   </select>
@@ -20,7 +25,6 @@
   <form (ngSubmit)="GeneraReporte(f)" #f="ngForm" style="width: 80%;">
 
     <div class="form-row mt-5">
-
 
       <div class="form-group col-md-2">
         <label for="inputPassword4">Fecha Inicial</label>
@@ -146,7 +150,6 @@
 
 </div>
 
-<hr>
 
 <!-- REPORTE 3: KÁRDEX -->
 <div class="titulo" style="margin: 0 auto;text-align: center;margin-top: 50px;">
