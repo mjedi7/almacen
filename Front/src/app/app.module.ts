@@ -1,16 +1,18 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+
 // Modulos
 import { AppRoutingModule } from './app-routing.module';
 import { PagesModule } from './pages/pages.module';
 import { AuthModule } from './auth/auth.module';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { AppComponent } from './app.component';
 import { NopagefoundComponent } from './nopagefound/nopagefound.component';
 
-//tablas
+// Tablas
 import { DataTablesModule } from "angular-datatables";
 import { GenerarDocumentoComponent } from './generar-documento/generar-documento.component';
 import { MisSeguimientosComponent } from './mis-seguimientos/mis-seguimientos.component';
@@ -31,8 +33,8 @@ import { ListaMovimientosComponent } from './app/lista-movimientos/lista-movimie
 import { UsarArticuloComponent } from './app/usar-articulo/usar-articulo.component';
 import { CargarExistenciasComponent } from './cargar-existencias/cargar-existencias/cargar-existencias.component';
 import { ListarArticulosPartidaComponent } from './listar-articulos-partida/listar-articulos-partida.component';
-
-
+import { RegistrarPartidaComponent } from './registrar-partida/registrar-partida.component';
+import { RegistrarProveedorComponent } from './registrar-proveedor/registrar-proveedor.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +56,9 @@ import { ListarArticulosPartidaComponent } from './listar-articulos-partida/list
     ListaMovimientosComponent,
     UsarArticuloComponent,
     CargarExistenciasComponent,
-    ListarArticulosPartidaComponent    
+    ListarArticulosPartidaComponent,
+    RegistrarPartidaComponent,
+    RegistrarProveedorComponent
   ],
   imports: [
     BrowserModule,
@@ -70,6 +74,6 @@ import { ListarArticulosPartidaComponent } from './listar-articulos-partida/list
   bootstrap: [AppComponent],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy }
-    ],
+  ],
 })
 export class AppModule { }
