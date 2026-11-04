@@ -1,18 +1,20 @@
 @page {
   size: letter portrait;
-  /* Margen superior para el banner, e inferior suficiente para que el texto nunca toque el footer */
-  margin: 10mm 14mm 2mm 14mm;
+  /* Margen inferior de 40mm OBLIGATORIO para que las filas de cualquier página nunca lleguen a la cenefa */
+  margin: 10mm 14mm 12mm 14mm !important;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body.report {
   margin: 0;
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 10pt;
+  font-size: 8.5pt;
   color: #000;
   background: #fff;
   -webkit-print-color-adjust: exact;
@@ -34,30 +36,30 @@ body.report {
   margin: 0 auto;
 }
 
-/* Encabezados */
+/* Encabezados institucionales */
 .report-heading {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .report-heading__institution {
   font-size: 10pt;
   font-weight: bold;
   text-transform: uppercase;
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
 }
 
 .report-heading__title {
-  font-size: 13pt;
+  font-size: 11.5pt;
   font-weight: bold;
   margin: 0 0 3px 0;
   letter-spacing: 0.5px;
 }
 
 .report-period {
-  font-size: 10pt;
-  margin: 0;
-  font-weight: normal;
+  font-size: 9pt;
+  margin: 0 0 8px 0;
+  font-weight: bold;
 }
 
 /* Metadatos */
@@ -65,11 +67,11 @@ body.report {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 10px;
-  font-size: 9.5pt;
+  font-size: 8.5pt;
 }
 
 .report-meta td {
-  padding: 2px 4px;
+  padding: 2.5px 4px;
   vertical-align: top;
 }
 
@@ -78,36 +80,46 @@ body.report {
   width: 12%;
 }
 
-/* Tablas de datos */
+/* Tabla de compras */
 .report-table {
   width: 100%;
-  border-collapse: collapse;
-  border: 1.5px solid #000;
-  margin-bottom: 10px;
+  border-collapse: collapse !important;
+  border: 1px solid #000 !important;
+  margin-bottom: 0;
+  page-break-inside: auto;
 }
 
 .report-table thead {
-  display: table-header-group;
+  display: table-header-group !important;
+}
+
+.report-table tbody {
+  display: table-row-group !important;
 }
 
 .report-table tr {
-  page-break-inside: avoid;
-  break-inside: avoid;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
 .report-table th {
-  background-color: #f7faff;
-  border: 1px solid #000;
-  padding: 5px 4px;
-  font-size: 9.5pt;
+  background-color: #f0f4f8 !important;
+  color: #000 !important;
+  border: 1px solid #000 !important;
+  padding: 4.5px 5px;
+  font-size: 8.5pt;
   font-weight: bold;
   text-align: center;
+  vertical-align: middle;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
 }
 
 .report-table td {
-  border: 1px solid #000;
-  padding: 4px 5px;
-  font-size: 9pt;
+  border: 1px solid #000 !important;
+  padding: 3.5px 6px;
+  font-size: 8pt;
+  vertical-align: middle;
 }
 
 .text-center { text-align: center; }
@@ -119,79 +131,69 @@ body.report {
 .empty-state {
   text-align: center;
   font-style: italic;
-  font-size: 9.5pt;
+  font-size: 8.5pt;
   color: #555;
   padding: 12px !important;
 }
 
-/* Resumen y Totales */
-.report-results {
+/* ==========================================================================
+   TOTALES (FLUJO NORMAL)
+   Jamás usar position:fixed aquí, para que no aparezca en páginas intermedias
+   ========================================================================== */
+/* Totales sin position:fixed */
+.totales-contenedor {
   width: 100%;
+  margin-top: 14px;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
+.totales-contenido {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-top: 8px;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-.report-count {
-  font-size: 9.5pt;
-}
-
-/* Pie informativo con totales */
-.document-footer {
-  position: fixed;
-  bottom: 40mm; /* Ajusta la altura respecto a la cenefa */
-  left: 12mm;   /* Mismo margen lateral de @page */
-  right: 12mm;  /* Mismo margen lateral de @page */
-  font-size: 9pt;
-  z-index: 1001;
-}
-
-.document-footer__content {
-  display: flex;
-  justify-content: space-between; /* Deja el contador a la izquierda y totales a la derecha */
   align-items: flex-end;
-  /* Si no quieres la línea gris larga que cruza toda la hoja, quita border-top */
-  border-top: none; 
+  width: 100%;
+}
+
+.totales-conteo {
+  font-size: 8.5pt;
+  padding-bottom: 2px;
 }
 
 .totals-table {
-  border-collapse: collapse;
-  min-width: 220px;
-  margin-left: auto; /* Fuerza a la tabla a alinearse al extremo derecho */
+  border-collapse: collapse !important;
+  border: none !important;
+  min-width: 250px;
+  margin-left: auto;
 }
 
 .totals-table td {
-  padding: 2px 4px;
-  font-size: 9.5pt;
+  border: none !important;
+  padding: 2.5px 6px;
+  font-size: 8.5pt;
+  vertical-align: middle;
 }
 
 .totals-table__total td {
-  border-top: 1px solid #000;
+  border-top: 1.5px solid #000 !important;
   padding-top: 4px;
 }
 
-/* Footer Institucional pegado al borde inferior físico */
-.institutional-footer {
-  position: fixed;
-  bottom: 1mm; /* Contrarresta el margen inferior de @page para anclarse a la orilla del papel */
-  left: -14mm;   /* Contrarresta el margen izquierdo */
-  right: -14mm;  /* Contrarresta el margen derecho */
-  width: calc(100% + 28mm);
+/* Cenefa institucional en flujo normal al final */
+.institutional-footer-final {
+  width: 100%;
+  margin-top: 25px;
   text-align: center;
-  line-height: 0;
-  margin: 0;
-  padding: 0;
-  z-index: 1000;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
-.institutional-footer img {
+.institutional-footer-final img {
   width: 100%;
+  max-width: 100%;
   height: auto;
-  max-height: 33mm;
+  max-height: 32mm;
   object-fit: contain;
-  object-position: bottom center;
   display: block;
+  margin: 0 auto;
 }

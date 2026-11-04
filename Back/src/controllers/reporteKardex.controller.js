@@ -26,16 +26,19 @@ const reporteKardex = async (req, res) => {
         COALESCE(um.nombre_medida, art.unidad_medida, 'N/A') AS unidad_medida,
         art.descripcion AS nom_articulo,
         (
-          SELECT MAX(e.fecha) FROM v_entradas_kardex e
-          JOIN costos c ON c.id=e.id_costo WHERE c.id_articulo=art.id
+          SELECT m.fecha 
+          FROM movimientosdg m 
+          WHERE m.id_articulo = art.id 
+          ORDER BY m.fecha DESC, m.id DESC 
+          LIMIT 1
         ) AS fecha_ult_compra,
         COALESCE(
           (SELECT c.precio_unitario FROM costos c WHERE c.id_articulo = art.id ORDER BY c.id DESC LIMIT 1),
           0
         ) AS precio_unitario,
         COALESCE(
-          (SELECT SUM(com.cantidad) 
-           FROM v_entradas_kardex com 
+          (SELECT SUM(com.total_articulos) 
+           FROM compras com 
            INNER JOIN costos cos ON cos.id = com.id_costo 
            WHERE cos.id_articulo = art.id), 
           0
@@ -62,30 +65,38 @@ const reporteKardex = async (req, res) => {
         COALESCE(mdg.existencia_final, 0) AS "existencia",
         mdg.fecha AS "fecha"
       FROM movimientosdg mdg
-        INNER JOIN cat_articulos art ON art.id = COALESCE(mdg.id_articulo, (SELECT c.id_articulo FROM costos c WHERE c.id=mdg.id_costos))
+        INNER JOIN cat_articulos art ON art.id = mdg.id_articulo
         INNER JOIN cat_partidas par ON par.id = art.id_partidas 
         LEFT JOIN costos cos ON cos.id = mdg.id_costos 
         LEFT JOIN centro_trabajo ct ON ct.id = mdg.id_centrotrabajo_transfiere
-      WHERE art.id = $1
+      WHERE (par.clave = $1 OR par.id = $4)
+        AND (
+          art.id = $2 
+          OR art.clave = $3
+          OR mdg.id_articulo = $2
+          OR mdg.id_costos = $2
+        )
       ORDER BY mdg.fecha ASC, mdg.id ASC
     `;
 
     const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
 
-    const resEncabezado = await pool.query(queryEncabezado, params);
-    if (!resEncabezado.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
-    const headerData = resEncabezado.rows[0];
-    const [resDetalle, resEntradas] = await Promise.all([
-      pool.query(queryDetalle, [headerData.id_articulo]),
-      pool.query(`SELECT e.* FROM v_entradas_kardex e JOIN costos c ON c.id=e.id_costo
-        WHERE c.id_articulo=$1 ORDER BY e.fecha,e.registrado_en NULLS FIRST,e.id`, [headerData.id_articulo])
+    const [resEncabezado, resDetalle] = await Promise.all([
+      pool.query(queryEncabezado, params),
+      pool.query(queryDetalle, params)
     ]);
+
+    const headerData = resEncabezado.rows[0] || {};
     const movimientosDb = resDetalle.rows;
 
     // 2. Cálculos y formateo
     const totalSalidas = movimientosDb.reduce((acc, curr) => acc + Number(curr.ventas_acumuladas || 0), 0);
 
     let totalEntradas = Number(headerData.total_entradas_compras || 0);
+    if (totalEntradas === 0 && movimientosDb.length > 0) {
+      totalEntradas = Number(movimientosDb[0].existencia_inicial || 0);
+    }
+
     let costoPromedio = 0;
     if (movimientosDb.length > 0) {
       const sumCostos = movimientosDb.reduce((acc, curr) => acc + Number(curr.costo_unitario || 0), 0);
@@ -120,13 +131,6 @@ const reporteKardex = async (req, res) => {
         unidad_medida: headerData.unidad_medida || 'N/A',
         costo_promedio: costoPromedio.toFixed(4)
       },
-      entradas: resEntradas.rows.map(e => ({
-        folio: e.folio_compra, tipo: e.tipo,
-        fecha: e.fecha ? new Date(e.fecha).toLocaleDateString('es-MX') : '',
-        cantidad: Number(e.cantidad).toFixed(2),
-        costo: Number(e.precio_unitario).toFixed(4),
-        importe: (Number(e.cantidad)*Number(e.precio_unitario)).toFixed(2)
-      })),
       movimientos: movimientosFormateados,
       totales: {
         entradas: totalEntradas.toFixed(2),

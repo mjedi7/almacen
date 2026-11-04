@@ -22,7 +22,9 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
 
   try {
-    const templatePath = path.join(__dirname, `../templates/${templateName}`);
+    const nombreArchivo = templateName.endsWith('.html') ? templateName : `${templateName}.html`;
+    const templatePath = path.join(__dirname, `../templates/${nombreArchivo}`);
+
     if (!fs.existsSync(templatePath)) {
       throw new Error(`No se encontró la plantilla en: ${templatePath}`);
     }
@@ -67,13 +69,13 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    // 1. Detección unificada: salidas, existencia, costo y todas usan reporte-solo-header
+    // 1. Detección unificada del tipo de reporte
     const nombreMin = templateName.toLowerCase().trim();
 
     const esSoloHeader = nombreMin.includes('existencia') || 
                          nombreMin.includes('costo') || 
                          nombreMin.includes('todas') ||
-                         nombreMin.includes('salida'); // <-- AÑADIDO: ahora entra aquí
+                         nombreMin.includes('salida');
 
     const llevaPie = !esSoloHeader && (
       nombreMin.includes('partida') ||
@@ -89,9 +91,70 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       await page.addStyleTag({ path: archivoCss });
     }
 
+    // 3. Neutralización de position: fixed en el DOM para reportes con pie
+    if (llevaPie) {
+      await page.evaluate(() => {
+        // Quitar comportamiento flotante a footers, totales y cenefas
+        const selectores = [
+          '.document-footer',
+          'footer',
+          '.institutional-footer',
+          '.totals-table',
+          '.report-results',
+          '.totales-contenedor'
+        ];
+
+        selectores.forEach((sel) => {
+          document.querySelectorAll(sel).forEach((el) => {
+            el.style.setProperty('position', 'static', 'important');
+            el.style.setProperty('bottom', 'auto', 'important');
+            el.style.setProperty('left', 'auto', 'important');
+            el.style.setProperty('right', 'auto', 'important');
+            el.style.setProperty('z-index', 'auto', 'important');
+          });
+        });
+
+        // Asegurar que los bloques queden al final del body en orden natural
+        const docFooter = document.querySelector('.document-footer, .totales-contenedor');
+        const instFooter = document.querySelector('.institutional-footer');
+        if (docFooter) document.body.appendChild(docFooter);
+        if (instFooter) document.body.appendChild(instFooter);
+      });
+
+      // Sobrescribir estilos para asegurar flujo natural y márgenes limpios
+      await page.addStyleTag({
+        content: `
+          @page {
+            margin: 10mm 14mm 12mm 14mm !important;
+          }
+          .document-footer,
+          footer,
+          .totales-contenedor {
+            position: static !important;
+            margin-top: 15px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .institutional-footer {
+            position: static !important;
+            margin-top: 25px !important;
+            width: 100% !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .institutional-footer img {
+            max-height: 30mm !important;
+            width: 100% !important;
+            display: block !important;
+            margin: 0 auto !important;
+          }
+        `
+      });
+    }
+
     await page.emulateMediaType('print');
 
-    // Esperar imágenes
+    // Esperar a que carguen completamente las imágenes
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
       await Promise.all(
@@ -105,7 +168,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
-    // 3. Opciones de PDF armonizadas
+    // 4. Opciones de PDF armonizadas
     const defaultOptions = {
       printBackground: true,
       displayHeaderFooter: esSoloHeader,
@@ -137,12 +200,6 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       preferCSSPageSize: !esSoloHeader,
       ...pdfOptions
     };
-
-    console.log('--- GENERANDO PDF ---');
-    console.log('Plantilla recibida:', templateName);
-    console.log('Ruta completa HTML:', templatePath);
-    console.log('CSS que se cargará:', archivoCss);
-    console.log('¿Es solo header?:', esSoloHeader);
 
     const pdfBuffer = await page.pdf(defaultOptions);
     return pdfBuffer;

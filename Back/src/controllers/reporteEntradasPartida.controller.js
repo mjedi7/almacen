@@ -85,42 +85,26 @@ const generarReporteEntradasPartida = async (req, res) => {
       });
     }
 
-    const esCompra = req.body.modo === 'compras';
-
-    // Consulta adaptada usando las columnas reales de movimientosdg y calculando importes vía costos
-    const consulta = esCompra ? `
+    const consulta = `
       SELECT
         cr.folio_factura,
         cr.id_proveedor,
-        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
+        COALESCE(
+          cp.razon_social,
+          'PROVEEDOR NO IDENTIFICADO'
+        ) AS razon_social,
         cr.fecha_compra,
         COALESCE(cr.importe, 0) AS importe,
         COALESCE(cr.impuesto, 0) AS impuesto,
         COALESCE(cr.total, 0) AS total,
         cr.id_partida
-      FROM v_compras_reportes cr
-      LEFT JOIN cat_proveedores cp ON cp.id = cr.id_proveedor
+      FROM compras_reportes cr
+      LEFT JOIN cat_proveedores cp
+        ON cp.id = cr.id_proveedor
       WHERE cr.fecha_compra::date >= $1::date
         AND cr.fecha_compra::date <= $2::date
         AND cr.id_partida = $3
       ORDER BY cr.folio_factura
-    ` : `
-      SELECT
-        m.folio_transferencia AS folio_factura,
-        NULL AS id_proveedor,
-        COALESCE(m.nom_articulo, 'ARTICULO SIN DESCRIPCION') AS razon_social,
-        m.fecha AS fecha_compra,
-        (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) AS importe,
-        ((COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) * 0.16) AS impuesto,
-        ((COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) * 1.16) AS total,
-        ca.id_partidas AS id_partida
-      FROM movimientosdg m
-      LEFT JOIN costos c ON c.id = m.id_costos
-      LEFT JOIN cat_articulos ca ON ca.id = c.id_articulo
-      WHERE m.fecha::date >= $1::date
-        AND m.fecha::date <= $2::date
-        AND ca.id_partidas = $3
-      ORDER BY m.folio_transferencia
     `;
 
     const resultado = await pool.query(consulta, [
@@ -182,7 +166,7 @@ const generarReporteEntradasPartida = async (req, res) => {
 
     const datosPlantilla = {
       usuario: usuario || 'USUARIO NO IDENTIFICADO',
-      titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
+      titulo: 'RESUMEN DE COMPRAS',
       tipoReporte: 'Por partida',
       partida: {
         id: idPartida,
