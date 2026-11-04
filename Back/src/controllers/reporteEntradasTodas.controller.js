@@ -61,7 +61,6 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
  */
 const generarReporteEntradasTodas = async (req, res) => {
   try {
-
     console.log(
       'Authorization recibido:',
       req.header('Authorization')
@@ -86,28 +85,38 @@ const generarReporteEntradasTodas = async (req, res) => {
       });
     }
 
-
     const esCompra = req.body.modo === 'compras';
-    const fuente = esCompra ? 'v_compras_reportes' : 'v_entradas_reportes';
-    const consulta = `
+
+    // Consulta adaptada para compras (usa vista) o entradas (calcula desde movimientosdg y costos)
+    const consulta = esCompra ? `
       SELECT
         cr.folio_factura,
         cr.id_proveedor,
-        COALESCE(
-          cp.razon_social,
-          'PROVEEDOR NO IDENTIFICADO'
-        ) AS razon_social,
+        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
         cr.fecha_compra,
         COALESCE(cr.importe, 0) AS importe,
         COALESCE(cr.impuesto, 0) AS impuesto,
         COALESCE(cr.total, 0) AS total,
         cr.id_partida
-      FROM ${fuente} cr
+      FROM v_compras_reportes cr
       LEFT JOIN cat_proveedores cp
         ON cp.id = cr.id_proveedor
       WHERE cr.fecha_compra::date >= $1::date
         AND cr.fecha_compra::date <= $2::date
       ORDER BY cr.folio_factura
+    ` : `
+      SELECT
+        COALESCE(ca.clave, 'S/C') AS clave,
+        COALESCE(m.nom_articulo, ca.descripcion, 'ARTICULO SIN DESCRIPCION') AS nom_articulo,
+        COALESCE(c.precio_unitario, 0) AS costo_unitario,
+        COALESCE(m.existencia_final, m.existencia_inicial, 0) AS existencia,
+        (COALESCE(m.existencia_final, m.existencia_inicial, 0) * COALESCE(c.precio_unitario, 0)) AS total
+      FROM movimientosdg m
+      LEFT JOIN costos c ON c.id = m.id_costos
+      LEFT JOIN cat_articulos ca ON ca.id = m.id_articulo
+      WHERE m.fecha::date >= $1::date
+        AND m.fecha::date <= $2::date
+      ORDER BY ca.clave
     `;
 
     const resultado = await pool.query(consulta, [
@@ -131,17 +140,11 @@ const generarReporteEntradasTodas = async (req, res) => {
     );
 
     const registros = resultado.rows.map((registro) => ({
-      folioFactura: registro.folio_factura || '',
-      proveedor: registro.razon_social,
-      fechaCompra: registro.fecha_compra
-        ? new Date(registro.fecha_compra).toLocaleDateString(
-          'es-MX',
-          { timeZone: 'UTC' }
-        )
-        : '',
-      importe: formatearMoneda(registro.importe),
-      impuesto: formatearMoneda(registro.impuesto),
-      total: formatearMoneda(registro.total)
+      clave: registro.clave || '',
+      articulo: registro.nom_articulo || 'ARTICULO SIN DESCRIPCION',
+      costo: formatearMoneda(registro.costo_unitario || 0).replace('$', '').trim(),
+      existencia: registro.num_articulos_solicitados || 0,
+      costoTotal: formatearMoneda(registro.total || 0).replace('$', '').trim()
     }));
 
     const datosPlantilla = {
