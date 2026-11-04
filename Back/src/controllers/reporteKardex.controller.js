@@ -9,15 +9,15 @@ const pool = new Pool({
   port: process.env.PORT_BD
 });
 
-// REPORTE: KÁRDEX
+// REPORTE: KÁRDEX (Directo a tablas base, sin vistas)
 const reporteKardex = async (req, res) => {
   try {
-    const clavePartidaRaw = (req.params.clavePartida || req.query.clavePartida || '21101').toString().trim();
-    const idParamRaw = (req.params.idCostos || req.query.idCostos || req.params.idArticulo || req.query.idArticulo || '48').toString().trim();
+    const clavePartidaRaw = (req.params.clavePartida || req.query.clavePartida || req.params.idPartida || req.query.idPartida || '').toString().trim();
+    const idParamRaw = (req.params.idCostos || req.query.idCostos || req.params.idArticulo || req.query.idArticulo || '').toString().trim();
     const idParamInt = parseInt(idParamRaw, 10) || 0;
     const partidaInt = parseInt(clavePartidaRaw, 10) || 0;
 
-    // 1. Consultas SQL
+    // 1. Consultas SQL sin vistas
     const queryEncabezado = `
       SELECT 
         par.clave AS clave_partida,
@@ -26,24 +26,26 @@ const reporteKardex = async (req, res) => {
         COALESCE(um.nombre_medida, art.unidad_medida, 'N/A') AS unidad_medida,
         art.descripcion AS nom_articulo,
         (
-          SELECT MAX(e.fecha) FROM v_entradas_kardex e
-          JOIN costos c ON c.id=e.id_costo WHERE c.id_articulo=art.id
+          SELECT MAX(c.fecha_compra)
+          FROM compras c
+          JOIN costos co ON co.id = c.id_costo
+          WHERE co.id_articulo = art.id AND c.esactivo IS TRUE
         ) AS fecha_ult_compra,
         COALESCE(
-          (SELECT c.precio_unitario FROM costos c WHERE c.id_articulo = art.id ORDER BY c.id DESC LIMIT 1),
+          (SELECT co.precio_unitario FROM costos co WHERE co.id_articulo = art.id ORDER BY co.id DESC LIMIT 1),
           0
         ) AS precio_unitario,
         COALESCE(
-          (SELECT SUM(com.cantidad) 
-           FROM v_entradas_kardex com 
-           INNER JOIN costos cos ON cos.id = com.id_costo 
-           WHERE cos.id_articulo = art.id), 
+          (SELECT SUM(c.total_articulos)
+            FROM compras c
+            INNER JOIN costos co ON co.id = c.id_costo
+            WHERE co.id_articulo = art.id AND c.esactivo IS TRUE), 
           0
         ) AS total_entradas_compras
       FROM cat_articulos art
         INNER JOIN cat_partidas par ON par.id = art.id_partidas
         LEFT JOIN unidad_medida um ON um.id = art.unidad_medida_id
-      WHERE (par.clave = $1 OR par.id = $4)
+      WHERE (par.clave = $1 OR par.id = $4 OR $1 = '' OR $1 = ':idPartida?')
         AND (
           art.id = $2 
           OR art.clave = $3
@@ -70,22 +72,41 @@ const reporteKardex = async (req, res) => {
       ORDER BY mdg.fecha ASC, mdg.id ASC
     `;
 
-    const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
+    const queryEntradas = `
+      SELECT 
+        c.id,
+        COALESCE(c.folio_compra, '') AS folio_compra,
+        'Compra' AS tipo,
+        c.fecha_compra AS fecha,
+        c.total_articulos AS cantidad,
+        co.precio_unitario,
+        co.id_articulo
+      FROM compras c
+      JOIN costos co ON co.id = c.id_costo
+      WHERE co.id_articulo = $1 AND c.esactivo IS TRUE
+      ORDER BY c.fecha_compra ASC, c.id ASC
+    `;
 
+    const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
     const resEncabezado = await pool.query(queryEncabezado, params);
-    if (!resEncabezado.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
+
+    if (!resEncabezado.rowCount) {
+      return res.status(404).json({ error: 'Artículo no encontrado para la partida seleccionada.' });
+    }
+
     const headerData = resEncabezado.rows[0];
+
     const [resDetalle, resEntradas] = await Promise.all([
       pool.query(queryDetalle, [headerData.id_articulo]),
-      pool.query(`SELECT e.* FROM v_entradas_kardex e JOIN costos c ON c.id=e.id_costo
-        WHERE c.id_articulo=$1 ORDER BY e.fecha,e.registrado_en NULLS FIRST,e.id`, [headerData.id_articulo])
+      pool.query(queryEntradas, [headerData.id_articulo])
     ]);
+
     const movimientosDb = resDetalle.rows;
 
     // 2. Cálculos y formateo
     const totalSalidas = movimientosDb.reduce((acc, curr) => acc + Number(curr.ventas_acumuladas || 0), 0);
-
     let totalEntradas = Number(headerData.total_entradas_compras || 0);
+
     let costoPromedio = 0;
     if (movimientosDb.length > 0) {
       const sumCostos = movimientosDb.reduce((acc, curr) => acc + Number(curr.costo_unitario || 0), 0);
@@ -100,7 +121,6 @@ const reporteKardex = async (req, res) => {
       const costoUni = Number(mov.costo_unitario || 0);
       const importeTotal = ventas * costoUni;
       const existFin = Number(mov.existencia || 0);
-
       return {
         folio: mov.folio || '-',
         plantel_destino: mov.plantel_destino || 'OFICINAS CENTRALES',
@@ -121,11 +141,12 @@ const reporteKardex = async (req, res) => {
         costo_promedio: costoPromedio.toFixed(4)
       },
       entradas: resEntradas.rows.map(e => ({
-        folio: e.folio_compra, tipo: e.tipo,
+        folio: e.folio_compra,
+        tipo: e.tipo,
         fecha: e.fecha ? new Date(e.fecha).toLocaleDateString('es-MX') : '',
         cantidad: Number(e.cantidad).toFixed(2),
         costo: Number(e.precio_unitario).toFixed(4),
-        importe: (Number(e.cantidad)*Number(e.precio_unitario)).toFixed(2)
+        importe: (Number(e.cantidad) * Number(e.precio_unitario)).toFixed(2)
       })),
       movimientos: movimientosFormateados,
       totales: {
@@ -140,11 +161,10 @@ const reporteKardex = async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="kardex_${clavePartidaRaw}_${idParamRaw}.pdf"`);
     res.setHeader('Content-Length', pdfBuffer.length);
-    res.send(pdfBuffer);
-
+    return res.send(pdfBuffer);
   } catch (error) {
     console.error('Error al generar PDF de Kárdex:', error);
-    res.status(500).json({ error: 'Error al consultar la base de datos o generar el documento' });
+    return res.status(500).json({ error: 'Error al consultar la base de datos o generar el documento de Kárdex: ' + error.message });
   }
 };
 

@@ -8,3 +8,8 @@
 .table td, .table th {
   vertical-align: middle;
 }
+
+.thead-guinda th {
+  background-color: #750025 !important;
+  color: #fff !important;
+}

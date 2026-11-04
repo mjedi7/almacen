@@ -15,7 +15,7 @@ export class AltaArticuloComponent implements OnInit {
 
   articulo: articulo = {
     clave: '',
-    id_partidas: null, // <-- Inicializado explícitamente
+    id_partidas: null,
     descripcion: '',
     unidad_medida_id: null,
     precio_unitario: null,

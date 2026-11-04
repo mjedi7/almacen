@@ -7,7 +7,6 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class GenerarPDFService {
-
   private API = environment.uri_api;
 
   constructor(private http: HttpClient) { }
@@ -15,17 +14,17 @@ export class GenerarPDFService {
   /**
    * Obtiene el PDF del Kardex como Blob binario
    * @param partida Clave de la partida (ej: '21101')
-   * @param idCosto ID del costo/artículo (ej: '048')
+   * @param idCosto ID del costo o artículo (ej: '271')
    */
   descargarKardex(partida: string, idCosto: string): Observable<Blob> {
     const params = new HttpParams()
       .set('clavePartida', partida)
       .set('idCostos', idCosto);
 
-    return this.http.get(`${this.API}/reporte/kardex/:idPartida?`, {
+    // Se eliminó ':idPartida?' del path para enviar una URL limpia y válida
+    return this.http.get(`${this.API}/reporte/kardex`, {
       params,
       responseType: 'blob'
     });
   }
-
 }
