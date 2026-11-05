@@ -221,7 +221,7 @@ const generarReporteEntradasPartida = async (req, res) => {
     );
 
     const nombreArchivo =
-      `reporte_entradas_partida_${clavePartida}.pdf`;
+      `reporte_entradas_partida_${clavePartida}_${fechaReporte}.pdf`;
 
     res.set({
       'Content-Type': 'application/pdf',

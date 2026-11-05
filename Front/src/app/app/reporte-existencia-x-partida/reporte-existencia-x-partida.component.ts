@@ -77,8 +77,8 @@ export class ReporteExistenciaXPartidaComponent implements OnInit {
 
     const clavePartida = this.reporteExistencias.partida || '0';
     const nombreArchivo = (clavePartida === '0')
-      ? `Reporte_existencias_general${sufijo}.pdf`
-      : `Reporte_existencia_partida_${clavePartida}${sufijo}.pdf`;
+      ? `Reporte_existencias_general${sufijo}_${this.reporteExistencias.fecha}.pdf`
+      : `Reporte_existencia_partida_${clavePartida}${sufijo}_${this.reporteExistencias.fecha}.pdf`;
 
     // 4. Payload con usuario y fecha corregida
     const payload = {

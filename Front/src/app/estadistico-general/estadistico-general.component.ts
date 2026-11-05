@@ -300,7 +300,7 @@ generarFormatoListaSurtidoSinMontos(indice: number) {
           const fileURL = window.URL.createObjectURL(res);
           const link = document.createElement('a');
           link.href = fileURL;
-          link.download = `Transferencia_${this.transferencia.consecutivo}.zip`;
+          link.download = `Transferencia_${this.transferencia.consecutivo}_${this.transferencia.plantel}_${this.transferencia.fecha}.zip`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);

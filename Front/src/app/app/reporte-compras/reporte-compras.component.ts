@@ -19,6 +19,7 @@ export class ReporteComprasComponent implements OnInit {
     fechaIni: null,
     fechaFin: null,
     partida: '',
+    clavePartida: '',
     fechaReporte: null
   };
 
@@ -26,6 +27,7 @@ export class ReporteComprasComponent implements OnInit {
     fechaIni: null,
     fechaFin: null,
     idproveedor: null,
+    nombreProveedor: '',
     fechaReporte: null
   };
 
@@ -103,9 +105,13 @@ export class ReporteComprasComponent implements OnInit {
       ? `${this.API_URL}/reporte/compras-todas`
       : `${this.API_URL}/reporte/compras-partida`;
 
+    
+    const partidaObj = this.partidas.find((p: any) => String(p.id) === String(this.reporte.partida));
+    const claveReal = partidaObj ? partidaObj.clave : (this.reporte.clavePartida || 'general');
+
     const nombreArchivo = (this.reporte.partida === '0')
-      ? 'Reporte_de_todas_las_compras.pdf'
-      : 'Reporte_compras_por_partida.pdf';
+      ? `Reporte_de_todas_las_compras_${this.reporte.fechaReporte || 'general'}.pdf`
+      : `Reporte_compras_partida_${claveReal}_${this.reporte.fechaReporte}.pdf`;
 
     Swal.fire({
       title: 'Generando Reporte...',
@@ -130,7 +136,7 @@ export class ReporteComprasComponent implements OnInit {
     });
   }
 
-  GeneraReportePorProveedor(form: NgForm) {
+ GeneraReportePorProveedor(form: NgForm) {
     if (!form.valid) {
       Swal.fire({
         title: 'Complete todos los campos',
@@ -150,6 +156,16 @@ export class ReporteComprasComponent implements OnInit {
       usuario: usuarioSesion
     };
 
+    // Buscamos el proveedor seleccionado para extraer su nombre o razón social de forma limpia
+    const proveedorObj = this.proveedores.find((p: any) => String(p.id) === String(this.reporte2.idproveedor));
+    // Limpiamos caracteres raros por si la razón social tiene espacios largos, comas o puntos
+    const nombreProveedorLimpio = proveedorObj 
+      ? (proveedorObj.razon_social || proveedorObj.nombre || 'proveedor').replace(/[^a-zA-Z0-9_-]/g, '_') 
+      : 'proveedor';
+
+    // Armamos el nombre dinámico incluyendo la modalidad (entradas/compras) y la fecha del reporte
+    const nombreArchivo = `Reporte_${this.modo}_proveedor_${nombreProveedorLimpio}_${this.reporte2.fechaReporte || 'general'}.pdf`;
+
     Swal.fire({
       title: 'Generando Reporte...',
       text: 'Por favor espere un momento',
@@ -163,7 +179,7 @@ export class ReporteComprasComponent implements OnInit {
     }).subscribe({
       next: (res: Blob) => {
         Swal.close();
-        this.descargarArchivo(res, `Reporte_${this.modo}_x_proveedor.pdf`);
+        this.descargarArchivo(res, nombreArchivo);
       },
       error: (err) => {
         Swal.close();
@@ -173,7 +189,7 @@ export class ReporteComprasComponent implements OnInit {
     });
   }
 
-  GeneraReporteKardex(form: NgForm) {
+GeneraReporteKardex(form: NgForm) {
     if (!form.valid) {
       Swal.fire({
         title: 'Complete todos los campos',
@@ -189,12 +205,26 @@ export class ReporteComprasComponent implements OnInit {
       didOpen: () => Swal.showLoading(null)
     });
 
+    // Buscamos el artículo seleccionado en el arreglo para extraer su descripción o nombre
+    const articuloObj = this.articulosKardex.find((a: any) => String(a.id) === String(this.reporteKardex.idCostos));
+    const nombreArticuloCrudo = articuloObj ? (articuloObj.descripcion || articuloObj.nombre || 'articulo') : 'articulo';
+    
+    // Limpiamos la descripción de caracteres extraños, espacios largos o barras para que el archivo no falle al descargarse
+    const nombreArticuloLimpio = nombreArticuloCrudo
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Quita acentos
+      .replace(/[^a-zA-Z0-9]/g, '_')   // Cambia todo lo que no sea letra o número por guión bajo
+      .replace(/_+/g, '_');            // Evita guiones bajos repetidos
+
+    const nombreArchivo = `Reporte_kardex_partida_${this.reporteKardex.clavePartida}_${nombreArticuloLimpio}.pdf`;
+
     this.reportesService.descargarKardex(this.reporteKardex.clavePartida, this.reporteKardex.idCostos)
       .subscribe({
         next: (pdfBlob: Blob) => {
           Swal.close();
-          const fileURL = URL.createObjectURL(pdfBlob);
-          window.open(fileURL, '_blank');
+          // Forzamos la descarga con el nombre limpio y descriptivo
+          this.descargarArchivo(pdfBlob, nombreArchivo);
         },
         error: (err: any) => {
           Swal.close();

@@ -81,6 +81,9 @@ filtrarPlanteles(): void {
 
   botonUtilizaArticulo: boolean = false;
 
+  // Identificar usuarios administrativos (rango 3)
+esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
+
   constructor(private traer: TraerDatosService) {}
 
   ngOnInit(): void {
@@ -107,16 +110,30 @@ filtrarPlanteles(): void {
   }
 
   // Opciones visibles en cada selector
-  get plantelesVisibles(): any[] {
-    const texto = this.busquedaPlantelDropdown
-      .trim()
-      .toLocaleLowerCase('es');
+  
+get plantelesVisibles(): any[] {
+  const texto = this.busquedaPlantelDropdown.trim().toLocaleLowerCase('es');
+
+  if (!texto) {
+    return this.plantelesLista;
+  }
+
+  // Si se escribe un número, buscar el código exacto.
+  if (/^\d+$/.test(texto)) {
+    const codigoBuscado = Number(texto);
 
     return this.plantelesLista.filter((p: any) =>
-      String(p.descripcion || '').toLocaleLowerCase('es').includes(texto) ||
-      String(p.codigo ?? '').includes(texto)
+      Number(p.codigo) === codigoBuscado
     );
   }
+
+  // Si se escribe texto, buscar por nombre del plantel.
+  return this.plantelesLista.filter((p: any) =>
+    String(p.descripcion || '')
+      .toLocaleLowerCase('es')
+      .includes(texto)
+  );
+}
 
   get direccionesVisibles(): any[] {
     const texto = this.busquedaDireccionDropdown
@@ -301,7 +318,8 @@ this.planteles = res.map((p: any) => {
         processing: true,
         destroy: true,
         language: {
-          url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
+          url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json',
+          search: 'Buscar:'
         }
       };
 
@@ -422,7 +440,8 @@ this.planteles = res.map((p: any) => {
 
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        
       }),
       responseType: 'blob' as 'json'
     };
@@ -434,13 +453,11 @@ this.planteles = res.map((p: any) => {
       next: (res: any) => {
         Swal.close();
 
-        const file = new Blob(
-          [res],
-          { type: 'application/pdf' }
-        );
+    
+        const nombreArchivo = `Reporte_general_plantel_${this.verSeleccion}.pdf`;
 
-        const fileURL = URL.createObjectURL(file);
-        window.open(fileURL, '_blank');
+        
+        this.descargarArchivo(res, nombreArchivo);
       },
       error: (err) => {
         Swal.close();
@@ -454,6 +471,18 @@ this.planteles = res.map((p: any) => {
         );
       }
     });
+  }
+
+  private descargarArchivo(res: Blob, nombreArchivo: string): void {
+    const file = new Blob([res], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
   }
 
   // Descargar formato PDF y Excel
