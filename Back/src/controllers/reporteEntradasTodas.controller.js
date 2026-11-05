@@ -39,8 +39,8 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
 };
 
 /**
- * Genera el reporte de compras de todas las partidas.
- * Unifica las compras registradas en compras_reportes y en la tabla compras sin requerir vistas.
+ * Genera el reporte general de todas las partidas.
+ * Unifica las consultas utilizando tablas reales sin requerir vistas.
  */
 const generarReporteEntradasTodas = async (req, res) => {
   try {
@@ -63,38 +63,25 @@ const generarReporteEntradasTodas = async (req, res) => {
 
     const esCompra = req.body.modo === 'compras';
 
-
-    // Consulta adaptada para compras (usa vista) o entradas (calcula desde movimientosdg y costos)
-
-    // Consulta adaptada: Compras usa su vista, Entradas calcula desde movimientosdg, costos y cat_articulos
-
+    // Consultas limpias y sin duplicados usando tablas reales para ambos modos
     const consulta = esCompra ? `
       SELECT
-        cr.folio_factura,
-        cr.id_proveedor,
-        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
-        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
-        cr.fecha_compra,
-        cr.importe,
-        cr.impuesto,
-        cr.total,
-        cr.id_partida
-      FROM v_compras_reportes cr
-      LEFT JOIN cat_proveedores cp
-        ON cp.id = cr.id_proveedor
-      WHERE cr.fecha_compra::date >= $1::date
-        AND cr.fecha_compra::date <= $2::date
-      ORDER BY cr.folio_factura
+        m.folio_transferencia AS clave,
+        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS nom_articulo,
+        COALESCE(c.precio_unitario, 0) AS costo_unitario,
+        COALESCE(m.existencia_final, m.existencia_inicial, m.num_articulos_solicitados, 0) AS existencia,
+        (COALESCE(m.existencia_final, m.existencia_inicial, m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) AS total
+      FROM movimientosdg m
+      LEFT JOIN costos c ON c.id = m.id_costos
+      LEFT JOIN cat_proveedores cp ON cp.id = c.id_proveedor
+      WHERE m.fecha::date >= $1::date
+        AND m.fecha::date <= $2::date
+      ORDER BY m.folio_transferencia
     ` : `
       SELECT
         COALESCE(ca.clave, 'S/C') AS clave,
         COALESCE(m.nom_articulo, ca.descripcion, 'ARTICULO SIN DESCRIPCION') AS nom_articulo,
         COALESCE(c.precio_unitario, 0) AS costo_unitario,
-        COALESCE(m.existencia_final, m.existencia_inicial, 0) AS existencia,
-        (COALESCE(m.existencia_final, m.existencia_inicial, 0) * COALESCE(c.precio_unitario, 0)) AS total
-      FROM movimientosdg m
-      LEFT JOIN costos c ON c.id = m.id_costos
-      LEFT JOIN cat_articulos ca ON ca.id = m.id_articulo
         COALESCE(m.existencia_final, m.existencia_inicial, m.num_articulos_solicitados, 0) AS existencia,
         (COALESCE(m.existencia_final, m.existencia_inicial, m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) AS total
       FROM movimientosdg m
@@ -112,30 +99,25 @@ const generarReporteEntradasTodas = async (req, res) => {
 
     const acumulados = resultado.rows.reduce(
       (totales, registro) => {
-        totales.importe += Number(registro.importe || registro.total || 0);
-        totales.impuesto += Number(registro.impuesto || 0);
+        totales.importe += Number(registro.total || 0);
         totales.total += Number(registro.total || 0);
         return totales;
       },
       { importe: 0, impuesto: 0, total: 0 }
     );
 
-    // Mapeo adaptado para que coincida exactamente con tu plantilla HTML de existencias y costos
+    // Mapeo limpio y sin duplicados para la plantilla HTML
     const registros = resultado.rows.map((registro) => ({
       clave: registro.clave || '',
-
       articulo: registro.nom_articulo || 'ARTICULO SIN DESCRIPCION',
       costo: formatearMoneda(registro.costo_unitario || 0).replace('$', '').trim(),
-      existencia: registro.num_articulos_solicitados || 0,
-      articulo: registro.nom_articulo || registro.razon_social || 'ARTICULO SIN DESCRIPCION',
-      costo: formatearMoneda(registro.costo_unitario || registro.importe || 0).replace('$', '').trim(),
-      existencia: registro.existencia || 1,
+      existencia: registro.existencia || 0,
       costoTotal: formatearMoneda(registro.total || 0).replace('$', '').trim()
     }));
 
     const datosPlantilla = {
       usuario: usuario || 'USUARIO NO IDENTIFICADO',
-      titulo: 'RESUMEN DE COMPRAS',
+      titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
       documentos: 'Todos',
       proveedores: 'Todos',
       fechaInicio: formatearFecha(fechaIni),
