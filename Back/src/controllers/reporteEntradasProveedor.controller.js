@@ -10,10 +10,7 @@ const pool = new Pool({
 });
 
 const formatearFecha = (fecha) => {
-  if (!fecha) {
-    return '';
-  }
-
+  if (!fecha) return '';
   const [anio, mes, dia] = fecha.split('-');
   return `${dia}-${mes}-${anio}`;
 };
@@ -31,58 +28,28 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
   if (!fechaIni || !fechaFin || !fechaReporte) {
     return 'Las fechas inicial, final y de reporte son obligatorias';
   }
-
   const formatoFecha = /^\d{4}-\d{2}-\d{2}$/;
-
-  if (
-    !formatoFecha.test(fechaIni) ||
-    !formatoFecha.test(fechaFin) ||
-    !formatoFecha.test(fechaReporte)
-  ) {
+  if (!formatoFecha.test(fechaIni) || !formatoFecha.test(fechaFin) || !formatoFecha.test(fechaReporte)) {
     return 'Las fechas deben tener el formato YYYY-MM-DD';
   }
-
   if (fechaIni > fechaFin) {
     return 'La fecha inicial no puede ser posterior a la fecha final';
   }
-
   return null;
 };
 
-/**
- * Genera el reporte de entradas de un proveedor.
- *
- * Ruta:
- * POST /reporte_de_compras_x_proveedor
- */
 const generarReporteEntradasProveedor = async (req, res) => {
   try {
-    const {
-      fechaIni,
-      fechaFin,
-      fechaReporte,
-      idproveedor,
-      usuario
-    } = req.body;
+    const { fechaIni, fechaFin, fechaReporte, idproveedor, usuario } = req.body;
 
-    const errorValidacion = validarFechas(
-      fechaIni,
-      fechaFin,
-      fechaReporte
-    );
-
+    const errorValidacion = validarFechas(fechaIni, fechaFin, fechaReporte);
     if (errorValidacion) {
-      return res.status(400).json({
-        error: errorValidacion
-      });
+      return res.status(400).json({ error: errorValidacion });
     }
 
     const idProveedor = Number(idproveedor);
-
     if (!Number.isInteger(idProveedor) || idProveedor <= 0) {
-      return res.status(400).json({
-        error: 'El proveedor seleccionado no es válido'
-      });
+      return res.status(400).json({ error: 'El proveedor seleccionado no es válido' });
     }
 
     const esCompra = req.body.modo === 'compras';
@@ -92,14 +59,11 @@ const generarReporteEntradasProveedor = async (req, res) => {
       SELECT
         cr.folio_factura,
         cr.id_proveedor,
-        COALESCE(
-          cp.razon_social,
-          'PROVEEDOR NO IDENTIFICADO'
-        ) AS razon_social,
+        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
         cr.fecha_compra,
-        COALESCE(cr.importe, 0) AS importe,
-        COALESCE(cr.impuesto, 0) AS impuesto,
-        COALESCE(cr.total, 0) AS total,
+        cr.importe,
+        cr.impuesto,
+        cr.total,
         cr.id_partida
       FROM v_compras_reportes cr
       LEFT JOIN cat_proveedores cp
@@ -150,11 +114,8 @@ const generarReporteEntradasProveedor = async (req, res) => {
     ]);
 
     const proveedor = resultadoProveedor.rows[0];
-
     if (!proveedor) {
-      return res.status(404).json({
-        error: 'No se encontró el proveedor seleccionado'
-      });
+      return res.status(404).json({ error: 'No se encontró el proveedor seleccionado' });
     }
 
     const acumulados = resultadoCompras.rows.reduce(
@@ -162,36 +123,25 @@ const generarReporteEntradasProveedor = async (req, res) => {
         totales.importe += Number(registro.importe || 0);
         totales.impuesto += Number(registro.impuesto || 0);
         totales.total += Number(registro.total || 0);
-
         return totales;
       },
-      {
-        importe: 0,
-        impuesto: 0,
-        total: 0
-      }
+      { importe: 0, impuesto: 0, total: 0 }
     );
 
-    const registros = resultadoCompras.rows.map(
-      (registro) => ({
-        folioFactura: registro.folio_factura || '',
-        proveedor: registro.razon_social,
-        fechaCompra: registro.fecha_compra
-          ? new Date(
-              registro.fecha_compra
-            ).toLocaleDateString('es-MX', {
-              timeZone: 'UTC'
-            })
-          : '',
-        importe: formatearMoneda(registro.importe),
-        impuesto: formatearMoneda(registro.impuesto),
-        total: formatearMoneda(registro.total)
-      })
-    );
+    const registros = resultadoCompras.rows.map((registro) => ({
+      folioFactura: registro.folio_factura || '',
+      proveedor: registro.razon_social,
+      fechaCompra: registro.fecha_compra
+        ? new Date(registro.fecha_compra).toLocaleDateString('es-MX', { timeZone: 'UTC' })
+        : '',
+      importe: formatearMoneda(registro.importe),
+      impuesto: formatearMoneda(registro.impuesto),
+      total: formatearMoneda(registro.total)
+    }));
 
     const datosPlantilla = {
       usuario: usuario || 'USUARIO NO IDENTIFICADO',
-      titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
+      titulo: 'RESUMEN DE COMPRAS',
       tipoReporte: 'Por proveedor',
       proveedor: {
         id: proveedor.id,
@@ -216,37 +166,21 @@ const generarReporteEntradasProveedor = async (req, res) => {
       {
         format: 'Letter',
         landscape: false,
-        printBackground: true,
-        margin: {
-          top: '12mm',
-          bottom: '17mm',
-          left: '10mm',
-          right: '10mm'
-        }
+        printBackground: true
       }
     );
 
-    const nombreArchivo =
-      `reporte_entradas_proveedor_${idProveedor}.pdf`;
-
+    const nombreArchivo = `reporte_compras_proveedor_${idProveedor}.pdf`;
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition':
-        `inline; filename="${nombreArchivo}"`,
+      'Content-Disposition': `inline; filename="${nombreArchivo}"`,
       'Content-Length': pdfBuffer.length
     });
 
     return res.send(pdfBuffer);
   } catch (error) {
-    console.error(
-      'Error al generar el reporte de entradas por proveedor:',
-      error
-    );
-
-    return res.status(500).json({
-      error:
-        'No se pudo generar el reporte de entradas por proveedor'
-    });
+    console.error('Error al generar el reporte de compras por proveedor:', error);
+    return res.status(500).json({ error: 'No se pudo generar el reporte de compras por proveedor' });
   }
 };
 

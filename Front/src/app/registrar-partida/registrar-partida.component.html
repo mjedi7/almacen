@@ -1,8 +1,8 @@
 <div class="container-fluid px-4">
   <!-- TÍTULO -->
   <div class="text-center" style="margin-top: 30px;">
-    <h3><b>Registrar Nueva Partida Presupuestal</b></h3>
-    <p class="text-muted">Gestión y alta de partidas del catálogo institucional (CECyTEV)</p>
+    <h3><b>Registrar Nueva Partida</b></h3>
+    <!-- <p class="text-muted">Gestión y alta de partidas del catálogo institucional (CECyTEV)</p> -->
     <hr>
   </div>
 
@@ -10,30 +10,40 @@
     <!-- FORMULARIO DE REGISTRO (COLUMNA IZQUIERDA / SUPERIOR) -->
     <div class="col-lg-5 mb-4">
       <div class="card shadow border-0">
-        <div class="card-header bg-primary text-white py-3">
+        <div class="card-header text-white py-3" style="background-color: #9c0031;">
           <h5 class="card-title mb-0">
-            <i class="fa fa-folder-plus me-2"></i> Datos de la Partida
+            <!-- <i class="fa fa-folder-plus me-2"> -->
+              <i class="fa-solid fa-book-medical"></i>
+            Datos de la Partida
           </h5>
         </div>
         <div class="card-body p-4">
           <form #f="ngForm" (ngSubmit)="guardarPartida(f)">
             <!-- Clave de Partida -->
             <div class="form-group mb-3">
-              <label for="clave" class="form-label"><b>Clave Presupuestal <span class="text-danger">*</span></b></label>
+              <label for="clave" class="form-label"><b>Clave de la Partida <span class="text-danger">*</span></b></label>
               <input
                 type="text"
                 id="clave"
                 name="clave"
                 class="form-control"
                 placeholder="Ejemplo: 21101, 21401, 22104"
+                inputmode="numeric"
                 [(ngModel)]="partidaNueva.clave"
+                (input)="onClaveInput()"
                 required
                 autocomplete="off"
+                [class.is-invalid]="claveExcedida"
                 #claveCtrl="ngModel"
               />
+              <small *ngIf="claveExcedida" class="text-warning fw-bold d-block">
+                <i class="fa fa-exclamation-triangle me-1"></i>
+                La clave excede los {{ LONGITUD_CLAVE }} dígitos permitidos.
+              </small>
               <small *ngIf="f.submitted && claveCtrl.invalid" class="text-danger">
                 La clave presupuestal es obligatoria.
               </small>
+              <div class="form-text">Formato de {{ LONGITUD_CLAVE }} dígitos.</div>
             </div>
 
             <!-- Descripción de la Partida -->
@@ -67,10 +77,10 @@
             </div>
 
             <!-- Botones de Acción -->
-            <div class="d-grid gap-2">
+            <div class="d-grid gap-2 col-6 mx-auto">
               <button
                 type="submit"
-                class="btn btn-success btn-lg shadow-sm"
+                class="btn btn-primary btn-lg shadow-sm"
                 [disabled]="guardando"
               >
                 <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -95,7 +105,7 @@
     <!-- TABLA DE PARTIDAS REGISTRADAS (COLUMNA DERECHA) -->
     <div class="col-lg-7 mb-4">
       <div class="card shadow border-0">
-        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header text-white py-3 d-flex justify-content-between align-items-center" style="background-color: #9c0031;">
           <h5 class="card-title mb-0">
             <i class="fa fa-list me-2"></i> Partidas Registradas en Catálogo
           </h5>
@@ -109,24 +119,27 @@
 
           <div class="table-responsive" [hidden]="cargandoLista">
             <table
+              *ngIf="mostrarTabla"
               datatable
               [dtOptions]="dtOptions"
               [dtTrigger]="dtTrigger"
               class="table table-striped table-bordered table-hover align-middle w-100"
             >
-              <thead class="table-light">
+              <thead class="thead-guinda">
                 <tr>
-                  <th style="width: 25%;">Clave</th>
-                  <th style="width: 55%;">Descripción</th>
-                  <th style="width: 20%;" class="text-center">Estatus</th>
+                  <th style="width: 5%;">Clave</th>
+                  <th style="width: 80%;">Descripción</th>
+                  <th style="width: 15%;" class="text-center">Estatus</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let p of partidas">
-                  <td class="fw-bold text-primary">{{ p.clave }}</td>
-                  <td>{{ p.descripcion }}</td>
+                  <td class="fw-bold text-danger">{{ p.clave }}</td>
+                  <td class="fw-bold">{{ p.descripcion }}</td>
                   <td class="text-center">
-                    <span class="badge bg-success">Activa</span>
+                    <span class="badge" [ngClass]="estaActiva(p) ? 'bg-success' : 'bg-secondary'">
+                      {{ estaActiva(p) ? 'Activa' : 'Inactiva' }}
+                    </span>
                   </td>
                 </tr>
               </tbody>

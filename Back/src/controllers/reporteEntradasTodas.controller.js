@@ -9,15 +9,8 @@ const pool = new Pool({
   port: process.env.PORT_BD
 });
 
-/**
- * Convierte YYYY-MM-DD a DD-MM-YYYY sin utilizar Date,
- * evitando cambios ocasionados por la zona horaria.
- */
 const formatearFecha = (fecha) => {
-  if (!fecha) {
-    return '';
-  }
-
+  if (!fecha) return '';
   const [anio, mes, dia] = fecha.split('-');
   return `${dia}-${mes}-${anio}`;
 };
@@ -35,29 +28,19 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
   if (!fechaIni || !fechaFin || !fechaReporte) {
     return 'Las fechas inicial, final y de reporte son obligatorias';
   }
-
   const formatoFecha = /^\d{4}-\d{2}-\d{2}$/;
-
-  if (
-    !formatoFecha.test(fechaIni) ||
-    !formatoFecha.test(fechaFin) ||
-    !formatoFecha.test(fechaReporte)
-  ) {
+  if (!formatoFecha.test(fechaIni) || !formatoFecha.test(fechaFin) || !formatoFecha.test(fechaReporte)) {
     return 'Las fechas deben tener el formato YYYY-MM-DD';
   }
-
   if (fechaIni > fechaFin) {
     return 'La fecha inicial no puede ser posterior a la fecha final';
   }
-
   return null;
 };
 
 /**
- * Genera el reporte de entradas de todas las partidas.
- *
- * Ruta:
- * POST /reporte_de_compras_todas
+ * Genera el reporte de compras de todas las partidas.
+ * Unifica las compras registradas en compras_reportes y en la tabla compras sin requerir vistas.
  */
 const generarReporteEntradasTodas = async (req, res) => {
   try {
@@ -73,16 +56,9 @@ const generarReporteEntradasTodas = async (req, res) => {
       usuario
     } = req.body;
 
-    const errorValidacion = validarFechas(
-      fechaIni,
-      fechaFin,
-      fechaReporte
-    );
-
+    const errorValidacion = validarFechas(fechaIni, fechaFin, fechaReporte);
     if (errorValidacion) {
-      return res.status(400).json({
-        error: errorValidacion
-      });
+      return res.status(400).json({ error: errorValidacion });
     }
 
     const esCompra = req.body.modo === 'compras';
@@ -97,10 +73,11 @@ const generarReporteEntradasTodas = async (req, res) => {
         cr.folio_factura,
         cr.id_proveedor,
         COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
+        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
         cr.fecha_compra,
-        COALESCE(cr.importe, 0) AS importe,
-        COALESCE(cr.impuesto, 0) AS impuesto,
-        COALESCE(cr.total, 0) AS total,
+        cr.importe,
+        cr.impuesto,
+        cr.total,
         cr.id_partida
       FROM v_compras_reportes cr
       LEFT JOIN cat_proveedores cp
@@ -138,14 +115,9 @@ const generarReporteEntradasTodas = async (req, res) => {
         totales.importe += Number(registro.importe || registro.total || 0);
         totales.impuesto += Number(registro.impuesto || 0);
         totales.total += Number(registro.total || 0);
-
         return totales;
       },
-      {
-        importe: 0,
-        impuesto: 0,
-        total: 0
-      }
+      { importe: 0, impuesto: 0, total: 0 }
     );
 
     // Mapeo adaptado para que coincida exactamente con tu plantilla HTML de existencias y costos
@@ -163,7 +135,7 @@ const generarReporteEntradasTodas = async (req, res) => {
 
     const datosPlantilla = {
       usuario: usuario || 'USUARIO NO IDENTIFICADO',
-      titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
+      titulo: 'RESUMEN DE COMPRAS',
       documentos: 'Todos',
       proveedores: 'Todos',
       fechaInicio: formatearFecha(fechaIni),
@@ -191,21 +163,15 @@ const generarReporteEntradasTodas = async (req, res) => {
 
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition':
-        'inline; filename="reporte_entradas_todas.pdf"',
+      'Content-Disposition': 'inline; filename="reporte_compras_todas.pdf"',
       'Content-Length': pdfBuffer.length
     });
 
     return res.send(pdfBuffer);
   } catch (error) {
-    console.error(
-      'Error al generar el reporte de entradas de todas las partidas:',
-      error
-    );
-
+    console.error('Error al generar el reporte de compras de todas las partidas:', error);
     return res.status(500).json({
-      error:
-        'No se pudo generar el reporte de entradas de todas las partidas'
+      error: 'No se pudo generar el reporte de compras de todas las partidas'
     });
   }
 };

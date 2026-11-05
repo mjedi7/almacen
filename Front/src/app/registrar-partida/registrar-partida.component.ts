@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import Swal from 'sweetalert2';
 import { PartidasService } from '../services/partidas.service';
@@ -12,8 +11,8 @@ import { partida } from '../models/articulos/alta-articulo';
   styleUrls: ['./registrar-partida.component.css']
 })
 export class RegistrarPartidaComponent implements OnInit, OnDestroy {
-  @ViewChild(DataTableDirective, { static: false })
-  dtElement!: DataTableDirective;
+  // Longitud de la clave presupuestal (por ahora 5 dígitos, ej. 21101, 21401, 22104)
+  readonly LONGITUD_CLAVE = 5;
 
   partidaNueva: {
     clave: string;
@@ -31,9 +30,12 @@ export class RegistrarPartidaComponent implements OnInit, OnDestroy {
 
   dtOptions: any = {};
   dtTrigger: Subject<any> = new Subject<any>();
-  datatableInicializada: boolean = false;
+  mostrarTabla: boolean = true;
 
-  constructor(private partidasService: PartidasService) {}
+  constructor(
+    private partidasService: PartidasService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.configurarDataTable();
@@ -43,7 +45,7 @@ export class RegistrarPartidaComponent implements OnInit, OnDestroy {
   configurarDataTable(): void {
     this.dtOptions = {
       pagingType: 'full_numbers',
-      pageLength: 10,
+      pageLength: 25,
       lengthMenu: [
         [10, 25, 50, 100],
         [10, 25, 50, 100]
@@ -90,18 +92,28 @@ export class RegistrarPartidaComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Recrea la tabla para que DataTables tome los datos nuevos sin necesidad de F5
   renderizarDataTable(): void {
-    if (this.datatableInicializada) {
-      if (this.dtElement && this.dtElement.dtInstance) {
-        this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-          dtInstance.destroy();
-          this.dtTrigger.next(null);
-        });
-      }
-    } else {
-      this.datatableInicializada = true;
-      this.dtTrigger.next(null);
-    }
+    this.mostrarTabla = false;
+    this.cdr.detectChanges(); // destruye la tabla anterior
+
+    this.mostrarTabla = true;
+    this.cdr.detectChanges(); // pinta la tabla con las filas actuales
+
+    this.dtTrigger.next(null); // inicializa DataTables
+  }
+
+  // Solo dígitos; si excede la longitud permitida se muestra el warning
+  onClaveInput(): void {
+    this.partidaNueva.clave = (this.partidaNueva.clave || '').replace(/\D/g, '');
+  }
+
+  get claveExcedida(): boolean {
+    return (this.partidaNueva.clave || '').length > this.LONGITUD_CLAVE;
+  }
+
+  estaActiva(p: any): boolean {
+    return p?.esactivo !== false;
   }
 
   guardarPartida(form: NgForm): void {
@@ -114,10 +126,28 @@ export class RegistrarPartidaComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const clave = this.partidaNueva.clave.trim();
+    if (clave.length > this.LONGITUD_CLAVE) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Clave demasiado larga',
+        text: `La clave de la partida debe tener ${this.LONGITUD_CLAVE} dígitos (ej. 21101). Capturaste ${clave.length}.`
+      });
+      return;
+    }
+    if (!/^\d+$/.test(clave) || clave.length < this.LONGITUD_CLAVE) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Clave no válida',
+        text: `La clave de la partida debe tener exactamente ${this.LONGITUD_CLAVE} dígitos numéricos (ej. 21101).`
+      });
+      return;
+    }
+
     this.guardando = true;
 
     const payload = {
-      clave: this.partidaNueva.clave.trim(),
+      clave,
       descripcion: this.partidaNueva.descripcion.trim(),
       esactivo: this.partidaNueva.esactivo
     };

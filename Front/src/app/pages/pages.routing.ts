@@ -20,12 +20,12 @@ import { RequisicionesPendientesComponent } from '../app/requisiciones-pendiente
 import { ReporteMovimientosXPartidaComponent } from '../app/reporte-movimientos-x-partida/reporte-movimientos-x-partida.component';
 import { ReporteExistenciaXPartidaComponent } from '../app/reporte-existencia-x-partida/reporte-existencia-x-partida.component';
 import { ReporteComprasComponent } from '../app/reporte-compras/reporte-compras.component';
-import { AltaArticuloComponent } from '../app/alta-articulo/alta-articulo.component';
 import { ListaMovimientosComponent } from '../app/lista-movimientos/lista-movimientos.component';
 import { UsarArticuloComponent } from '../app/usar-articulo/usar-articulo.component';
 import { CargarExistenciasComponent } from '../cargar-existencias/cargar-existencias/cargar-existencias.component';
 import { InicioComponent } from './inicio/inicio.component';
 
+import { AltaArticuloComponent } from '../registrar-articulo/alta-articulo.component';
 import { ListarArticulosPartidaComponent } from '../listar-articulos-partida/listar-articulos-partida.component';
 import { RegistrarPartidaComponent } from '../registrar-partida/registrar-partida.component';
 import { RegistrarProveedorComponent } from '../registrar-proveedor/registrar-proveedor.component';

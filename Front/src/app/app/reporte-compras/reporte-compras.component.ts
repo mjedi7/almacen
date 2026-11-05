@@ -13,7 +13,6 @@ import Swal from 'sweetalert2';
   styleUrls: ['./reporte-compras.component.css']
 })
 export class ReporteComprasComponent implements OnInit {
-
   modo = 'entradas';
 
   reporte: reporte_de_compras = {
@@ -52,15 +51,22 @@ export class ReporteComprasComponent implements OnInit {
     this.traerProveedores();
   }
 
+  private getAuthHeaders(): HttpHeaders {
+    const rawToken = localStorage.getItem('token') || '';
+    const token = rawToken.startsWith('Bearer ') ? rawToken : `Bearer ${rawToken}`;
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': rawToken ? token : ''
+    });
+  }
+
   // Carga artículos dinámicos para el Kárdex al seleccionar una partida
   onPartidaKardexChange() {
     this.articulosKardex = [];
     this.reporteKardex.idCostos = '';
-
     const partidaSeleccionada = this.partidas.find((p: any) => p.clave === this.reporteKardex.clavePartida);
-
     if (partidaSeleccionada && partidaSeleccionada.id !== '0') {
-      this.traer.http.get(`${this.API_URL}/traerProductos/${partidaSeleccionada.id}`)
+      this.traer.http.get(`${this.API_URL}/traerProductos/${partidaSeleccionada.id}`, { headers: this.getAuthHeaders() })
         .subscribe({
           next: (res: any) => {
             this.articulosKardex = res;
@@ -109,7 +115,7 @@ export class ReporteComprasComponent implements OnInit {
     });
 
     this.traer.http.post(endpoint, payload, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      headers: this.getAuthHeaders(),
       responseType: 'blob'
     }).subscribe({
       next: (res: Blob) => {
@@ -119,7 +125,7 @@ export class ReporteComprasComponent implements OnInit {
       error: (err) => {
         Swal.close();
         console.error('Error al generar compras:', err);
-        Swal.fire('Error', 'No se pudo generar el reporte de compras.', 'error');
+        Swal.fire('Error', 'No se pudo generar el reporte de compras. Verifique las fechas o el estado del servidor.', 'error');
       }
     });
   }
@@ -151,9 +157,8 @@ export class ReporteComprasComponent implements OnInit {
       didOpen: () => Swal.showLoading(null)
     });
 
-    // Endpoint actualizado a /reporte/compras-proveedor
     this.traer.http.post(`${this.API_URL}/reporte/compras-proveedor`, payload, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      headers: this.getAuthHeaders(),
       responseType: 'blob'
     }).subscribe({
       next: (res: Blob) => {
@@ -207,7 +212,6 @@ export class ReporteComprasComponent implements OnInit {
     const file = new Blob([res], { type: 'application/pdf' });
     const fileURL = URL.createObjectURL(file);
     const link = document.createElement('a');
-
     link.href = fileURL;
     link.download = nombreArchivo;
     document.body.appendChild(link);
@@ -216,16 +220,16 @@ export class ReporteComprasComponent implements OnInit {
     URL.revokeObjectURL(fileURL);
   }
 
-	traerPartidas() {
-	  this.traer.http.get(`${this.API_URL}/traerPartidas`)
-		.subscribe((res: any) => {
-		  this.partidas = res || [];
-		  this.partidas.unshift({ id: '0', clave: '0', descripcion: 'TODAS' });
-		});
-	}
+  traerPartidas() {
+    this.traer.http.get(`${this.API_URL}/traerPartidas`, { headers: this.getAuthHeaders() })
+      .subscribe((res: any) => {
+        this.partidas = res || [];
+        this.partidas.unshift({ id: '0', clave: '0', descripcion: 'TODAS' });
+      });
+  }
 
   traerProveedores() {
-    this.traer.http.get(`${this.API_URL}/traerProveedores`)
+    this.traer.http.get(`${this.API_URL}/traerProveedores`, { headers: this.getAuthHeaders() })
       .subscribe((res: any) => {
         this.proveedores = res || [];
       });
@@ -233,7 +237,7 @@ export class ReporteComprasComponent implements OnInit {
 
   CapturarValor() {
     const idproveedor = this.direccionSeleccionada;
-    this.traer.http.get(`${this.API_URL}/traerDatosProveedores/${idproveedor}`)
+    this.traer.http.get(`${this.API_URL}/traerDatosProveedores/${idproveedor}`, { headers: this.getAuthHeaders() })
       .subscribe((res: any) => {
         this.datosproveedor = res;
       });
