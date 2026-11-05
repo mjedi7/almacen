@@ -9,7 +9,13 @@
 
     <!-- Combo Partidas -->
     <div class="form-group mb-3">
-      <label for="id_partidas" class="form-label"><b>Partida</b></label>
+    
+      <div class="card-header text-white py-3" style="background-color: #9c0031;">
+        <label for="id_partidas" class="form-label"><b>
+          <i class="fa-solid fa-table-list"></i>
+          Partida</b></label>
+      </div>
+
       <select id="id_partidas" name="id_partidas" class="form-select" [(ngModel)]="articulo.id_partidas"
         (ngModelChange)="onPartidaChange($event)" required>
         <option [ngValue]="null" disabled selected>Selecciona una partida...</option>
