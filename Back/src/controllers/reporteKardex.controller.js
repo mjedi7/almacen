@@ -17,7 +17,10 @@ const reporteKardex = async (req, res) => {
     const idParamInt = parseInt(idParamRaw, 10) || 0;
     const partidaInt = parseInt(clavePartidaRaw, 10) || 0;
 
-    // 1. Consultas SQL
+    // Declaración correcta de los parámetros para las consultas
+    const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
+
+    // 1. Consultas SQL usando tablas reales en lugar de la vista v_entradas_kardex
     const queryEncabezado = `
       SELECT 
         par.clave AS clave_partida,
@@ -26,17 +29,18 @@ const reporteKardex = async (req, res) => {
         COALESCE(um.nombre_medida, art.unidad_medida, 'N/A') AS unidad_medida,
         art.descripcion AS nom_articulo,
         (
-          SELECT MAX(e.fecha) FROM v_entradas_kardex e
-          JOIN costos c ON c.id=e.id_costo WHERE c.id_articulo=art.id
+          SELECT MAX(m.fecha) FROM movimientosdg m 
+          JOIN costos c ON c.id = m.id_costos 
+          WHERE c.id_articulo = art.id
         ) AS fecha_ult_compra,
         COALESCE(
           (SELECT c.precio_unitario FROM costos c WHERE c.id_articulo = art.id ORDER BY c.id DESC LIMIT 1),
           0
         ) AS precio_unitario,
         COALESCE(
-          (SELECT SUM(com.cantidad) 
-           FROM v_entradas_kardex com 
-           INNER JOIN costos cos ON cos.id = com.id_costo 
+          (SELECT SUM(m.num_articulos_solicitados) 
+           FROM movimientosdg m 
+           INNER JOIN costos cos ON cos.id = m.id_costos 
            WHERE cos.id_articulo = art.id), 
           0
         ) AS total_entradas_compras
@@ -52,6 +56,19 @@ const reporteKardex = async (req, res) => {
       LIMIT 1
     `;
 
+    const resEncabezado = await pool.query(queryEncabezado, params);
+    if (!resEncabezado.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
+    const headerData = resEncabezado.rows[0];
+
+    // --- DEPURACIÓN RÁPIDA ---
+    console.log("=== DEBUG KÁRDEX ===");
+    console.log("Artículo encontrado ID:", headerData.id_articulo);
+    console.log("Clave de artículo:", headerData.clave_articulo);
+
+    const testMovs = await pool.query('SELECT COUNT(*) FROM movimientosdg WHERE id_articulo = $1', [headerData.id_articulo]);
+    console.log("Movimientos directos en movimientosdg con id_articulo:", testMovs.rows[0].count);
+    // -------------------------
+
     const queryDetalle = `
       SELECT 
         mdg.folio_transferencia AS "folio",
@@ -62,24 +79,36 @@ const reporteKardex = async (req, res) => {
         COALESCE(mdg.existencia_final, 0) AS "existencia",
         mdg.fecha AS "fecha"
       FROM movimientosdg mdg
-        INNER JOIN cat_articulos art ON art.id = COALESCE(mdg.id_articulo, (SELECT c.id_articulo FROM costos c WHERE c.id=mdg.id_costos))
-        INNER JOIN cat_partidas par ON par.id = art.id_partidas 
         LEFT JOIN costos cos ON cos.id = mdg.id_costos 
+        LEFT JOIN cat_articulos art ON art.id = COALESCE(mdg.id_articulo, cos.id_articulo)
         LEFT JOIN centro_trabajo ct ON ct.id = mdg.id_centrotrabajo_transfiere
-      WHERE art.id = $1
+      WHERE art.id = $1 OR cos.id_articulo = $1 OR mdg.id_articulo = $1
       ORDER BY mdg.fecha ASC, mdg.id ASC
     `;
 
-    const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
+    const queryEntradasReales = `
+      SELECT 
+        m.folio_transferencia AS folio_compra,
+        'ENTRADA' AS tipo,
+        m.fecha,
+        COALESCE(m.num_articulos_solicitados, 0) AS cantidad,
+        COALESCE(c.precio_unitario, 0) AS precio_unitario,
+        m.id,
+        m.fecha AS registrado_en
+      FROM movimientosdg m
+      LEFT JOIN costos c ON c.id = m.id_costos
+      WHERE c.id_articulo = $1 OR m.id_articulo = $1
+      ORDER BY m.fecha, m.id
+    `;
 
-    const resEncabezado = await pool.query(queryEncabezado, params);
-    if (!resEncabezado.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
-    const headerData = resEncabezado.rows[0];
     const [resDetalle, resEntradas] = await Promise.all([
       pool.query(queryDetalle, [headerData.id_articulo]),
-      pool.query(`SELECT e.* FROM v_entradas_kardex e JOIN costos c ON c.id=e.id_costo
-        WHERE c.id_articulo=$1 ORDER BY e.fecha,e.registrado_en NULLS FIRST,e.id`, [headerData.id_articulo])
+      pool.query(queryEntradasReales, [headerData.id_articulo])
     ]);
+
+    console.log("Filas detalle encontradas:", resDetalle.rowCount);
+    console.log("Filas entradas encontradas:", resEntradas.rowCount);
+
     const movimientosDb = resDetalle.rows;
 
     // 2. Cálculos y formateo
