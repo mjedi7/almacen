@@ -440,7 +440,8 @@ this.planteles = res.map((p: any) => {
 
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        
       }),
       responseType: 'blob' as 'json'
     };
@@ -452,13 +453,11 @@ this.planteles = res.map((p: any) => {
       next: (res: any) => {
         Swal.close();
 
-        const file = new Blob(
-          [res],
-          { type: 'application/pdf' }
-        );
+    
+        const nombreArchivo = `Reporte_general_plantel_${this.verSeleccion}.pdf`;
 
-        const fileURL = URL.createObjectURL(file);
-        window.open(fileURL, '_blank');
+        
+        this.descargarArchivo(res, nombreArchivo);
       },
       error: (err) => {
         Swal.close();
@@ -472,6 +471,18 @@ this.planteles = res.map((p: any) => {
         );
       }
     });
+  }
+
+  private descargarArchivo(res: Blob, nombreArchivo: string): void {
+    const file = new Blob([res], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
   }
 
   // Descargar formato PDF y Excel
