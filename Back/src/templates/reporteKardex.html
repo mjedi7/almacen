@@ -36,6 +36,97 @@
         <td class="report-meta__label nowrap" style="width: 16%;">Descripción:</td>
         <td style="width: 44%;">{{header.nom_articulo}}</td>
 
+          <!-- Cuadro de datos del artículo -->
+          <table class="table-header">
+            <tbody>
+              <tr>
+                <td class="lbl">Descripción:</td>
+                <td class="val" colspan="3">{{header.nom_articulo}}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Clave artículo:</td>
+                <td class="val">{{header.clave_completa}}</td>
+                <td class="lbl">Última entrada:</td>
+                <td class="val">{{header.fecha_ult_compra}}</td>
+              </tr>
+              <tr>
+                <td class="lbl">Unidad entrada:</td>
+                <td class="val">{{header.unidad_medida}}</td>
+                <td class="lbl">Tipo costeo:</td>
+                <td class="val"><strong>P.E.P.S.</strong></td>
+              </tr>
+              <tr>
+                <td class="lbl">Unidad salida:</td>
+                <td class="val">{{header.unidad_medida}}</td>
+                <td class="lbl">Costo promedio:</td>
+                <td class="val">$ {{header.costo_promedio}}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Entradas y recepciones</h3>
+          <table class="table-detalle">
+            <thead><tr><th>Folio compra</th><th>Movimiento</th><th>Fecha</th><th>Cantidad</th><th>Costo unitario</th><th>Importe</th></tr></thead>
+            <tbody>
+              {{#each entradas}}
+              <tr><td>{{folio}}</td><td>{{tipo}}</td><td>{{fecha}}</td><td class="num">{{cantidad}}</td><td class="num">{{costo}}</td><td class="num">{{importe}}</td></tr>
+              {{else}}<tr><td colspan="6">Sin entradas registradas.</td></tr>{{/each}}
+            </tbody>
+          </table>
+          <h3>Salidas registradas</h3>
+          <!-- Tabla de movimientos (Kárdex) -->
+          <table class="table-detalle" cellspacing="0" cellpadding="0">
+            <thead>
+              <tr>
+                <th style="width: 10%;" class="cen">Doc/Folio</th>
+                <th style="width: 27%;">Plantel / Destino</th>
+                <th style="width: 11%;" class="num">Exist. Inicial</th>
+                <th style="width: 11%;" class="num">Salida</th>
+                <th style="width: 13%;" class="num">Importe Total</th>
+                <th style="width: 11%;" class="num">Existencia</th>
+                <th style="width: 17%;" class="cen">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#if movimientos.length}}
+              {{#each movimientos}}
+              <tr>
+                <td class="cen">{{this.folio}}</td>
+                <td style="text-transform: uppercase;">{{this.plantel_destino}}</td>
+                <td class="num">{{this.existencia_inicial}}</td>
+                <td class="num">{{this.ventas_acumuladas}}</td>
+                <td class="num">$ {{this.importe_total}}</td>
+                <td class="num">{{this.existencia}}</td>
+                <td class="cen">{{this.fecha}}</td>
+              </tr>
+              {{/each}}
+              {{else}}
+              <tr>
+                <td colspan="7" class="cen" style="padding: 12px; color: #555;">
+                  No hay movimientos registrados para este criterio.
+                </td>
+              </tr>
+              {{/if}}
+            </tbody>
+          </table>
+
+          <!-- Totales al pie -->
+          <div class="totales-derecha-contenedor">
+            <div class="totales-caja">
+              <div class="totales-fila">
+                <span class="lbl">Total Entradas:</span>
+                <span class="val">{{totales.entradas}}</span>
+              </div>
+              <div class="totales-fila">
+                <span class="lbl">Total Salidas:</span>
+                <span class="val">{{totales.salidas}}</span>
+              </div>
+            </div>
+          </div>
+
+        </td>
+
+
         <!-- Columna Derecha (Fila 1) -->
         <td class="report-meta__label nowrap" style="width: 18%; text-align: left;">Clave artículo:</td>
         <td style="width: 22%; text-align: left;">{{header.clave_completa}}</td>
@@ -48,6 +139,7 @@
         <!-- Columna Derecha (Fila 2) -->
         <td class="report-meta__label nowrap" style="width: 18%; text-align: left;">Fecha últ. compra:</td>
         <td style="width: 22%; text-align: left;">{{header.fecha_ult_compra}}</td>
+
       </tr>
     </tbody>
   </table>

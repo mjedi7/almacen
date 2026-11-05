@@ -17,7 +17,10 @@ const reporteKardex = async (req, res) => {
     const idParamInt = parseInt(idParamRaw, 10) || 0;
     const partidaInt = parseInt(clavePartidaRaw, 10) || 0;
 
-    // 1. Consultas SQL
+    // Declaración correcta de los parámetros para las consultas
+    const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
+
+    // 1. Consultas SQL usando tablas reales en lugar de la vista v_entradas_kardex
     const queryEncabezado = `
       SELECT 
         par.clave AS clave_partida,
@@ -55,6 +58,19 @@ const reporteKardex = async (req, res) => {
       LIMIT 1
     `;
 
+    const resEncabezado = await pool.query(queryEncabezado, params);
+    if (!resEncabezado.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
+    const headerData = resEncabezado.rows[0];
+
+    // --- DEPURACIÓN RÁPIDA ---
+    console.log("=== DEBUG KÁRDEX ===");
+    console.log("Artículo encontrado ID:", headerData.id_articulo);
+    console.log("Clave de artículo:", headerData.clave_articulo);
+
+    const testMovs = await pool.query('SELECT COUNT(*) FROM movimientosdg WHERE id_articulo = $1', [headerData.id_articulo]);
+    console.log("Movimientos directos en movimientosdg con id_articulo:", testMovs.rows[0].count);
+    // -------------------------
+
     const queryDetalle = `
       SELECT 
         mdg.folio_transferencia AS "folio",
@@ -68,6 +84,7 @@ const reporteKardex = async (req, res) => {
         INNER JOIN cat_articulos art ON art.id = mdg.id_articulo
         INNER JOIN cat_partidas par ON par.id = art.id_partidas 
         LEFT JOIN costos cos ON cos.id = mdg.id_costos 
+        LEFT JOIN cat_articulos art ON art.id = COALESCE(mdg.id_articulo, cos.id_articulo)
         LEFT JOIN centro_trabajo ct ON ct.id = mdg.id_centrotrabajo_transfiere
       WHERE (par.clave = $1 OR par.id = $4)
         AND (
@@ -79,14 +96,27 @@ const reporteKardex = async (req, res) => {
       ORDER BY mdg.fecha ASC, mdg.id ASC
     `;
 
-    const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
+    const queryEntradasReales = `
+      SELECT 
+        m.folio_transferencia AS folio_compra,
+        'ENTRADA' AS tipo,
+        m.fecha,
+        COALESCE(m.num_articulos_solicitados, 0) AS cantidad,
+        COALESCE(c.precio_unitario, 0) AS precio_unitario,
+        m.id,
+        m.fecha AS registrado_en
+      FROM movimientosdg m
+      LEFT JOIN costos c ON c.id = m.id_costos
+      WHERE c.id_articulo = $1 OR m.id_articulo = $1
+      ORDER BY m.fecha, m.id
+    `;
 
-    const [resEncabezado, resDetalle] = await Promise.all([
+    [resEncabezado, resDetalle] = await Promise.all([
       pool.query(queryEncabezado, params),
       pool.query(queryDetalle, params)
     ]);
 
-    const headerData = resEncabezado.rows[0] || {};
+     headerData = resEncabezado.rows[0] || {};
     const movimientosDb = resDetalle.rows;
 
     // 2. Cálculos y formateo

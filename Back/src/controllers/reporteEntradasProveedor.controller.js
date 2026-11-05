@@ -86,8 +86,9 @@ const generarReporteEntradasProveedor = async (req, res) => {
     }
 
     const esCompra = req.body.modo === 'compras';
-    const fuente = esCompra ? 'v_compras_reportes' : 'v_entradas_reportes';
-    const consulta = `
+
+    // Consulta adaptada: Si es compra usa su vista con proveedor, si es entrada consulta costos vinculados al proveedor
+    const consulta = esCompra ? `
       SELECT
         cr.folio_factura,
         cr.id_proveedor,
@@ -100,13 +101,31 @@ const generarReporteEntradasProveedor = async (req, res) => {
         COALESCE(cr.impuesto, 0) AS impuesto,
         COALESCE(cr.total, 0) AS total,
         cr.id_partida
-      FROM ${fuente} cr
+      FROM v_compras_reportes cr
       LEFT JOIN cat_proveedores cp
         ON cp.id = cr.id_proveedor
       WHERE cr.fecha_compra::date >= $1::date
         AND cr.fecha_compra::date <= $2::date
         AND cr.id_proveedor = $3
       ORDER BY cr.folio_factura
+    ` : `
+      SELECT
+        m.folio_transferencia AS folio_factura,
+        c.id_proveedor AS id_proveedor,
+        COALESCE(cp.razon_social, 'PROVEEDOR NO IDENTIFICADO') AS razon_social,
+        m.fecha AS fecha_compra,
+        (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) AS importe,
+        ((COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) * 0.16) AS impuesto,
+        ((COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) * 1.16) AS total,
+        ca.id_partidas AS id_partida
+      FROM movimientosdg m
+      LEFT JOIN costos c ON c.id = m.id_costos
+      LEFT JOIN cat_proveedores cp ON cp.id = c.id_proveedor
+      LEFT JOIN cat_articulos ca ON ca.id = COALESCE(m.id_articulo, c.id_articulo)
+      WHERE m.fecha::date >= $1::date
+        AND m.fecha::date <= $2::date
+        AND c.id_proveedor = $3
+      ORDER BY m.folio_transferencia
     `;
 
     const consultaProveedor = `

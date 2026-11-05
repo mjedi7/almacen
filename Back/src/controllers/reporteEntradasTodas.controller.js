@@ -87,7 +87,11 @@ const generarReporteEntradasTodas = async (req, res) => {
 
     const esCompra = req.body.modo === 'compras';
 
+
     // Consulta adaptada para compras (usa vista) o entradas (calcula desde movimientosdg y costos)
+
+    // Consulta adaptada: Compras usa su vista, Entradas calcula desde movimientosdg, costos y cat_articulos
+
     const consulta = esCompra ? `
       SELECT
         cr.folio_factura,
@@ -114,6 +118,11 @@ const generarReporteEntradasTodas = async (req, res) => {
       FROM movimientosdg m
       LEFT JOIN costos c ON c.id = m.id_costos
       LEFT JOIN cat_articulos ca ON ca.id = m.id_articulo
+        COALESCE(m.existencia_final, m.existencia_inicial, m.num_articulos_solicitados, 0) AS existencia,
+        (COALESCE(m.existencia_final, m.existencia_inicial, m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) AS total
+      FROM movimientosdg m
+      LEFT JOIN costos c ON c.id = m.id_costos
+      LEFT JOIN cat_articulos ca ON ca.id = COALESCE(m.id_articulo, c.id_articulo)
       WHERE m.fecha::date >= $1::date
         AND m.fecha::date <= $2::date
       ORDER BY ca.clave
@@ -126,7 +135,7 @@ const generarReporteEntradasTodas = async (req, res) => {
 
     const acumulados = resultado.rows.reduce(
       (totales, registro) => {
-        totales.importe += Number(registro.importe || 0);
+        totales.importe += Number(registro.importe || registro.total || 0);
         totales.impuesto += Number(registro.impuesto || 0);
         totales.total += Number(registro.total || 0);
 
@@ -139,11 +148,16 @@ const generarReporteEntradasTodas = async (req, res) => {
       }
     );
 
+    // Mapeo adaptado para que coincida exactamente con tu plantilla HTML de existencias y costos
     const registros = resultado.rows.map((registro) => ({
       clave: registro.clave || '',
+
       articulo: registro.nom_articulo || 'ARTICULO SIN DESCRIPCION',
       costo: formatearMoneda(registro.costo_unitario || 0).replace('$', '').trim(),
       existencia: registro.num_articulos_solicitados || 0,
+      articulo: registro.nom_articulo || registro.razon_social || 'ARTICULO SIN DESCRIPCION',
+      costo: formatearMoneda(registro.costo_unitario || registro.importe || 0).replace('$', '').trim(),
+      existencia: registro.existencia || 1,
       costoTotal: formatearMoneda(registro.total || 0).replace('$', '').trim()
     }));
 
