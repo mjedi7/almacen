@@ -184,7 +184,7 @@ const generarReporteEntradasPartida = async (req, res) => {
 
     const datosPlantilla = {
       usuario: usuario || 'USUARIO NO IDENTIFICADO',
-      titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
+      titulo: 'RESUMEN DE COMPRAS',
       tipoReporte: 'Por partida',
       partida: {
         id: idPartida,

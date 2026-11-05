@@ -57,8 +57,8 @@
     </div>
 
     <!-- DIRECCIONES GENERALES -->
-    <div class="form-group col-md-4 col-sm-12">
-      <label>Dirección general</label>
+    <div class="form-group col-md-4 col-sm-12" *ngIf="!esAdministrativo">
+    <label>Dirección general</label>
 
       <button
         type="button"
@@ -105,8 +105,8 @@
     </div>
 
     <!-- OTROS -->
-    <div class="form-group col-md-4 col-sm-12">
-      <label>Otros</label>
+    <div class="form-group col-md-4 col-sm-12" *ngIf="!esAdministrativo">
+    <label>Otros</label>
 
       <button
         type="button"
@@ -184,7 +184,7 @@
     </div>
 
     
-<div class="col-md-4 col-sm-12 mb-2">
+<div class="col-md-4 col-sm-12 mb-2" *ngIf="!esAdministrativo">
   <label>Descargar Inventario</label>
   <br>
 

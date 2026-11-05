@@ -28,7 +28,7 @@
     </p>
   </header>
 
-  <!-- Metadatos (Partida, Período, Proveedores) alineados en 4 columnas -->
+  <!-- Metadatos de la consulta -->
   <table class="report-meta">
     <tbody>
       <tr>
@@ -82,36 +82,34 @@
     </tbody>
   </table>
 
-  <!-- Conteo de Registros y Totales -->
-  <div class="report-results">
-    <div class="report-count">
-      Registros encontrados: <strong>{{totalRegistros}}</strong>
+  <!-- Bloque de totales al final de la tabla -->
+  <div class="totales-contenedor">
+    <div class="totales-contenido">
+      <div class="totales-conteo">
+        Registros encontrados: <strong>{{totalRegistros}}</strong>
+      </div>
+      <div>
+        <table class="totals-table">
+          <tbody>
+            <tr>
+              <td class="text-right font-bold">Subtotal:</td>
+              <td class="text-right nowrap">{{totales.subtotal}}</td>
+            </tr>
+            <tr>
+              <td class="text-right font-bold">I.V.A.:</td>
+              <td class="text-right nowrap">{{totales.iva}}</td>
+            </tr>
+            <tr class="totals-table__total">
+              <td class="text-right font-bold">Total:</td>
+              <td class="text-right nowrap font-bold">{{totales.total}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Pie informativo (Partida y Fecha fijados sobre el membrete) -->
-  <footer class="document-footer">
-    <div class="document-footer__content">
-     <table class="totals-table">
-      <tbody>
-        <tr>
-          <td class="text-right font-bold">Subtotal:</td>
-          <td class="text-right nowrap">{{totales.subtotal}}</td>
-        </tr>
-        <tr>
-          <td class="text-right font-bold">I.V.A.:</td>
-          <td class="text-right nowrap">{{totales.iva}}</td>
-        </tr>
-        <tr class="totals-table__total">
-          <td class="text-right font-bold">Total:</td>
-          <td class="text-right nowrap font-bold">{{totales.total}}</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-  </footer>
-
-  <!-- Pie institucional anclado al fondo (cenefa y corazón) -->
+  <!-- Cenefa institucional: al no ser fixed, solo existirá una vez al cierre -->
   {{#if pieBase64}}
   <div class="institutional-footer">
     <img src="{{pieBase64}}" alt="Pie institucional">
@@ -119,5 +117,4 @@
   {{/if}}
 
 </body>
-
 </html>

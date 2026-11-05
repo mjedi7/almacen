@@ -29,18 +29,20 @@ const reporteKardex = async (req, res) => {
         COALESCE(um.nombre_medida, art.unidad_medida, 'N/A') AS unidad_medida,
         art.descripcion AS nom_articulo,
         (
-          SELECT MAX(m.fecha) FROM movimientosdg m 
-          JOIN costos c ON c.id = m.id_costos 
-          WHERE c.id_articulo = art.id
+          SELECT m.fecha 
+          FROM movimientosdg m 
+          WHERE m.id_articulo = art.id 
+          ORDER BY m.fecha DESC, m.id DESC 
+          LIMIT 1
         ) AS fecha_ult_compra,
         COALESCE(
           (SELECT co.precio_unitario FROM costos co WHERE co.id_articulo = art.id ORDER BY co.id DESC LIMIT 1),
           0
         ) AS precio_unitario,
         COALESCE(
-          (SELECT SUM(m.num_articulos_solicitados) 
-           FROM movimientosdg m 
-           INNER JOIN costos cos ON cos.id = m.id_costos 
+          (SELECT SUM(com.total_articulos) 
+           FROM compras com 
+           INNER JOIN costos cos ON cos.id = com.id_costo 
            WHERE cos.id_articulo = art.id), 
           0
         ) AS total_entradas_compras
@@ -79,10 +81,18 @@ const reporteKardex = async (req, res) => {
         COALESCE(mdg.existencia_final, 0) AS "existencia",
         mdg.fecha AS "fecha"
       FROM movimientosdg mdg
+        INNER JOIN cat_articulos art ON art.id = mdg.id_articulo
+        INNER JOIN cat_partidas par ON par.id = art.id_partidas 
         LEFT JOIN costos cos ON cos.id = mdg.id_costos 
         LEFT JOIN cat_articulos art ON art.id = COALESCE(mdg.id_articulo, cos.id_articulo)
         LEFT JOIN centro_trabajo ct ON ct.id = mdg.id_centrotrabajo_transfiere
-      WHERE art.id = $1 OR cos.id_articulo = $1 OR mdg.id_articulo = $1
+      WHERE (par.clave = $1 OR par.id = $4)
+        AND (
+          art.id = $2 
+          OR art.clave = $3
+          OR mdg.id_articulo = $2
+          OR mdg.id_costos = $2
+        )
       ORDER BY mdg.fecha ASC, mdg.id ASC
     `;
 
@@ -116,14 +126,12 @@ const reporteKardex = async (req, res) => {
       ORDER BY m.fecha, m.id
     `;
 
-    const [resDetalle, resEntradas] = await Promise.all([
-      pool.query(queryDetalle, [headerData.id_articulo]),
-      pool.query(queryEntradasReales, [headerData.id_articulo])
+    [resEncabezado, resDetalle] = await Promise.all([
+      pool.query(queryEncabezado, params),
+      pool.query(queryDetalle, params)
     ]);
 
-    console.log("Filas detalle encontradas:", resDetalle.rowCount);
-    console.log("Filas entradas encontradas:", resEntradas.rowCount);
-
+     headerData = resEncabezado.rows[0] || {};
     const movimientosDb = resDetalle.rows;
 
     // 2. Cálculos y formateo
