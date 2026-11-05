@@ -88,6 +88,7 @@ const generarReporteEntradasPartida = async (req, res) => {
     const esCompra = req.body.modo === 'compras';
 
     // Consulta adaptada usando las columnas reales de movimientosdg y calculando importes vía costos
+    // Consulta adaptada: Compras usa su vista, Entradas calcula desde tablas reales filtrando por id_partidas
     const consulta = esCompra ? `
       SELECT
         cr.folio_factura,
@@ -100,6 +101,8 @@ const generarReporteEntradasPartida = async (req, res) => {
         cr.id_partida
       FROM v_compras_reportes cr
       LEFT JOIN cat_proveedores cp ON cp.id = cr.id_proveedor
+      LEFT JOIN cat_proveedores cp
+        ON cp.id = cr.id_proveedor
       WHERE cr.fecha_compra::date >= $1::date
         AND cr.fecha_compra::date <= $2::date
         AND cr.id_partida = $3
@@ -109,6 +112,7 @@ const generarReporteEntradasPartida = async (req, res) => {
         m.folio_transferencia AS folio_factura,
         NULL AS id_proveedor,
         COALESCE(m.nom_articulo, 'ARTICULO SIN DESCRIPCION') AS razon_social,
+        COALESCE(m.nom_articulo, ca.descripcion, 'ARTICULO SIN DESCRIPCION') AS razon_social,
         m.fecha AS fecha_compra,
         (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) AS importe,
         ((COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) * 0.16) AS impuesto,
@@ -117,6 +121,7 @@ const generarReporteEntradasPartida = async (req, res) => {
       FROM movimientosdg m
       LEFT JOIN costos c ON c.id = m.id_costos
       LEFT JOIN cat_articulos ca ON ca.id = c.id_articulo
+      LEFT JOIN cat_articulos ca ON ca.id = COALESCE(m.id_articulo, c.id_articulo)
       WHERE m.fecha::date >= $1::date
         AND m.fecha::date <= $2::date
         AND ca.id_partidas = $3
