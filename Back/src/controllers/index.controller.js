@@ -308,7 +308,13 @@ const registrarStock = async (req, res) => {
         // 4. SI HAY CANTIDAD RECIBIDA INICIALMENTE, REGISTRAMOS EL DETALLE DE RECEPCIÓN Y ACTUALIZAMOS STOCK
         if (cantidadInicial > 0) {
             var idUsuarioActual = req.usuario?.id || req.body.id_usuario || 67;
-            var nombreUsuarioActual = req.usuario?.nombre || req.body.usuario_nombre || 'Sistema';
+            var nombreUsuarioActual = req.usuario?.nombre || req.body.usuario_nombre;
+
+            // Si el nombre no vino en token ni en body, consultamos directamente en la tabla usuarios
+            if (!nombreUsuarioActual || nombreUsuarioActual === 'Sistema') {
+                const uRes = await pool.query('SELECT nombre FROM usuarios WHERE id_usuario = $1', [idUsuarioActual]);
+                nombreUsuarioActual = uRes.rows[0]?.nombre || 'Marisela Alarcón Hernández';
+            }
 
             // Insertamos cabecera de recepción usando gen_random_uuid() para 'clave_operacion'
             var resCabecera = await pool.query(
@@ -332,7 +338,12 @@ const registrarStock = async (req, res) => {
             );
         }
 
-        return res.json({ mensaje: "Save" });
+        return res.json({ 
+            mensaje: "Save",
+            id_compra: idCompraCreada,
+            id: idCompraCreada,
+            folio_compra: folio
+        });
 
     } catch (error) {
         console.error("Error en registrarStock:", error);
@@ -395,12 +406,19 @@ const recibirEntregaParcial = async (req, res) => {
 
         const nuevoEstatus = nuevaCantidadRecibida >= item.total_articulos ? 'Entregada' : 'Incompleta';
 
+        let idUsuarioOperacion = id_usuario || req.usuario?.id || 67;
+        let nombreUsuarioOperacion = usuario_nombre || req.usuario?.nombre;
+        if (!nombreUsuarioOperacion || nombreUsuarioOperacion === 'Sistema') {
+            const uRes = await client.query('SELECT nombre FROM usuarios WHERE id_usuario = $1', [idUsuarioOperacion]);
+            nombreUsuarioOperacion = uRes.rows[0]?.nombre || 'Marisela Alarcón Hernández';
+        }
+
         // 2. Insertamos la CABECERA de la recepción (recepciones_compra)
         const resCabecera = await client.query(
             `INSERT INTO recepciones_compra (
                 fecha_recepcion, registrado_en, id_usuario, usuario_nombre, referencia, observaciones, solicitud_original
             ) VALUES (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2, $3, $4, $5) RETURNING id`,
-            [id_usuario || null, usuario_nombre || 'Sistema', referencia || folio_compra, observaciones || 'Entrega parcial', folio_compra]
+            [idUsuarioOperacion, nombreUsuarioOperacion, referencia || folio_compra, observaciones || 'Entrega parcial', folio_compra]
         );
 
         const idRecepcion = resCabecera.rows[0].id;
@@ -509,8 +527,12 @@ const registrarRecepcionBatch = async (req, res) => {
 
     try {
         const { clave_operacion, fecha_recepcion, referencia, observaciones, detalles } = req.body;
-        const id_usuario = req.usuario?.id_usuario || req.usuario?.id;
-        const usuario_nombre = req.usuario?.nombre || 'Usuario Almacén';
+        const id_usuario = req.usuario?.id_usuario || req.usuario?.id || req.body.id_usuario || 67;
+        let usuario_nombre = req.usuario?.nombre || req.body.usuario_nombre;
+        if (!usuario_nombre || usuario_nombre === 'Sistema') {
+            const uRes = await pool.query('SELECT nombre FROM usuarios WHERE id_usuario = $1', [id_usuario]);
+            usuario_nombre = uRes.rows[0]?.nombre || 'Marisela Alarcón Hernández';
+        }
 
         if (!detalles || !Array.isArray(detalles) || detalles.length === 0) {
             return res.status(400).json({ error: 'Debe incluir al menos un artículo para recibir.' });
@@ -679,10 +701,15 @@ const getHistorialItem = async (req, res) => {
                 rc.registrado_en,
                 rc.referencia,
                 rc.observaciones,
-                rc.usuario_nombre,
+                COALESCE(
+                    NULLIF(NULLIF(rc.usuario_nombre, 'Sistema'), ''),
+                    u.nombre,
+                    'Marisela Alarcón Hernández'
+                ) AS usuario_nombre,
                 rcd.cantidad
             FROM recepciones_compra_detalle rcd
             INNER JOIN recepciones_compra rc ON rcd.id_recepcion = rc.id
+            LEFT JOIN usuarios u ON rc.id_usuario = u.id_usuario
             WHERE rcd.id_compra = $1
             ORDER BY rc.fecha_recepcion DESC;
         `;
