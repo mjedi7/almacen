@@ -81,6 +81,9 @@ filtrarPlanteles(): void {
 
   botonUtilizaArticulo: boolean = false;
 
+  // Identificar usuarios administrativos (rango 3)
+esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
+
   constructor(private traer: TraerDatosService) {}
 
   ngOnInit(): void {
@@ -107,16 +110,30 @@ filtrarPlanteles(): void {
   }
 
   // Opciones visibles en cada selector
-  get plantelesVisibles(): any[] {
-    const texto = this.busquedaPlantelDropdown
-      .trim()
-      .toLocaleLowerCase('es');
+  
+get plantelesVisibles(): any[] {
+  const texto = this.busquedaPlantelDropdown.trim().toLocaleLowerCase('es');
+
+  if (!texto) {
+    return this.plantelesLista;
+  }
+
+  // Si se escribe un número, buscar el código exacto.
+  if (/^\d+$/.test(texto)) {
+    const codigoBuscado = Number(texto);
 
     return this.plantelesLista.filter((p: any) =>
-      String(p.descripcion || '').toLocaleLowerCase('es').includes(texto) ||
-      String(p.codigo ?? '').includes(texto)
+      Number(p.codigo) === codigoBuscado
     );
   }
+
+  // Si se escribe texto, buscar por nombre del plantel.
+  return this.plantelesLista.filter((p: any) =>
+    String(p.descripcion || '')
+      .toLocaleLowerCase('es')
+      .includes(texto)
+  );
+}
 
   get direccionesVisibles(): any[] {
     const texto = this.busquedaDireccionDropdown
@@ -301,7 +318,8 @@ this.planteles = res.map((p: any) => {
         processing: true,
         destroy: true,
         language: {
-          url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
+          url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json',
+          search: 'Buscar:'
         }
       };
 
