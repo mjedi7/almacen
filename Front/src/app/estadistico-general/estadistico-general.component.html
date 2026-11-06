@@ -8,6 +8,7 @@
 
         <div class="form-row mt-5">
 
+            <!-- Plantel: Se bloquea si ya hay artículos en la lista -->
             <div class="form-group col-md-4">
                 <label for="inputPassword4">Plantel</label>
                 <select [(ngModel)]="transferencia.plantel" id="areaEmite" class="form-control" name="Plantel"
@@ -22,19 +23,25 @@
             </div>
 
 
+            <!-- Partida: Se bloquea si no se ha elegido un Plantel -->
             <div class="form-group col-md-4">
-                <label for="inputPassword4">Partida</label>
-                <select [(ngModel)]="transferencia.partida" id="areaEmite" class="form-control" name="Partida"
-                    (change)="opcionSeleccionadaX()" required #Partida="ngModel">
-                    <option [value]="null" disabled selected>Selecciona una partida...</option>
-                    <ng-container *ngFor="let partida of partidas">
-                        <option [value]="partida.id">{{partida.clave}} -- {{partida.descripcion}}</option>
-                    </ng-container>
-                </select>
-                <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo
-                    Obligatorio</small>
+                <fieldset [disabled]="!transferencia.plantel" style="border: 0; padding: 0; margin: 0; width: 100%;">
+                    <label for="inputPassword4">Partida</label>
+                    <select [(ngModel)]="transferencia.partida" id="areaEmite" class="form-control" name="Partida"
+                        (change)="opcionSeleccionadaX()" required #Partida="ngModel">
+                        <option [value]="null" disabled selected>Selecciona una partida...</option>
+                        <ng-container *ngFor="let partida of partidas">
+                            <option [value]="partida.id">{{partida.clave}} -- {{partida.descripcion}}</option>
+                        </ng-container>
+                    </select>
+                    <small *ngIf="Partida.invalid && Partida.touched"
+                        class="form-text text-danger animated fadeIn">Campo
+                        Obligatorio</small>
+                </fieldset>
             </div>
 
+            <!-- Producto: Se bloquea si no se ha elegido una Partida -->
+            <!-- Producto -->
             <div class="form-group col-md-4" style="position: relative;">
                 <label for="inputProducto">Producto</label>
                 <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
@@ -43,18 +50,20 @@
                     #Producto="ngModel" />
                 <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
                     Obligatorio</small>
+
+                <!-- UL FLOTANTE AJUSTADO -->
                 <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
-                position: absolute;
-                z-index: 1000;
-                width: 100%;
-                max-height: 400px;
-                overflow-y: auto;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                background-color: white;
-                border: 1px solid #ccc;
-            ">
+                    position: absolute;
+                    z-index: 99; /* Reducido para que no tape elementos críticos de abajo si se solapan */
+                    width: 100%;
+                    max-height: 250px; /* Reducido un poquito para que no sea tan gigante */
+                    overflow-y: auto;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    background-color: white;
+                    border: 1px solid #ccc;
+                ">
                     <li class="list-group-item list-group-item-action" *ngFor="let producto of productosFiltrados"
-                        (click)="seleccionarProducto(producto)">
+                        (click)="seleccionarProducto(producto)" style="cursor: pointer;">
                         {{ producto.nombre_producto }}
                     </li>
                 </ul>
@@ -63,53 +72,52 @@
         </div>
 
 
+        <!-- Fila inferior: Se bloquea si no se ha seleccionado un producto válido -->
         <div class="form-row">
+            <fieldset [disabled]="!transferencia.idcosto" style="border: 0; padding: 0; margin: 0; display: contents;">
 
-            <div class="form-group col-md-3">
-                <label for="inputAddress">Fecha</label>
-                <input [(ngModel)]="transferencia.fecha" type="date" class="form-control" name="Fecha" id="inputAddress"
-                    placeholder="" required #Fecha="ngModel">
-                <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo
-                    Obligatorio</small>
-            </div>
+                <div class="form-group col-md-3">
+                    <label for="inputAddress">Fecha</label>
+                    <input [(ngModel)]="transferencia.fecha" type="date" class="form-control" name="Fecha"
+                        id="inputAddress" placeholder="" required #Fecha="ngModel">
+                    <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo
+                        Obligatorio</small>
+                </div>
 
+                <div class="form-group col-md-3">
+                    <label for="inputAddress">Cantidad disponible</label>
+                    <input [(ngModel)]="transferencia.cantidadEnStock" type="number" class="form-control"
+                        name="cantidadEnStock" id="inputAddress" placeholder="" style="text-align: center;" required
+                        readonly #cantidadEnStock="ngModel">
+                    <small *ngIf="cantidadEnStock.invalid && cantidadEnStock.touched"
+                        class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                </div>
 
+                <div class="form-group col-md-3">
+                    <label for="inputAddress">Cantidad a transferir</label>
+                    <input [(ngModel)]="transferencia.cantidadTransferir" type="number" class="form-control"
+                        name="cantidadTransferir" id="inputAddress" min="1" placeholder="" style="text-align: center;"
+                        required #cantidadTransferir="ngModel">
+                    <small *ngIf="cantidadTransferir.invalid && cantidadTransferir.touched"
+                        class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                </div>
 
-            <div class="form-group col-md-3">
-                <label for="inputAddress">Cantidad disponible</label>
-                <input [(ngModel)]="transferencia.cantidadEnStock" type="number" class="form-control"
-                    name="cantidadEnStock" id="inputAddress" placeholder="" style="text-align: center;" required
-                    readonly #cantidadEnStock="ngModel">
-                <small *ngIf="cantidadEnStock.invalid && cantidadEnStock.touched"
-                    class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-            </div>
+                <div class="form-group col-md-3">
+                    <label for="inputAddress">Folio</label>
+                    <input [(ngModel)]="transferencia.consecutivo" type="number" class="form-control"
+                        name="folioTransferencia" id="inputAddress" readonly placeholder="" style="text-align: center;"
+                        required #folioTransferencia="ngModel">
+                    <small *ngIf="folioTransferencia.invalid && folioTransferencia.touched"
+                        class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                </div>
 
-
-            <div class="form-group col-md-3">
-                <label for="inputAddress">Cantidad a transferir</label>
-                <input [(ngModel)]="transferencia.cantidadTransferir" type="number" class="form-control"
-                    name="cantidadTransferir" id="inputAddress" min="1" placeholder="" style="text-align: center;"
-                    required #cantidadTransferir="ngModel">
-                <small *ngIf="cantidadTransferir.invalid && cantidadTransferir.touched"
-                    class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-            </div>
-
-            <div class="form-group col-md-3">
-                <label for="inputAddress">Folio</label>
-                <input [(ngModel)]="transferencia.consecutivo" type="number" class="form-control"
-                    name="folioTransferencia" id="inputAddress" readonly placeholder="" style="text-align: center;"
-                    required #folioTransferencia="ngModel">
-                <small *ngIf="folioTransferencia.invalid && folioTransferencia.touched"
-                    class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-            </div>
-
+            </fieldset>
 
             <div class="boton mt-4" style="margin: 0 auto;text-align: center;">
                 <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-light"
-                    title="Agregar artículo"><i class="fas fa-cart-plus fa-2x"
-                        style="color: rgb(255, 166, 0);"></i></button>
-
-
+                    title="Agregar artículo" [disabled]="!transferencia.idcosto">
+                    <i class="fas fa-cart-plus fa-2x" style="color: rgb(255, 166, 0);"></i>
+                </button>
             </div>
 
         </div>
@@ -121,17 +129,26 @@
 
 <!-- lista de productos a surtir -->
 
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: -100px;width: 75%;">
+<!-- Lista de artículos a surtir -->
+<div class="titulo d-flex justify-content-between align-items-center"
+    style="margin: 0 auto; margin-top: -50px; width: 75%;">
 
-    <h5>Lista de artículos a transferir</h5>
-    <button *ngIf="mostrarBotonTransferir" class="btn btn-success" style="float: right;" title="Confirmar Transferencia"
-        (click)="confirmarTranferencia()"><i class="fas fa-clipboard-check fa-2x"></i></button>
+    <!-- Botón ahora del lado izquierdo -->
+    <button *ngIf="mostrarBotonTransferir" class="btn btn-success" title="Confirmar Transferencia"
+        (click)="confirmarTranferencia()">
+        <i class="fas fa-clipboard-check fa-2x"></i>
+    </button>
+
+    <h5 class="mb-0">Lista de artículos a transferir</h5>
+
+    <!-- Espaciador invisible para equilibrar el flex y que el título quede perfectamente centrado -->
+    <div style="width: 45px;" *ngIf="mostrarBotonTransferir"></div>
 
 </div>
 
 <div class="mt-2" style="width: 85%;margin: 0 auto;">
 
-    <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
+    <table id="articulos" class="table" style="width: 100%;">
         <thead>
             <tr style="color:#000">
                 <th style="text-align:center;width:50px">Num.</th>
@@ -142,16 +159,15 @@
             </tr>
         </thead>
         <tbody style="font-size: 15px;">
-            <tr *ngFor="let articulo of articulosTransferir">
-                <td style="text-align:center;"></td>
-                <td style="text-align:center;">{{articulo.nom_articulo}}</td>
-                <td style="text-align:center;">{{articulo.num_articulos_solicitados}}</td>
-                <td style="text-align:center;">{{articulo.fecha | date:'dd/MM/yyyy'}}</td>
+            <tr *ngFor="let articulo of articulosTransferir; let i = index">
+                <td style="text-align:center;">{{ i + 1 }}</td>
+                <td style="text-align:center;">{{ articulo.nom_articulo }}</td>
+                <td style="text-align:center;">{{ articulo.num_articulos_solicitados }}</td>
+                <td style="text-align:center;">{{ articulo.fecha | date:'dd/MM/yyyy' }}</td>
                 <td style="text-align:center;">
-
-                    <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)"><i
-                            class="fas fa-trash"></i></button>
-
+                    <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         </tbody>
