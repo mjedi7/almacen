@@ -34,21 +34,23 @@
                             <option [value]="partida.id">{{partida.clave}} -- {{partida.descripcion}}</option>
                         </ng-container>
                     </select>
-                    <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo
+                    <small *ngIf="Partida.invalid && Partida.touched"
+                        class="form-text text-danger animated fadeIn">Campo
                         Obligatorio</small>
                 </fieldset>
             </div>
 
             <!-- Producto: Se bloquea si no se ha elegido una Partida -->
             <!-- Producto -->
-              <div class="form-group col-md-4" style="position: relative;">
+            <div class="form-group col-md-4" style="position: relative;">
                 <label for="inputProducto">Producto</label>
                 <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
                     [(ngModel)]="productoBuscado" (input)="filtrarProductos()" (click)="validarProducto()"
                     [ngModelOptions]="{standalone: true}" placeholder="Escribe el nombre del artículo" required ngModel
                     #Producto="ngModel" />
-                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-                
+                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
+                    Obligatorio</small>
+
                 <!-- UL FLOTANTE AJUSTADO -->
                 <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
                     position: absolute;
@@ -76,8 +78,8 @@
 
                 <div class="form-group col-md-3">
                     <label for="inputAddress">Fecha</label>
-                    <input [(ngModel)]="transferencia.fecha" type="date" class="form-control" name="Fecha" id="inputAddress"
-                        placeholder="" required #Fecha="ngModel">
+                    <input [(ngModel)]="transferencia.fecha" type="date" class="form-control" name="Fecha"
+                        id="inputAddress" placeholder="" required #Fecha="ngModel">
                     <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo
                         Obligatorio</small>
                 </div>
@@ -113,8 +115,9 @@
 
             <div class="boton mt-4" style="margin: 0 auto;text-align: center;">
                 <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-light"
-                    title="Agregar artículo"><i class="fas fa-cart-plus fa-2x"
-                        style="color: rgb(255, 166, 0);"></i></button>
+                    title="Agregar artículo" [disabled]="!transferencia.idcosto">
+                    <i class="fas fa-cart-plus fa-2x" style="color: rgb(255, 166, 0);"></i>
+                </button>
             </div>
 
         </div>
@@ -126,38 +129,47 @@
 
 <!-- lista de productos a surtir -->
 
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: -100px;width: 75%;">
+<!-- Lista de artículos a surtir -->
+<div class="titulo d-flex justify-content-between align-items-center"
+    style="margin: 0 auto; margin-top: -50px; width: 75%;">
 
-    <h5>Lista de artículos a transferir</h5>
-    <button *ngIf="mostrarBotonTransferir" class="btn btn-success" style="float: right;" title="Confirmar Transferencia"
-        (click)="confirmarTranferencia()"><i class="fas fa-clipboard-check fa-2x"></i></button>
+    <!-- Botón ahora del lado izquierdo -->
+    <button *ngIf="mostrarBotonTransferir" class="btn btn-success" title="Confirmar Transferencia"
+        (click)="confirmarTranferencia()">
+        <i class="fas fa-clipboard-check fa-2x"></i>
+    </button>
+
+    <h5 class="mb-0">Lista de artículos a transferir</h5>
+
+    <!-- Espaciador invisible para equilibrar el flex y que el título quede perfectamente centrado -->
+    <div style="width: 45px;" *ngIf="mostrarBotonTransferir"></div>
 
 </div>
 
 <div class="mt-2" style="width: 85%;margin: 0 auto;">
 
-<table id="articulos" class="table" style="width: 100%;">
-    <thead>
-        <tr style="color:#000">
-            <th style="text-align:center;width:50px">Num.</th>
-            <th style="text-align:center;width:200px">Artículo</th>
-            <th style="text-align:center;width:80px">Cantidad</th>
-            <th style="text-align:center;width: 80px;">Fecha autorizada</th>
-            <th style="text-align:center;width: 50px;"></th>
-        </tr>
-    </thead>
-    <tbody style="font-size: 15px;">
-        <tr *ngFor="let articulo of articulosTransferir; let i = index">
-            <td style="text-align:center;">{{ i + 1 }}</td>
-            <td style="text-align:center;">{{ articulo.nom_articulo }}</td>
-            <td style="text-align:center;">{{ articulo.num_articulos_solicitados }}</td>
-            <td style="text-align:center;">{{ articulo.fecha | date:'dd/MM/yyyy' }}</td>
-            <td style="text-align:center;">
-                <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    </tbody>
-</table>
+    <table id="articulos" class="table" style="width: 100%;">
+        <thead>
+            <tr style="color:#000">
+                <th style="text-align:center;width:50px">Num.</th>
+                <th style="text-align:center;width:200px">Artículo</th>
+                <th style="text-align:center;width:80px">Cantidad</th>
+                <th style="text-align:center;width: 80px;">Fecha autorizada</th>
+                <th style="text-align:center;width: 50px;"></th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 15px;">
+            <tr *ngFor="let articulo of articulosTransferir; let i = index">
+                <td style="text-align:center;">{{ i + 1 }}</td>
+                <td style="text-align:center;">{{ articulo.nom_articulo }}</td>
+                <td style="text-align:center;">{{ articulo.num_articulos_solicitados }}</td>
+                <td style="text-align:center;">{{ articulo.fecha | date:'dd/MM/yyyy' }}</td>
+                <td style="text-align:center;">
+                    <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

@@ -286,14 +286,21 @@ getListaArticulosTransferir() {
       });
   }
 
-  opcionSeleccionadaX() {
+opcionSeleccionadaX() {
+    // 1. Limpiamos por completo el producto actual y los stocks en cuanto se cambia de partida
+    this.transferencia.idcosto = null;
+    this.productoBuscado = '';
+    this.productos = [];
+    this.productosFiltrados = [];
+    this.transferencia.cantidadEnStock = 0;
+    this.transferencia.cantidadTransferir = null;
+
+    // 2. Pedimos los nuevos productos exclusivos de la nueva partida seleccionada
     this.traer.http.get(`${this.API_URL}/traerProductosDesdeTransferir/${this.transferencia.partida}`)
       .subscribe((res: any) => {
-        this.productos = res;
-        this.productosFiltrados = res;
-        this.transferencia.cantidadEnStock = 0;
-        this.transferencia.idcosto = null;
-        this.transferencia.nombreProducto = '';
+        this.productos = res || [];
+        this.productosFiltrados = res || [];
+        this.cdr.detectChanges();
       });
   }
 
@@ -332,11 +339,12 @@ getListaArticulosTransferir() {
       });
   }
 
- agregarArticulo(form: NgForm) {
-    if (this.transferencia.idcosto == null) {
+agregarArticulo(form: NgForm) {
+    // Si no hay un idcosto seleccionado de la lista desplegable, se frena en seco
+    if (!this.transferencia.idcosto) {
       Swal.fire({
         title: 'Producto no válido',
-        text: 'Debe elegir un producto de la lista',
+        text: 'Debe seleccionar un producto haciendo clic en las opciones de la lista desplegable',
         icon: 'warning'
       });
       return;
@@ -378,29 +386,25 @@ getListaArticulosTransferir() {
       return;
     }
 
-    // Guardamos el consecutivo actual antes de enviar para asegurarnos de consultar el correcto
-    const folioActual = this.transferencia.consecutivo;
-
+    // Enviamos al backend de forma segura
     this.traer.http.post(`${this.API_URL}/TransferirArticulosPlantel`, this.transferencia)
       .subscribe((res: any) => {
-        if (res === 'Add') {
+     if (res === 'Add') {
           Swal.fire('Ok', 'Artículo agregado a la lista', 'success');
           
           this.getListaArticulosTransferir();
 
-          // 1. Limpiamos las variables de control del producto actual
+          // Limpieza total
           this.transferencia.idcosto = null;
           this.productoBuscado = '';
           this.transferencia.cantidadEnStock = null;
           this.transferencia.cantidadTransferir = null;
 
-          // 2. IMPORTANTE: Volvemos a cargar los productos de la partida actual 
-          // para que el autocompletado y el select de productos no se queden vacíos
+          // RECARGAMOS LOS PRODUCTOS DE LA PARTIDA ACTUAL PARA QUE EL SELECT VUELVA A FUNCIONAR
           if (this.transferencia.partida) {
             this.opcionSeleccionadaX();
           }
 
-          // 3. Limpiamos los controles del formulario
           form.controls['Producto']?.reset();
           form.controls['cantidadTransferir']?.reset();
           form.controls['cantidadEnStock']?.reset();
