@@ -11,7 +11,8 @@
             <div class="form-group col-md-4">
                 <label for="inputPassword4">Plantel</label>
                 <select [(ngModel)]="transferencia.plantel" id="areaEmite" class="form-control" name="Plantel"
-                    (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel">
+                    (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel"
+                    [disabled]="articulosTransferir.length > 0">
                     <ng-container *ngFor="let plantel of planteles">
                         <option [value]="plantel.id">{{plantel.descripcion}}</option>
                     </ng-container>
@@ -87,8 +88,8 @@
             <div class="form-group col-md-3">
                 <label for="inputAddress">Cantidad a transferir</label>
                 <input [(ngModel)]="transferencia.cantidadTransferir" type="number" class="form-control"
-                    name="cantidadTransferir" id="inputAddress" min="1" placeholder="" style="text-align: center;" required
-                    #cantidadTransferir="ngModel">
+                    name="cantidadTransferir" id="inputAddress" min="1" placeholder="" style="text-align: center;"
+                    required #cantidadTransferir="ngModel">
                 <small *ngIf="cantidadTransferir.invalid && cantidadTransferir.touched"
                     class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
             </div>
@@ -107,6 +108,8 @@
                 <button style="padding:10px;margin-right: 10px;" type="submit" class="btn btn-light"
                     title="Agregar artículo"><i class="fas fa-cart-plus fa-2x"
                         style="color: rgb(255, 166, 0);"></i></button>
+
+
             </div>
 
         </div>
