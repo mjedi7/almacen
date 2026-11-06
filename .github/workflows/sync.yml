@@ -20,6 +20,13 @@ jobs:
         run: |
           git config --global user.name "mjedi7"
           git config --global user.email "oscar.salinas.mora@me.com"
-          git remote add destino https://x-access-token:${{ secrets.PAT_OTRA_CUENTA }}@github.com/mjedi7/almacen.git
+          
+          # Limpiamos por si ya existe el remote destino
+          git remote remove destino || true
+          
+          # Configuramos el remote inyectando el token de forma segura en la URL
+          git remote add destino https://${{ secrets.PAT_OTRA_CUENTA }}@github.com/mjedi7/almacen.git
+          
+          # Hacemos fetch y push directo a main
           git fetch destino main || true
           git push destino HEAD:refs/heads/main --force
