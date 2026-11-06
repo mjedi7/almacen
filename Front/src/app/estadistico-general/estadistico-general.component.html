@@ -40,31 +40,31 @@
             </div>
 
             <!-- Producto: Se bloquea si no se ha elegido una Partida -->
-            <div class="form-group col-md-4" style="position: relative;">
-                <fieldset [disabled]="!transferencia.partida" style="border: 0; padding: 0; margin: 0; width: 100%;">
-                    <label for="inputProducto">Producto</label>
-                    <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
-                        [(ngModel)]="productoBuscado" (input)="filtrarProductos()" (click)="validarProducto()"
-                        [ngModelOptions]="{standalone: true}" placeholder="Escribe el nombre del artículo" required ngModel
-                        #Producto="ngModel" />
-                    <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
-                        Obligatorio</small>
-                    <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
+            <!-- Producto -->
+              <div class="form-group col-md-4" style="position: relative;">
+                <label for="inputProducto">Producto</label>
+                <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
+                    [(ngModel)]="productoBuscado" (input)="filtrarProductos()" (click)="validarProducto()"
+                    [ngModelOptions]="{standalone: true}" placeholder="Escribe el nombre del artículo" required ngModel
+                    #Producto="ngModel" />
+                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+                
+                <!-- UL FLOTANTE AJUSTADO -->
+                <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
                     position: absolute;
-                    z-index: 1000;
+                    z-index: 99; /* Reducido para que no tape elementos críticos de abajo si se solapan */
                     width: 100%;
-                    max-height: 400px;
+                    max-height: 250px; /* Reducido un poquito para que no sea tan gigante */
                     overflow-y: auto;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     background-color: white;
                     border: 1px solid #ccc;
                 ">
-                        <li class="list-group-item list-group-item-action" *ngFor="let producto of productosFiltrados"
-                            (click)="seleccionarProducto(producto)">
-                            {{ producto.nombre_producto }}
-                        </li>
-                    </ul>
-                </fieldset>
+                    <li class="list-group-item list-group-item-action" *ngFor="let producto of productosFiltrados"
+                        (click)="seleccionarProducto(producto)" style="cursor: pointer;">
+                        {{ producto.nombre_producto }}
+                    </li>
+                </ul>
             </div>
 
         </div>
