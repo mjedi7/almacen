@@ -286,6 +286,106 @@ const traerPlanteles2 = async (req, res) => {
   }
 };
 
+const traerEncargadosPlantel = async (req, res) => {
+  try {
+    const response = await pool.query(`
+      SELECT id, codigo, id_tamano_plantel, claveplantel, descripcion, director, administrativo, esactivo
+      FROM centro_trabajo
+      ORDER BY descripcion ASC;
+    `);
+    return res.status(200).json({
+      ok: true,
+      centros: response.rows
+    });
+  } catch (error) {
+    console.error('Error al traer encargados de plantel:', error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al consultar los encargados de plantel',
+      error: error.message
+    });
+  }
+};
+
+const actualizarEncargadosPlantel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { director, administrativo } = req.body;
+    const response = await pool.query(`
+      UPDATE centro_trabajo
+      SET director = $1, administrativo = $2
+      WHERE id = $3
+      RETURNING id, codigo, id_tamano_plantel, claveplantel, descripcion, director, administrativo, esactivo;
+    `, [
+      director ? director.trim() : '',
+      administrativo ? administrativo.trim() : '',
+      Number(id)
+    ]);
+    return res.status(200).json({
+      ok: true,
+      msg: 'Encargados actualizados exitosamente',
+      centro: response.rows[0]
+    });
+  } catch (error) {
+    console.error('Error al actualizar encargados:', error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al actualizar encargados',
+      error: error.message
+    });
+  }
+};
+
+const actualizarDirectorPlantel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { director } = req.body;
+    const response = await pool.query(`
+      UPDATE centro_trabajo
+      SET director = $1
+      WHERE id = $2
+      RETURNING id, codigo, id_tamano_plantel, claveplantel, descripcion, director, administrativo, esactivo;
+    `, [director ? director.trim() : '', Number(id)]);
+    return res.status(200).json({
+      ok: true,
+      msg: 'Director actualizado exitosamente',
+      centro: response.rows[0]
+    });
+  } catch (error) {
+    console.error('Error al actualizar director:', error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al actualizar director',
+      error: error.message
+    });
+  }
+};
+
+const actualizarAdministrativoPlantel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { administrativo } = req.body;
+    const response = await pool.query(`
+      UPDATE centro_trabajo
+      SET administrativo = $1
+      WHERE id = $2
+      RETURNING id, codigo, id_tamano_plantel, claveplantel, descripcion, director, administrativo, esactivo;
+    `, [administrativo ? administrativo.trim() : '', Number(id)]);
+    return res.status(200).json({
+      ok: true,
+      msg: 'Administrativo actualizado exitosamente',
+      centro: response.rows[0]
+    });
+  } catch (error) {
+    console.error('Error al actualizar administrativo:', error);
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error al actualizar administrativo',
+      error: error.message
+    });
+  }
+};
+
 
 const traerTotalDisponible = async(req, res) => {
 
@@ -1318,5 +1418,9 @@ module.exports = {
     conteoNoAtendidos,
     traerTotalAtendidosEnviados,
     traerTotalProcesoEnviados,
-     traerTotalSinAtenderEnviados
+     traerTotalSinAtenderEnviados,
+     traerEncargadosPlantel,
+     actualizarEncargadosPlantel,
+     actualizarDirectorPlantel,
+     actualizarAdministrativoPlantel
 }

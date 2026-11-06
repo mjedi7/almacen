@@ -1,0 +1,192 @@
+<div class="row page-titles mb-3">
+  <div class="col-md-6 align-self-center">
+    <h3 class="text-themecolor mb-0 font-weight-bold">
+      <i class="mdi mdi-account-card-details me-2"></i> Encargados de Plantel
+    </h3>
+    <small class="text-muted">Directores y Coordinadores Administrativos de Centros de Trabajo y Planteles del CECyTEV</small>
+  </div>
+  <div class="col-md-6 align-self-center text-right text-md-end">
+    <span class="badge badge-primary px-3 py-2" style="background-color: #9c0031; font-size: 13px;">
+      <i class="mdi mdi-school me-1"></i> {{ centros.length }} Centros Registrados
+    </span>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+    <h5 class="card-title mb-0 text-dark font-weight-bold">
+      <i class="mdi mdi-format-list-bulleted me-2 text-danger"></i> Catálogo de Centros de Encargados de Direcciones, Departamento, Areas y Planteles.
+    </h5>
+    <div>
+     <button class="btn btn-sm btn-outline-secondary" (click)="cargarCentros()" [disabled]="cargando" title="Recargar lista">
+        <i class="fa fa-refresh me-1" [class.fa-spin]="cargando"></i> Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body p-4">
+    <!-- Spinner de carga -->
+    <div *ngIf="cargando" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; color: #9c0031 !important;">
+        <span class="sr-only">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando catálogo de planteles...</p>
+    </div>
+
+    <!-- Tabla DataTables -->
+    <div class="table-responsive" [hidden]="cargando">
+      <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-hover table-striped align-middle border" style="width: 100%;">
+        <thead class="thead-guinda">
+          <tr>
+            <th class="text-center" style="width: 60px;">#</th>
+            <th class="text-center" style="width: 130px;">Clave Plantel</th>
+            <th style="min-width: 200px;">Centro de Trabajo / Plantel</th>
+            <th style="min-width: 250px;">Director</th>
+            <th style="min-width: 250px;">Coordinador Administrativo</th>
+            <th class="text-center" style="width: 130px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let centro of centros; let i = index">
+            <!-- ID / Consecutivo -->
+            <td class="text-center text-muted font-weight-bold">{{ centro.codigo || centro.id }}</td>
+
+            <!-- Clave Plantel -->
+            <td class="text-center">
+              <span *ngIf="centro.claveplantel" class="badge bg-light text-dark border px-2 py-1 font-monospace">
+                {{ centro.claveplantel }}
+              </span>
+              <span *ngIf="!centro.claveplantel" class="text-muted fst-italic">
+                N/A
+              </span>
+            </td>
+
+            <!-- Descripción del Plantel -->
+            <td class="font-weight-bold text-dark">
+              <i class="mdi mdi-map-marker text-danger me-1"></i> {{ centro.descripcion }}
+            </td>
+
+            <!-- Director con botón de edición -->
+            <td>
+              <div class="d-flex align-items-center justify-content-between pe-1">
+                <span [class.text-muted]="!centro.director" [class.fst-italic]="!centro.director">
+                  <i class="mdi mdi-account-tie text-info me-1"></i>
+                  {{ centro.director || 'Sin asignar' }}
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-info rounded-circle ms-2 p-1"
+                  style="width: 30px; height: 30px;"
+                  (click)="abrirEditarDirector(centro, modalEdicion)"
+                  title="Editar Director">
+                  <i class="fa fa-pencil"></i>
+                </button>
+              </div>
+            </td>
+
+            <!-- Administrativo con botón de edición -->
+            <td>
+              <div class="d-flex align-items-center justify-content-between pe-1">
+                <span [class.text-muted]="!centro.administrativo" [class.fst-italic]="!centro.administrativo">
+                  <i class="mdi mdi-account-cash text-success me-1"></i>
+                  {{ centro.administrativo || 'Sin asignar' }}
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-success rounded-circle ms-2 p-1"
+                  style="width: 30px; height: 30px;"
+                  (click)="abrirEditarAdministrativo(centro, modalEdicion)"
+                  title="Editar Administrativo">
+                  <i class="fa fa-pencil"></i>
+                </button>
+              </div>
+            </td>
+
+            <!-- Acciones -->
+            <td class="text-center">
+              <button
+                type="button"
+                class="btn btn-sm btn-warning text-dark font-weight-bold"
+                (click)="abrirEditarAmbos(centro, modalEdicion)"
+                title="Editar ambos encargados">
+                <i class="fa fa-edit me-1"></i> Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL UNIFICADO PARA EDICIÓN DE ENCARGADOS -->
+<ng-template #modalEdicion let-modal>
+  <div class="modal-header text-white" style="background-color: #5a323f;">
+    <h5 class="modal-title font-weight-bold text-white mb-0">
+      <i class="mdi mdi-account-edit me-2"></i>
+      <ng-container *ngIf="campoEdicion === 'director'">Editar Director</ng-container>
+      <ng-container *ngIf="campoEdicion === 'administrativo'">Editar Coordinador Administrativo</ng-container>
+      <ng-container *ngIf="campoEdicion === 'ambos'">Editar Encargados de Plantel</ng-container>
+    </h5>
+    <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body p-4">
+    <!-- Información del Plantel -->
+    <div class="alert alert-light border mb-4">
+      <div class="row">
+        <div class="col-sm-8">
+          <small class="text-muted d-block">Centro de Trabajo / Plantel</small>
+          <strong class="text-dark fs-6">{{ centroSeleccionado?.descripcion }}</strong>
+        </div>
+        <div class="col-sm-4 text-sm-end">
+          <small class="text-muted d-block">Clave de Plantel</small>
+          <span class="badge bg-secondary">{{ centroSeleccionado?.claveplantel || 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campo Director -->
+    <div class="mb-3" *ngIf="campoEdicion === 'director' || campoEdicion === 'ambos'">
+      <label class="form-label font-weight-bold text-dark">
+        <i class="mdi mdi-account-tie text-info me-1"></i> Nombre del Director
+      </label>
+      <div class="input-group">
+        <span class="input-group-text bg-light"><i class="fa fa-user"></i></span>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="nuevoDirector"
+          placeholder="Ej. Ing. Juan Pérez López"
+          autocomplete="off">
+      </div>
+      <small class="form-text text-muted">Título profesional y nombre completo del Director.</small>
+    </div>
+
+    <!-- Campo Administrativo -->
+    <div class="mb-3" *ngIf="campoEdicion === 'administrativo' || campoEdicion === 'ambos'">
+      <label class="form-label font-weight-bold text-dark">
+        <i class="mdi mdi-account-cash text-success me-1"></i> Nombre del Coordinador Administrativo
+      </label>
+      <div class="input-group">
+        <span class="input-group-text bg-light"><i class="fa fa-briefcase"></i></span>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="nuevoAdministrativo"
+          placeholder="Ej. Lic. María García Martínez"
+          autocomplete="off">
+      </div>
+      <small class="form-text text-muted">Título profesional y nombre completo del Administrador.</small>
+    </div>
+  </div>
+
+  <div class="modal-footer bg-light">
+    <button type="button" class="btn btn-secondary px-4" (click)="modal.dismiss()">
+      <i class="fa fa-times me-1"></i> Cancelar
+    </button>
+    <button type="button" class="btn btn-success px-4" (click)="guardarEdicion(modal)">
+      <i class="fa fa-check me-1"></i> Guardar Cambios
+    </button>
+  </div>
+</ng-template>

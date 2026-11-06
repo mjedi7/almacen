@@ -1,7 +1,28 @@
 const { Router } = require('express');
 const router = Router();
 
-const { traerPartidas,traerProductos,traerProveedores,datosDelProveedor, traerPlanteles, traerTotalDisponible, traerConsecutivo, traerDatosAdmin, traerProductosDesdeTransferir, traerConsecutivoRequisicion, getUsuarios, getTodosUsuarios, traerPlanteles2, datosCostosArticulo, traerProductosDesdeUsarArticuloPlantel, traerConsecutivoUsarArticuloPlantel} = require('../controllers/traerDatosGenerales.controller.js');
+const { 
+  traerPartidas,
+  traerProductos,
+  traerProveedores,
+  datosDelProveedor, 
+  traerPlanteles, 
+  traerTotalDisponible, 
+  traerConsecutivo, 
+  traerDatosAdmin, 
+  traerProductosDesdeTransferir, 
+  traerConsecutivoRequisicion, 
+  getUsuarios, 
+  getTodosUsuarios, 
+  traerPlanteles2, 
+  datosCostosArticulo, 
+  traerProductosDesdeUsarArticuloPlantel, 
+  traerConsecutivoUsarArticuloPlantel,
+  traerEncargadosPlantel,
+  actualizarEncargadosPlantel,
+  actualizarDirectorPlantel,
+  actualizarAdministrativoPlantel
+} = require('../controllers/traerDatosGenerales.controller.js');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 router.get('/traerPartidas', traerPartidas);        //Ruta para traer PArtidas
@@ -19,13 +40,27 @@ router.get('/traerDatosAdministrativo/:idPlantel',traerDatosAdmin);
 
 router.get('/traerConsecutivoPlantelesUsarArticulo/:plantel',traerConsecutivoUsarArticuloPlantel);   //Traer consecutivo de plantles usar Articulo
 
-
-
 router.get('/getusuarios/:area', getUsuarios);
 router.get('/gettodosusuarios', getTodosUsuarios);
 
-
 router.get('/traerCostoArticulo/:idProveedor/:idProducto',datosCostosArticulo);
 
+// Rutas para Encargados de Plantel (Módulo Usuarios)
+router.get('/traerEncargadosPlantel', traerEncargadosPlantel);
+router.put('/actualizarEncargadosPlantel/:id', actualizarEncargadosPlantel);
+router.put('/actualizarDirectorPlantel/:id', actualizarDirectorPlantel);
+router.put('/actualizarAdministrativoPlantel/:id', actualizarAdministrativoPlantel);
+
+const path = require('path');
+const fs = require('fs');
+router.get('/descargar-zip', (req, res) => {
+  const filePath = path.resolve(__dirname, '../../../cambios_modulo_encargados.zip');
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="cambios_modulo_encargados.zip"');
+    return res.sendFile(filePath);
+  }
+  return res.status(404).send('ZIP no encontrado');
+});
 
 module.exports = router;

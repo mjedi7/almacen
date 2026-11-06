@@ -141,13 +141,14 @@ export class SidebarService {
     }
   ];
 
-  // USUARIOS
+  // USUARIOS (solo id_tipo_usuario 0)
   menu5: any[] = [
     {
       titulo: 'Usuarios',
       icono: 'mdi mdi-gauge',
       submenu: [
-        { titulo: 'Ver usuarios', url: 'lista-usuarios', mostrar: false }
+        { titulo: 'Ver usuarios', url: 'lista-usuarios', mostrar: true },
+        { titulo: 'Encargados de Plantel', url: 'encargados-plantel', mostrar: true }
       ]
     }
   ];
