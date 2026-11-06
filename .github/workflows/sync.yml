@@ -1,0 +1,24 @@
+name: Sincronizar con la cuenta de Oscar
+
+on:
+  push:
+    branches:
+      - oscar  # Reemplaza por el nombre de la rama en la que trabajas
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest  # Se ejecuta en la nube de GitHub
+    steps:
+      - name: Clonar repositorio origen
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enviar cambios a la otra cuenta
+        env:
+          PAT_OTRA_CUENTA: ${{ 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 }}
+        run: |
+          git config --global user.name "mjedi7"
+          git config --global user.email "oscar.salinas.mora@me.com"
+          git remote add destino https://x-access-token:${{ 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 }}@github.com/mjedi7/almacen.git
+          git push destino HEAD:main --force
