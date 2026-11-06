@@ -1,7 +1,6 @@
 @page {
   size: letter portrait;
-  /* Margen inferior de 40mm OBLIGATORIO para que las filas de cualquier página nunca lleguen a la cenefa */
-  margin: 10mm 14mm 12mm 14mm !important;
+  margin: 12mm 14mm 0mm 14mm !important;
 }
 
 * {
@@ -21,7 +20,7 @@ body.report {
   print-color-adjust: exact;
 }
 
-/* Banner superior */
+/* Banner superior institucional */
 .report-banner {
   width: 100%;
   text-align: center;
@@ -36,7 +35,7 @@ body.report {
   margin: 0 auto;
 }
 
-/* Encabezados institucionales */
+/* Encabezados */
 .report-heading {
   text-align: center;
   margin-bottom: 10px;
@@ -46,20 +45,20 @@ body.report {
   font-size: 10pt;
   font-weight: bold;
   text-transform: uppercase;
-  margin: 0 0 3px 0;
+  margin-bottom: 3px;
 }
 
 .report-heading__title {
   font-size: 11.5pt;
   font-weight: bold;
-  margin: 0 0 3px 0;
+  margin-bottom: 3px;
   letter-spacing: 0.5px;
 }
 
 .report-period {
   font-size: 9pt;
-  margin: 0 0 8px 0;
   font-weight: bold;
+  margin-bottom: 8px;
 }
 
 /* Metadatos */
@@ -136,14 +135,14 @@ body.report {
   padding: 12px !important;
 }
 
-/* ==========================================================================
-   TOTALES (FLUJO NORMAL)
-   Jamás usar position:fixed aquí, para que no aparezca en páginas intermedias
-   ========================================================================== */
-/* Totales sin position:fixed */
-.totales-contenedor {
+/* ========================================================
+   SECCIÓN DE CIERRE (TOTALES + CENEFA)
+   Flujo estático: solo se imprime después de la tabla en la última hoja
+   ======================================================== */
+.seccion-cierre-reporte {
+  position: static !important;
   width: 100%;
-  margin-top: 14px;
+  margin-top: 15px;
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
@@ -153,6 +152,7 @@ body.report {
   justify-content: space-between;
   align-items: flex-end;
   width: 100%;
+  margin-bottom: 25px;
 }
 
 .totales-conteo {
@@ -179,20 +179,21 @@ body.report {
   padding-top: 4px;
 }
 
-/* Cenefa institucional en flujo normal al final */
-.institutional-footer-final {
+/* Cenefa institucional en flujo normal */
+.cenefa-institucional-final {
+  position: static !important;
   width: 100%;
-  margin-top: 25px;
   text-align: center;
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
 }
 
-.institutional-footer-final img {
+.cenefa-institucional-final img {
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 32mm;
+  max-height: 30mm;
   object-fit: contain;
   display: block;
   margin: 0 auto;

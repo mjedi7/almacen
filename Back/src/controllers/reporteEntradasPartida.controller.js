@@ -167,9 +167,9 @@ const generarReporteEntradasPartida = async (req, res) => {
       proveedor: registro.razon_social,
       fechaCompra: registro.fecha_compra
         ? new Date(registro.fecha_compra).toLocaleDateString(
-            'es-MX',
-            { timeZone: 'UTC' }
-          )
+          'es-MX',
+          { timeZone: 'UTC' }
+        )
         : '',
       importe: formatearMoneda(registro.importe),
       impuesto: formatearMoneda(registro.impuesto),
@@ -205,21 +205,11 @@ const generarReporteEntradasPartida = async (req, res) => {
     };
 
     const pdfBuffer = await generarPDF(
-      'reporteEntradasPartida.html',
+      'reporteEntradasPartida.html', // <--- ¿Dice exactamente esto?
       datosPlantilla,
-      {
-        format: 'Letter',
-        landscape: false,
-        printBackground: true,
-        margin: {
-          top: '12mm',
-          bottom: '17mm',
-          left: '10mm',
-          right: '10mm'
-        }
-      }
+      // ...
     );
-
+    
     const nombreArchivo =
       `reporte_entradas_partida_${clavePartida}.pdf`;
 

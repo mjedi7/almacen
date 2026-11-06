@@ -14,7 +14,6 @@ const imgToBase64 = (filePath) => {
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
-// Rutas de ambos CSS
 const cssConPiePath = path.join(__dirname, '../templates/css/reportes-con-pie.css');
 const cssSoloHeaderPath = path.join(__dirname, '../templates/css/reportes-solo-header.css');
 
@@ -30,6 +29,9 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     }
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
+    console.log("=== RUTA DE LA PLANTILLA ===", templatePath);
+    console.log("=== ¿TIENE CENEFA EL HTML? ===", templateHtml.includes("cenefa-contenedor") || templateHtml.includes("institutional-footer"));
+
 
     handlebars.registerHelper('primeraMayuscula', function (str) {
       if (!str) return '';
@@ -69,92 +71,37 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    // 1. Detección unificada del tipo de reporte
+    // Detección del tipo de reporte
     const nombreMin = templateName.toLowerCase().trim();
 
-    const esSoloHeader = nombreMin.includes('existencia') || 
-                         nombreMin.includes('costo') || 
-                         nombreMin.includes('todas') ||
-                         nombreMin.includes('salida');
+    const esSoloHeader =
+      nombreMin.includes('existencia') ||
+      nombreMin.includes('costo') ||
+      nombreMin.includes('todas') ||
+      nombreMin.includes('salida');
 
-    const llevaPie = !esSoloHeader && (
-      nombreMin.includes('partida') ||
-      nombreMin.includes('proveedor') ||
-      nombreMin.includes('reporteentradas') ||
-      nombreMin.includes('kardex')
-    );
-
-    // 2. Inyección de CSS según el tipo de reporte
-    const archivoCss = llevaPie ? cssConPiePath : cssSoloHeaderPath;
-
-    if (fs.existsSync(archivoCss)) {
-      await page.addStyleTag({ path: archivoCss });
+      // 1. INYECCIÓN ESTRICTA: 'partida' NUNCA debe cargar reportes-con-pie.css
+    if (esSoloHeader && fs.existsSync(cssSoloHeaderPath)) {
+      await page.addStyleTag({ path: cssSoloHeaderPath });
+    } else if (nombreMin.includes('kardex') && fs.existsSync(cssConPiePath)) {
+      await page.addStyleTag({ path: cssConPiePath });
     }
+    // Si es reporteEntradasPartida, NO entra aquí y no carga ningún CSS externo.
 
-    // 3. Neutralización de position: fixed en el DOM para reportes con pie
-    if (llevaPie) {
-      await page.evaluate(() => {
-        // Quitar comportamiento flotante a footers, totales y cenefas
-        const selectores = [
-          '.document-footer',
-          'footer',
-          '.institutional-footer',
-          '.totals-table',
-          '.report-results',
-          '.totales-contenedor'
-        ];
+    // Compras por partida es autónomo: NO debe cargar estilos externos con position:fixed
+    const usaCssExterno = esSoloHeader
+      ? cssSoloHeaderPath
+      : nombreMin.includes('kardex')
+      ? cssConPiePath
+      : null;
 
-        selectores.forEach((sel) => {
-          document.querySelectorAll(sel).forEach((el) => {
-            el.style.setProperty('position', 'static', 'important');
-            el.style.setProperty('bottom', 'auto', 'important');
-            el.style.setProperty('left', 'auto', 'important');
-            el.style.setProperty('right', 'auto', 'important');
-            el.style.setProperty('z-index', 'auto', 'important');
-          });
-        });
-
-        // Asegurar que los bloques queden al final del body en orden natural
-        const docFooter = document.querySelector('.document-footer, .totales-contenedor');
-        const instFooter = document.querySelector('.institutional-footer');
-        if (docFooter) document.body.appendChild(docFooter);
-        if (instFooter) document.body.appendChild(instFooter);
-      });
-
-      // Sobrescribir estilos para asegurar flujo natural y márgenes limpios
-      await page.addStyleTag({
-        content: `
-          @page {
-            margin: 10mm 14mm 12mm 14mm !important;
-          }
-          .document-footer,
-          footer,
-          .totales-contenedor {
-            position: static !important;
-            margin-top: 15px !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          .institutional-footer {
-            position: static !important;
-            margin-top: 25px !important;
-            width: 100% !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          .institutional-footer img {
-            max-height: 30mm !important;
-            width: 100% !important;
-            display: block !important;
-            margin: 0 auto !important;
-          }
-        `
-      });
+    if (usaCssExterno && fs.existsSync(usaCssExterno)) {
+      await page.addStyleTag({ path: usaCssExterno });
     }
 
     await page.emulateMediaType('print');
 
-    // Esperar a que carguen completamente las imágenes
+    // Esperar imágenes
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
       await Promise.all(
@@ -168,36 +115,18 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
-    // 4. Opciones de PDF armonizadas
-    const defaultOptions = {
+    // Opciones de Puppeteer:
+    // Para compras por partida se desactiva displayHeaderFooter y se respeta el tamaño del CSS
+   const defaultOptions = {
+      format: 'Letter',
       printBackground: true,
-      displayHeaderFooter: esSoloHeader,
+      displayHeaderFooter: esSoloHeader, // False para partida
       headerTemplate: '<span></span>',
-      footerTemplate: `
-        <div style="
-          width: 100%;
-          font-family: Arial, Helvetica, sans-serif;
-          font-size: 7pt;
-          color: #000;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-left: 14mm;
-          padding-right: 14mm;
-          box-sizing: border-box;
-        ">
-          <div>
-            <strong>Usuario:</strong> ${usuarioPie}
-          </div>
-          <div>
-            Pág. <span class="pageNumber"></span>
-          </div>
-        </div>
-      `,
+      footerTemplate: '<span></span>',
       margin: esSoloHeader
-        ? { top: '12mm', bottom: '22mm', left: '0px', right: '0px' }
+        ? { top: '12mm', bottom: '22mm', left: '10mm', right: '10mm' }
         : { top: '0px', bottom: '0px', left: '0px', right: '0px' },
-      preferCSSPageSize: !esSoloHeader,
+      preferCSSPageSize: true,
       ...pdfOptions
     };
 
