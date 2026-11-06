@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import * as Chart from 'chart.js';
-import { ChartType } from 'chart.js';
 import { Subject } from 'rxjs';
 import { TraerDatosService } from '../services/traer-datos.service';
 import { environment } from 'src/environments/environment';
 import { Transferencias } from '../models/nuevoDocumento';
 import { NgForm } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { HttpHeaders } from '@angular/common/http';
+import { DataTableDirective } from 'angular-datatables';
 
 declare var $: any;
 
@@ -16,38 +15,31 @@ declare var $: any;
   templateUrl: './estadistico-general.component.html',
   styleUrls: ['./estadistico-general.component.css']
 })
-export class EstadisticoGeneralComponent implements OnInit {
+export class EstadisticoGeneralComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  transferencia: Transferencias = {
+  @ViewChild(DataTableDirective, { static: false })
+  dtElement!: DataTableDirective;
 
+  
+
+ transferencia: Transferencias = {
     plantel: null,
-
     partida: null,
-
     idcosto: null,
-
     fecha: null,
-
     cantidadEnStock: null,
-
     cantidadTransferir: null,
-
     consecutivo: null,
-
     autorizo: localStorage.getItem('nombre'),
-
     recibio: '',
-
     nombreProducto: ''
-
   };
 
   plantelesTransferencia: number[] = [];
-
   productosFiltrados: any[] = [];
   productoBuscado: string = '';
   dtOptions: any = {};
-  dtTrigger = new Subject();
+  dtTrigger = new Subject<any>(); // Única declaración limpia
   API_URL = environment.uri_api;
   articulosTransferir: any = [];
   totales: any;
@@ -61,14 +53,39 @@ export class EstadisticoGeneralComponent implements OnInit {
   sumagenerados: number = 0;
   mostrarBotonTransferir: boolean = false;
 
-  constructor(private traer: TraerDatosService) { }
+  constructor(private traer: TraerDatosService, private cdr: ChangeDetectorRef) { }
 
   public chart: Chart;
 
   ngOnInit(): void {
+    this.dtOptions = {
+      pagingType: 'full_numbers',
+      pageLength: 10,
+      searching: false,
+      processing: true,
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
+      }
+    };
+
     this.traerPartidas();
     this.traerPlanteles();
     this.TraerConsecutivo();
+  }
+
+  ngAfterViewInit(): void {
+    this.dtTrigger.next(null);
+  }
+
+  ngOnDestroy(): void {
+    this.dtTrigger.unsubscribe();
+  }
+
+  rerender(): void {
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.dtTrigger.next(null);
+    });
   }
 
   filtrarProductos() {
@@ -85,40 +102,32 @@ export class EstadisticoGeneralComponent implements OnInit {
     this.TraerTotalDisponible();
   }
 
-  getListaArticulosTransferir() {
-    if ($.fn.DataTable.isDataTable('#articulos')) {
-      $('#articulos').DataTable().clear();
-      $('#articulos').DataTable().destroy();
-    }
+getListaArticulosTransferir() {
+    const folio = this.transferencia.consecutivo;
+    
+    const plantelProtegido = this.transferencia.plantel;
+    const partidaProtegida = this.transferencia.partida;
 
-    try {
-      this.dtOptions = {
-        pagingType: 'full_numbers',
-        pageLength: 10,
-        searching: false,
-        processing: true,
-        destroy: true,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
+    this.traer.http.get(`${this.API_URL}/getListaArticulosTransferir/${folio}`)
+      .subscribe({
+        next: (res: any) => {
+          console.log("Datos recibidos del servidor:", res);
+          
+          // Clonamos el arreglo para romper la referencia y obligar a Angular a refrescar
+          this.articulosTransferir = res ? [...res] : [];
+          
+          this.transferencia.plantel = plantelProtegido;
+          this.transferencia.partida = partidaProtegida;
+
+          this.mostrarBotonTransferir = this.articulosTransferir.length > 0;
+
+          // Forzamos la detección de cambios
+          this.cdr.detectChanges();
         },
-      };
-
-      const folio = this.transferencia.consecutivo;
-
-      this.traer.http.get(`${this.API_URL}/getListaArticulosTransferir/${folio}`)
-        .subscribe({
-          next: (res: any) => {
-            this.articulosTransferir = res || [];
-            this.dtTrigger.next(null);
-            this.mostrarBotonTransferir = this.articulosTransferir.length > 0;
-          },
-          error: (err) => {
-            console.error('Error al cargar artículos a transferir:', err);
-          }
-        });
-    } catch (error) {
-      console.error(error);
-    }
+        error: (err) => {
+          console.error('Error al cargar artículos a transferir:', err);
+        }
+      });
   }
 
   eliminarArticulo(idarticulo: number) {
@@ -160,131 +169,87 @@ export class EstadisticoGeneralComponent implements OnInit {
     });
   }
 
-obtenerPlantelesTransferencia() {
-  this.traer.http.get(
-    this.API_URL + `/getListaArticulosTransferir/${this.transferencia.consecutivo}`
-  ).subscribe({
-    next: (res: any) => {
+  obtenerPlantelesTransferencia() {
+    this.traer.http.get(
+      this.API_URL + `/getListaArticulosTransferir/${this.transferencia.consecutivo}`
+    ).subscribe({
+      next: (res: any) => {
+        this.plantelesTransferencia = Array.from(
+          new Set<number>(
+            res.map((movimiento: any) =>
+              Number(movimiento.id_centrotrabajo_transfiere)
+            )
+          )
+        );
 
-      console.log("Movimientos de la transferencia:", res);
+        if (this.plantelesTransferencia.length === 0) {
+          Swal.fire(
+            'Error',
+            'No se encontraron planteles para esta transferencia',
+            'error'
+          );
+          return;
+        }
 
-      this.plantelesTransferencia = Array.from(
-  new Set<number>(
-    res.map((movimiento: any) =>
-      Number(movimiento.id_centrotrabajo_transfiere)
-    )
-  )
-);
-
-      console.log(
-        "Planteles de la transferencia:",
-        this.plantelesTransferencia
-      );
-
-      if (this.plantelesTransferencia.length === 0) {
+        this.generarFormatoListaSurtido(0);
+      },
+      error: (err) => {
+        console.error("Error al obtener los planteles de la transferencia", err);
         Swal.fire(
           'Error',
-          'No se encontraron planteles para esta transferencia',
+          'No se pudieron obtener los planteles de la transferencia',
           'error'
         );
-        return;
       }
-
-      this.generarFormatoListaSurtido(0);
-    },
-
-    error: (err) => {
-      console.error(
-        "Error al obtener los planteles de la transferencia",
-        err
-      );
-
-      Swal.fire(
-        'Error',
-        'No se pudieron obtener los planteles de la transferencia',
-        'error'
-      );
-    }
-  });
-}
+    });
+  }
 
   generarFormatoListaSurtido(indice: number) {
+    const plantel = this.plantelesTransferencia[indice];
 
-  const plantel = this.plantelesTransferencia[indice];
-
-  console.log("Generando PDF con montos para plantel:", plantel);
-
-  this.traer.http.get(
-    this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}`,
-    { responseType: 'text' }
-  ).subscribe({
-    next: (res: any) => {
-
-      console.log(res);
-
-      this.generarFormatoListaSurtidoSinMontos(indice);
-
-    },
-    error: (err) => {
-
-      console.error(
-        "Error al generar el PDF con montos",
-        err
-      );
-
-      Swal.fire(
-        'Error',
-        'Hubo un error al generar el PDF con montos',
-        'error'
-      );
-    }
-  });
-}
-
-generarFormatoListaSurtidoSinMontos(indice: number) {
-
-  const plantel = this.plantelesTransferencia[indice];
-
-  console.log("Generando PDF sin montos para plantel:", plantel);
-
-  this.traer.http.get(
-    this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}`,
-    { responseType: 'text' }
-  ).subscribe({
-    next: (res: any) => {
-
-      console.log(res);
-
-      const siguienteIndice = indice + 1;
-
-      if (siguienteIndice < this.plantelesTransferencia.length) {
-
-        // Todavía faltan planteles
-        this.generarFormatoListaSurtido(siguienteIndice);
-
-      } else {
-
-        // Ya se generaron los 2 PDFs de todos los planteles
-        this.descargarZip();
-
+    this.traer.http.get(
+      this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}`,
+      { responseType: 'text' }
+    ).subscribe({
+      next: (res: any) => {
+        this.generarFormatoListaSurtidoSinMontos(indice);
+      },
+      error: (err) => {
+        console.error("Error al generar el PDF con montos", err);
+        Swal.fire(
+          'Error',
+          'Hubo un error al generar el PDF con montos',
+          'error'
+        );
       }
-    },
+    });
+  }
 
-    error: (err) => {
+  generarFormatoListaSurtidoSinMontos(indice: number) {
+    const plantel = this.plantelesTransferencia[indice];
 
-      console.error(
-        "Error al generar el PDF sin montos",
-        err
-      );
-
-      Swal.fire(
-        'Error',
-        'Hubo un error al generar el PDF sin montos',
-        'error'
-      );
-    }
-  });
-}
+    this.traer.http.get(
+      this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}`,
+      { responseType: 'text' }
+    ).subscribe({
+      next: (res: any) => {
+        const siguienteIndice = indice + 1;
+        if (siguienteIndice < this.plantelesTransferencia.length) {
+          this.generarFormatoListaSurtido(siguienteIndice);
+        } else {
+          this.descargarZip();
+        }
+      },
+      error: (err) => {
+        console.error("Error al generar el PDF sin montos", err);
+        Swal.fire(
+          'Error',
+          'Hubo un error al generar el PDF sin montos',
+          'error'
+        );
+      }
+    });
+  }
 
   traerPartidas() {
     this.traer.http.get(`${this.API_URL}/traerPartidas`)
@@ -367,58 +332,86 @@ generarFormatoListaSurtidoSinMontos(indice: number) {
       });
   }
 
-  agregarArticulo(form: NgForm) {
+ agregarArticulo(form: NgForm) {
     if (this.transferencia.idcosto == null) {
       Swal.fire({
         title: 'Producto no válido',
         text: 'Debe elegir un producto de la lista',
         icon: 'warning'
       });
-    } else if (!Number.isInteger(Number(this.transferencia.cantidadTransferir))) {
+      return;
+    } 
+    
+    if (!Number.isInteger(Number(this.transferencia.cantidadTransferir))) {
       Swal.fire({
         title: 'Cantidad no válida',
         text: 'La cantidad a transferir debe ser número entero',
         icon: 'warning'
       });
-    } else {
-      if (form.valid) {
-        if (this.transferencia.cantidadEnStock < this.transferencia.cantidadTransferir) {
-          Swal.fire({
-            title: 'Operación no realizada',
-            text: 'No hay suficiente stock de este producto',
-            icon: 'warning'
-          });
-        } else if (this.transferencia.cantidadTransferir <= 0) {
-          Swal.fire({
-            title: 'Operación no realizada',
-            text: 'Debe transferir mínimo 1 artículo',
-            icon: 'warning'
-          });
-        } else {
-          this.traer.http.post(`${this.API_URL}/TransferirArticulosPlantel`, this.transferencia)
-            .subscribe((res: any) => {
-              if (res === 'Add') {
-                Swal.fire('Ok', 'Artículo agregado a la lista', 'success');
-                this.transferencia.idcosto = null;
-                this.getListaArticulosTransferir();
-                this.productoBuscado = '';
-                this.transferencia.cantidadEnStock = null;
-                this.transferencia.cantidadTransferir = null;
-              } else if (res === 'Duplicado') {
-                Swal.fire('Artículo Duplicado', 'Este artículo ya fue agregado a la lista', 'warning');
-              } else {
-                Swal.fire('Error', '¡No se guardaron los cambios!', 'error');
-              }
-            });
-        }
-      } else {
-        Swal.fire({
-          title: 'Operación no realizada',
-          text: 'Complete todos los campos',
-          icon: 'warning'
-        });
-      }
+      return;
     }
+
+    if (!form.valid) {
+      Swal.fire({
+        title: 'Operación no realizada',
+        text: 'Complete todos los campos',
+        icon: 'warning'
+      });
+      return;
+    }
+
+    if (this.transferencia.cantidadEnStock < this.transferencia.cantidadTransferir) {
+      Swal.fire({
+        title: 'Operación no realizada',
+        text: 'No hay suficiente stock de este producto',
+        icon: 'warning'
+      });
+      return;
+    } 
+    
+    if (this.transferencia.cantidadTransferir <= 0) {
+      Swal.fire({
+        title: 'Operación no realizada',
+        text: 'Debe transferir mínimo 1 artículo',
+        icon: 'warning'
+      });
+      return;
+    }
+
+    // Guardamos el consecutivo actual antes de enviar para asegurarnos de consultar el correcto
+    const folioActual = this.transferencia.consecutivo;
+
+    this.traer.http.post(`${this.API_URL}/TransferirArticulosPlantel`, this.transferencia)
+      .subscribe((res: any) => {
+        if (res === 'Add') {
+          Swal.fire('Ok', 'Artículo agregado a la lista', 'success');
+          
+          this.getListaArticulosTransferir();
+
+          // 1. Limpiamos las variables de control del producto actual
+          this.transferencia.idcosto = null;
+          this.productoBuscado = '';
+          this.transferencia.cantidadEnStock = null;
+          this.transferencia.cantidadTransferir = null;
+
+          // 2. IMPORTANTE: Volvemos a cargar los productos de la partida actual 
+          // para que el autocompletado y el select de productos no se queden vacíos
+          if (this.transferencia.partida) {
+            this.opcionSeleccionadaX();
+          }
+
+          // 3. Limpiamos los controles del formulario
+          form.controls['Producto']?.reset();
+          form.controls['cantidadTransferir']?.reset();
+          form.controls['cantidadEnStock']?.reset();
+          
+          this.cdr.detectChanges();
+        } else if (res === 'Duplicado') {
+          Swal.fire('Artículo Duplicado', 'Este artículo ya fue agregado a la lista', 'warning');
+        } else {
+          Swal.fire('Error', '¡No se guardaron los cambios!', 'error');
+        }
+      });
   }
 
   validarProducto() {
