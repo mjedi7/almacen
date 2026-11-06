@@ -58,19 +58,21 @@ const reporteKardex = async (req, res) => {
       LIMIT 1
     `;
 
-    const resEncabezado = await pool.query(queryEncabezado, params);
-    if (!resEncabezado.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
-    const headerData = resEncabezado.rows[0];
+    // Primero obtenemos el encabezado para conocer el id_articulo exacto
+    const resEncabezadoTemp = await pool.query(queryEncabezado, params);
+    if (!resEncabezadoTemp.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
+    const headerDataTemp = resEncabezadoTemp.rows[0];
 
     // --- DEPURACIÓN RÁPIDA ---
     console.log("=== DEBUG KÁRDEX ===");
-    console.log("Artículo encontrado ID:", headerData.id_articulo);
-    console.log("Clave de artículo:", headerData.clave_articulo);
+    console.log("Artículo encontrado ID:", headerDataTemp.id_articulo);
+    console.log("Clave de artículo:", headerDataTemp.clave_articulo);
 
-    const testMovs = await pool.query('SELECT COUNT(*) FROM movimientosdg WHERE id_articulo = $1', [headerData.id_articulo]);
+    const testMovs = await pool.query('SELECT COUNT(*) FROM movimientosdg WHERE id_articulo = $1', [headerDataTemp.id_articulo]);
     console.log("Movimientos directos en movimientosdg con id_articulo:", testMovs.rows[0].count);
     // -------------------------
 
+    // Consulta de detalle corregida sin duplicar el alias 'art'
     const queryDetalle = `
       SELECT 
         mdg.folio_transferencia AS "folio",
@@ -84,7 +86,6 @@ const reporteKardex = async (req, res) => {
         INNER JOIN cat_articulos art ON art.id = mdg.id_articulo
         INNER JOIN cat_partidas par ON par.id = art.id_partidas 
         LEFT JOIN costos cos ON cos.id = mdg.id_costos 
-        LEFT JOIN cat_articulos art ON art.id = COALESCE(mdg.id_articulo, cos.id_articulo)
         LEFT JOIN centro_trabajo ct ON ct.id = mdg.id_centrotrabajo_transfiere
       WHERE (par.clave = $1 OR par.id = $4)
         AND (
@@ -111,32 +112,19 @@ const reporteKardex = async (req, res) => {
       ORDER BY c.fecha_compra ASC, c.id ASC
     `;
 
-    const queryEntradasReales = `
-      SELECT 
-        m.folio_transferencia AS folio_compra,
-        'ENTRADA' AS tipo,
-        m.fecha,
-        COALESCE(m.num_articulos_solicitados, 0) AS cantidad,
-        COALESCE(c.precio_unitario, 0) AS precio_unitario,
-        m.id,
-        m.fecha AS registrado_en
-      FROM movimientosdg m
-      LEFT JOIN costos c ON c.id = m.id_costos
-      WHERE c.id_articulo = $1 OR m.id_articulo = $1
-      ORDER BY m.fecha, m.id
-    `;
-
-    [resEncabezado, resDetalle] = await Promise.all([
+    // Ejecutamos todas las consultas en paralelo de forma limpia y segura
+    const [resEncabezado, resDetalle, resEntradas] = await Promise.all([
       pool.query(queryEncabezado, params),
-      pool.query(queryDetalle, params)
+      pool.query(queryDetalle, params),
+      pool.query(queryEntradas, [headerDataTemp.id_articulo])
     ]);
 
-     headerData = resEncabezado.rows[0] || {};
+    const headerData = resEncabezado.rows[0] || {};
     const movimientosDb = resDetalle.rows;
 
     // 2. Cálculos y formateo
     const totalSalidas = movimientosDb.reduce((acc, curr) => acc + Number(curr.ventas_acumuladas || 0), 0);
-    let totalEntradas = Number(headerData.total_entradas_compras || 0);
+    const totalEntradas = resEntradas.rows.reduce((acc, curr) => acc + Number(curr.cantidad || 0), Number(headerData.total_entradas_compras || 0));
 
     let costoPromedio = 0;
     if (movimientosDb.length > 0) {
@@ -189,8 +177,18 @@ const reporteKardex = async (req, res) => {
     // 3. Generación del buffer vertical vía pdfGenerator service
     const pdfBuffer = await generarPDF('reporteKardex.html', templateData, { landscape: false });
 
+    // Limpiamos el nombre del artículo para que el archivo descargado coincida con lo que espera el cliente
+    const nombreArticuloLimpio = (headerData.nom_articulo || 'articulo')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .replace(/_+/g, '_');
+
+    const nombreArchivo = `Reporte_kardex_partida_${clavePartidaRaw}_${nombreArticuloLimpio}.pdf`;
+
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="kardex_${clavePartidaRaw}_${idParamRaw}.pdf"`);
+    res.setHeader('Content-Disposition', `inline; filename="${nombreArchivo}"`);
     res.setHeader('Content-Length', pdfBuffer.length);
     return res.send(pdfBuffer);
   } catch (error) {
