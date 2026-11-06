@@ -24,14 +24,14 @@ export class RegistrarProveedorComponent implements OnInit, OnDestroy {
     codigo_postal: string;
     esactivo: boolean;
   } = {
-    rfc: '',
-    razon_social: '',
-    direccion: '',
-    municipio: '',
-    telefono: '',
-    codigo_postal: '',
-    esactivo: true
-  };
+      rfc: '',
+      razon_social: '',
+      direccion: '',
+      municipio: '',
+      telefono: '',
+      codigo_postal: '',
+      esactivo: true
+    };
 
   proveedoresList: proveedores[] = [];
   cargandoLista: boolean = false;
@@ -41,7 +41,7 @@ export class RegistrarProveedorComponent implements OnInit, OnDestroy {
   dtTrigger: Subject<any> = new Subject<any>();
   datatableInicializada: boolean = false;
 
-  constructor(private proveedoresService: ProveedoresService) {}
+  constructor(private proveedoresService: ProveedoresService) { }
 
   ngOnInit(): void {
     this.configurarDataTable();
@@ -112,83 +112,123 @@ export class RegistrarProveedorComponent implements OnInit, OnDestroy {
     }
   }
 
-  onRfcInput(): void {
-    if (this.proveedorNuevo.rfc) {
-      // Convertir a mayúsculas y remover caracteres no permitidos
-      this.proveedorNuevo.rfc = this.proveedorNuevo.rfc
-        .toUpperCase()
-        .replace(/[^A-Z0-9&Ñ]/g, '')
-        .trim();
+  // Convierte a mayúsculas y quita caracteres especiales
+  // Bloquea símbolos en tiempo real: solo permite letras A-Z, números, & y Ñ
+  onRfcInput(event?: Event): void {
+    const input = event ? (event.target as HTMLInputElement) : null;
+    let valor = (input ? input.value : this.proveedorNuevo.rfc) || '';
+
+    // Limpia caracteres no permitidos y pasa a mayúsculas
+    valor = valor.toUpperCase().replace(/[^A-Z0-9&Ñ]/g, '');
+
+    this.proveedorNuevo.rfc = valor;
+    if (input) {
+      input.value = valor;
+    }
+  }
+
+  // Bloquea letras y símbolos: solo permite números (máximo 10 dígitos)
+  onTelefonoInput(event?: Event): void {
+    const input = event ? (event.target as HTMLInputElement) : null;
+    let valor = (input ? input.value : this.proveedorNuevo.telefono) || '';
+
+    valor = valor.replace(/\D/g, ''); // Elimina todo lo que no sea dígito
+
+    this.proveedorNuevo.telefono = valor;
+    if (input) {
+      input.value = valor;
+    }
+  }
+
+  // Bloquea letras y símbolos: solo permite números (máximo 5 dígitos)
+  onCpInput(event?: Event): void {
+    const input = event ? (event.target as HTMLInputElement) : null;
+    let valor = (input ? input.value : this.proveedorNuevo.codigo_postal) || '';
+
+    valor = valor.replace(/\D/g, ''); // Elimina todo lo que no sea dígito
+
+    this.proveedorNuevo.codigo_postal = valor;
+    if (input) {
+      input.value = valor;
     }
   }
 
   guardarProveedor(form: NgForm): void {
-    if (form.invalid) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Formulario incompleto',
-        text: 'Por favor llena los campos requeridos correctamente.'
-      });
-      return;
-    }
-
-    const rfcLimpio = this.proveedorNuevo.rfc.trim().toUpperCase();
-    if (rfcLimpio.length < 12 || rfcLimpio.length > 13) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'RFC no válido',
-        text: 'El RFC debe tener exactamente 12 caracteres (persona moral) o 13 caracteres (persona física).'
-      });
-      return;
-    }
-
-    this.guardando = true;
-
-    const payload: Partial<proveedores> = {
-      rfc: rfcLimpio,
-      razon_social: this.proveedorNuevo.razon_social.trim(),
-      direccion: this.proveedorNuevo.direccion?.trim() || '',
-      municipio: this.proveedorNuevo.municipio?.trim() || '',
-      telefono: this.proveedorNuevo.telefono?.trim() || '',
-      codigo_postal: this.proveedorNuevo.codigo_postal?.trim() || '',
-      esactivo: this.proveedorNuevo.esactivo
-    };
-
-    this.proveedoresService.crearProveedor(payload).subscribe({
-      next: (resp) => {
-        this.guardando = false;
-        Swal.fire({
-          icon: 'success',
-          title: '¡Registrado!',
-          text: resp.msg || 'El proveedor ha sido registrado con éxito.'
-        });
-
-        // Limpiar formulario
-        form.resetForm({
-          rfc: '',
-          razon_social: '',
-          direccion: '',
-          municipio: '',
-          telefono: '',
-          codigo_postal: '',
-          esactivo: true
-        });
-
-        // Recargar tabla de proveedores
-        this.cargarProveedores();
-      },
-      error: (err) => {
-        this.guardando = false;
-        console.error('Error al registrar proveedor:', err);
-        const mensaje = err.error?.msg || 'Ocurrió un error al intentar registrar el proveedor.';
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al registrar',
-          text: mensaje
-        });
-      }
+  if (form.invalid) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Formulario incompleto o inválido',
+      text: 'Por favor verifica los campos marcados en rojo.'
     });
+    return;
   }
+
+  const rfcLimpio = this.proveedorNuevo.rfc?.trim().toUpperCase() || '';
+  if (rfcLimpio.length < 12 || rfcLimpio.length > 13) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'RFC no válido',
+      text: 'El RFC debe contener exactamente 12 caracteres (persona moral) o 13 caracteres (persona física).'
+    });
+    return;
+  }
+
+  const cpLimpio = this.proveedorNuevo.codigo_postal?.trim() || '';
+  if (cpLimpio && cpLimpio.length !== 5) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Código Postal incompleto',
+      text: 'El código postal debe contener exactamente 5 dígitos numéricos.'
+    });
+    return;
+  }
+
+  const telLimpio = this.proveedorNuevo.telefono?.trim() || '';
+  if (telLimpio && telLimpio.length !== 10) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Teléfono incompleto',
+      text: 'El teléfono debe contener exactamente 10 dígitos numéricos.'
+    });
+    return;
+  }
+
+  this.guardando = true;
+
+  const payload: Partial<proveedores> = {
+    rfc: rfcLimpio,
+    razon_social: this.proveedorNuevo.razon_social.trim(),
+    direccion: this.proveedorNuevo.direccion?.trim() || '',
+    municipio: this.proveedorNuevo.municipio?.trim() || '',
+    telefono: telLimpio,
+    codigo_postal: cpLimpio,
+    esactivo: this.proveedorNuevo.esactivo
+  };
+
+  this.proveedoresService.crearProveedor(payload).subscribe({
+    next: (resp) => {
+      this.guardando = false;
+      Swal.fire({
+        icon: 'success',
+        title: '¡Registrado!',
+        text: resp.msg || 'El proveedor ha sido registrado con éxito.'
+      });
+
+      form.resetForm({ esactivo: true });
+      this.cargarProveedores();
+    },
+    error: (err) => {
+      this.guardando = false;
+      console.error('Error al registrar proveedor:', err);
+      const mensaje = err.error?.msg || 'Ocurrió un error al intentar registrar el proveedor.';
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al registrar',
+        text: mensaje
+      });
+    }
+  });
+}
 
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
