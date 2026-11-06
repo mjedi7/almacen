@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false   # Desactiva las credenciales por defecto de github-actions[bot]
 
       - name: Enviar cambios a la otra cuenta
         env:
@@ -21,12 +22,5 @@ jobs:
           git config --global user.name "mjedi7"
           git config --global user.email "oscar.salinas.mora@me.com"
           
-          # Limpiamos por si ya existe el remote destino
-          git remote remove destino || true
-          
-          # Configuramos el remote inyectando el token de forma segura en la URL
-          git remote add destino https://${{ secrets.PAT_OTRA_CUENTA }}@github.com/mjedi7/almacen.git
-          
-          # Hacemos fetch y push directo a main
-          git fetch destino main || true
-          git push destino HEAD:refs/heads/main --force
+          # Se inserta el Token directamente en la URL de destino para la sesion de Git
+          git push https://x-access-token:${PAT_OTRA_CUENTA}@github.com/mjedi7/almacen.git HEAD:refs/heads/main --force
