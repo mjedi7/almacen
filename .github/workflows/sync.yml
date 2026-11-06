@@ -16,9 +16,9 @@ jobs:
 
       - name: Enviar cambios a la otra cuenta
         env:
-          PAT_OTRA_CUENTA: ${{ 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 }}
+          PAT_OTRA_CUENTA: ${{ secrets.PAT_OTRA_CUENTA }}
         run: |
           git config --global user.name "mjedi7"
           git config --global user.email "oscar.salinas.mora@me.com"
-          git remote add destino https://x-access-token:${{ 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 }}@github.com/mjedi7/almacen.git
+          git remote add destino https://x-access-token:${{ secrets.PAT_OTRA_CUENTA }}@github.com/mjedi7/almacen.git
           git push destino HEAD:main --force
