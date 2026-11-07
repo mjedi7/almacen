@@ -4,6 +4,191 @@
 <head>
   <meta charset="UTF-8">
   <title>{{titulo}}</title>
+  <style>
+    @page {
+      size: letter portrait;
+      /* Margen estándar con resguardo inferior */
+      margin: 10mm 12mm 10mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      position: relative;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8.5pt;
+      color: #000;
+      background: #fff;
+      /* Espacio reservado para que la tabla y totales nunca tapen la cenefa */
+      padding-bottom: 35mm;
+    }
+
+    /* Banner superior */
+    .report-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .report-banner img {
+      width: 100%;
+      max-width: 92%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Encabezados */
+    .report-heading {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .report-heading__institution {
+      font-size: 10pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .report-heading__title {
+      font-size: 11.5pt;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+
+    .report-period {
+      font-size: 9pt;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    /* Metadatos */
+    .report-meta {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 8.5pt;
+    }
+
+    .report-meta td {
+      padding: 2.5px 4px;
+      vertical-align: top;
+    }
+
+    .report-meta__label {
+      font-weight: bold;
+      width: 12%;
+    }
+
+    /* Tabla de registros */
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+      page-break-inside: auto;
+      margin-bottom: 12px;
+    }
+
+    .report-table thead {
+      display: table-header-group;
+    }
+
+    .report-table tr {
+      page-break-inside: avoid;
+    }
+
+    .report-table th {
+      background-color: #f0f4f8;
+      border: 1px solid #000;
+      padding: 4.5px 5px;
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-align: center;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .report-table td {
+      border: 1px solid #000;
+      padding: 3.5px 6px;
+      font-size: 8pt;
+    }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-bold { font-weight: bold; }
+    .nowrap { white-space: nowrap; }
+
+    .empty-state {
+      text-align: center;
+      font-style: italic;
+      font-size: 8.5pt;
+      color: #555;
+      padding: 12px;
+    }
+
+    /* ========================================================
+       SECCIÓN DE CIERRE (Totales)
+       ======================================================== */
+    .bloque-final-cierre {
+      width: 100%;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    .totales-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .tabla-totales {
+      border-collapse: collapse;
+      min-width: 240px;
+      margin-left: auto;
+    }
+
+    .tabla-totales td {
+      padding: 2.5px 6px;
+      font-size: 8.5pt;
+    }
+
+    /* ========================================================
+       CENEFA INSTITUCIONAL AL PIE DEL DOCUMENTO
+       ======================================================== */
+    .cenefa-fija-fondo {
+      position: absolute;
+      bottom: -6mm; /* Ajusta la cenefa contra el borde inferior */
+      left: 0;
+      width: 100%;
+      text-align: center;
+      line-height: 0;
+      font-size: 0;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    .cenefa-fija-fondo img {
+      width: 100%;
+      max-height: 30mm;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      transform: translateY(2mm);
+    }
+  </style>
 </head>
 
 <body class="report">
@@ -62,34 +247,34 @@
     </thead>
     <tbody>
       {{#if hayRegistros}}
-        {{#each registros}}
-        <tr>
-          <td class="text-center">{{this.folioFactura}}</td>
-          <td class="text-left">{{this.proveedor}}</td>
-          <td class="text-center">{{this.fechaCompra}}</td>
-          <td class="text-right nowrap">{{this.importe}}</td>
-          <td class="text-right nowrap">{{this.impuesto}}</td>
-          <td class="text-right nowrap font-bold">{{this.total}}</td>
-        </tr>
-        {{/each}}
+      {{#each registros}}
+      <tr>
+        <td class="text-center">{{this.folioFactura}}</td>
+        <td class="text-left">{{this.proveedor}}</td>
+        <td class="text-center">{{this.fechaCompra}}</td>
+        <td class="text-right nowrap">{{this.importe}}</td>
+        <td class="text-right nowrap">{{this.impuesto}}</td>
+        <td class="text-right nowrap font-bold">{{this.total}}</td>
+      </tr>
+      {{/each}}
       {{else}}
-        <tr>
-          <td colspan="6" class="empty-state">
-            No se encontraron compras para los criterios seleccionados.
-          </td>
-        </tr>
+      <tr>
+        <td colspan="6" class="empty-state">
+          No se encontraron compras para los criterios seleccionados.
+        </td>
+      </tr>
       {{/if}}
     </tbody>
   </table>
 
-  <!-- Bloque de totales al final de la tabla -->
-  <div class="totales-contenedor">
-    <div class="totales-contenido">
-      <div class="totales-conteo">
+  <!-- CIERRE FINAL (Totales en flujo normal) -->
+  <div class="bloque-final-cierre">
+    <div class="totales-flex">
+      <div>
         Registros encontrados: <strong>{{totalRegistros}}</strong>
       </div>
       <div>
-        <table class="totals-table">
+        <table class="tabla-totales">
           <tbody>
             <tr>
               <td class="text-right font-bold">Subtotal:</td>
@@ -99,7 +284,7 @@
               <td class="text-right font-bold">I.V.A.:</td>
               <td class="text-right nowrap">{{totales.iva}}</td>
             </tr>
-            <tr class="totals-table__total">
+            <tr style="border-top: 1.5px solid #000;">
               <td class="text-right font-bold">Total:</td>
               <td class="text-right nowrap font-bold">{{totales.total}}</td>
             </tr>
@@ -109,12 +294,13 @@
     </div>
   </div>
 
-  <!-- Cenefa institucional: al no ser fixed, solo existirá una vez al cierre -->
+  <!-- Cenefa institucional: Ubicada al fondo absoluto de todo el documento -->
   {{#if pieBase64}}
-  <div class="institutional-footer">
+  <div class="cenefa-fija-fondo">
     <img src="{{pieBase64}}" alt="Pie institucional">
   </div>
   {{/if}}
 
 </body>
+
 </html>

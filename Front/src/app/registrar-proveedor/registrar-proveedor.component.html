@@ -14,9 +14,10 @@
       </h5>
     </div>
     <div class="card-body p-4">
-      <form #f="ngForm" (ngSubmit)="guardarProveedor(f)">
+      <form #f="ngForm" (ngSubmit)="guardarProveedor(f)" novalidate>
         <!-- Fila 1: RFC y Razón Social -->
         <div class="row mb-3">
+          <!-- CAMPO RFC -->
           <div class="col-md-4">
             <label for="rfc" class="form-label"><b>R.F.C.<span class="text-danger">*</span></b></label>
             <input
@@ -24,16 +25,22 @@
               id="rfc"
               name="rfc"
               class="form-control text-uppercase"
+              [class.is-invalid]="(rfcCtrl.touched || f.submitted) && rfcCtrl.invalid"
               placeholder="ABCD123456EFG"
+              minlength="12"
               maxlength="13"
+              pattern="^[A-Za-z0-9&Ññ]{12,13}$"
               [(ngModel)]="proveedorNuevo.rfc"
-              (input)="onRfcInput()"
+              (input)="onRfcInput($event)"
               required
               #rfcCtrl="ngModel"
             />
-            <small *ngIf="f.submitted && rfcCtrl.invalid" class="text-danger">
-              El RFC es obligatorio (12 o 13 caracteres).
-            </small>
+            <div *ngIf="(rfcCtrl.touched || f.submitted) && rfcCtrl.invalid" class="invalid-feedback">
+              <span *ngIf="rfcCtrl.errors?.['required']">El RFC es obligatorio.</span>
+              <span *ngIf="rfcCtrl.errors?.['minlength'] || rfcCtrl.errors?.['pattern']">
+                El RFC debe tener 12 o 13 caracteres.
+              </span>
+            </div>
             <div class="form-text">12 dígitos para empresa, 13 para persona física.</div>
           </div>
 
@@ -81,6 +88,7 @@
             />
           </div>
 
+          <!-- CAMPO CÓDIGO POSTAL -->
           <div class="col-md-3">
             <label for="codigo_postal" class="form-label"><b>Código Postal</b></label>
             <input
@@ -88,15 +96,24 @@
               id="codigo_postal"
               name="codigo_postal"
               class="form-control"
+              [class.is-invalid]="(cpCtrl.touched || f.submitted) && cpCtrl.invalid"
               placeholder="Ejemplo: 91000"
+              minlength="5"
               maxlength="5"
+              pattern="^[0-9]{5}$"
               [(ngModel)]="proveedorNuevo.codigo_postal"
+              (input)="onCpInput($event)"
+              #cpCtrl="ngModel"
             />
+            <div *ngIf="(cpCtrl.touched || f.submitted) && cpCtrl.invalid" class="invalid-feedback">
+              El código postal debe tener exactamente 5 dígitos numéricos.
+            </div>
           </div>
         </div>
 
         <!-- Fila 3: Teléfono y Estado Activo -->
         <div class="row mb-4 align-items-center">
+          <!-- CAMPO TELÉFONO -->
           <div class="col-md-6">
             <label for="telefono" class="form-label"><b>Teléfono de Contacto</b></label>
             <input
@@ -104,10 +121,18 @@
               id="telefono"
               name="telefono"
               class="form-control"
+              [class.is-invalid]="(telCtrl.touched || f.submitted) && telCtrl.invalid"
               placeholder="Ejemplo: 2281234567"
-              maxlength="15"
+              minlength="10"
+              maxlength="10"
+              pattern="^[0-9]{10}$"
               [(ngModel)]="proveedorNuevo.telefono"
+              (input)="onTelefonoInput($event)"
+              #telCtrl="ngModel"
             />
+            <div *ngIf="(telCtrl.touched || f.submitted) && telCtrl.invalid" class="invalid-feedback">
+              El teléfono debe tener exactamente 10 dígitos numéricos.
+            </div>
           </div>
 
           <div class="col-md-6 mt-3 mt-md-4">
@@ -190,7 +215,7 @@
               <td>
                 <div>{{ prov.direccion || 'Sin dirección' }}</div>
                 <small class="text-muted" *ngIf="prov.municipio || prov.codigo_postal">
-                  {{ prov.municipio }} <span *ngIf="prov.codigo_postal">- C.P. {{ prov.codigo_postal }}</span>
+                  {{ prov.municipio }} <span *ngIf="prov.codigo_postal">C.P. {{ prov.codigo_postal }}</span>
                 </small>
               </td>
               <td>{{ prov.telefono || 'Sin teléfono' }}</td>

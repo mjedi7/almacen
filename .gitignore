@@ -1,8 +1,9 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# dependencies (remueve la barra '/' inicial para que aplique a subcarpetas como Back/ y Front/)
 node_modules/
 **/node_modules/
+
+Back/.env
+.env
 
 # compiled output
 dist/
@@ -70,3 +71,4 @@ Front/src/environments/environment.prod.ts
 *.bad
 *.backup
 *.bak
+
