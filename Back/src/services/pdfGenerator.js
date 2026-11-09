@@ -115,17 +115,33 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
-    // Opciones de Puppeteer:
-    // Para compras por partida se desactiva displayHeaderFooter y se respeta el tamaño del CSS
-   const defaultOptions = {
+   // Plantilla HTML del pie nativo de Puppeteer con tamaño imponente y ancho total
+   
+    const footerHtmlTemplate = `
+      <div style="font-size: 7.5pt; font-family: Arial, sans-serif; width: 100%; text-align: center; margin: 0; padding: 0;">
+        ${pieBase64 ? `<img src="${pieBase64}" style="height: 22mm; width: auto; max-width: 95vw; display: block; margin: 0 auto 2px auto;" />` : ''}
+        <div style="font-weight: bold; margin-bottom: 1px; color: #000;">
+          Carrillo Puerto #21, Col. Centro C.P 91000 Xalapa, Veracruz. Tel. (228) 8421600
+        </div>
+        <div style="color: #000;">
+          www.cecytev.edu.mx — POR AMOR A VERACRUZ
+        </div>
+      </div>
+    `;
+
+    // Opciones definitivas de Puppeteer para forzar el footer en grande en todas partes
+    const defaultOptions = {
       format: 'Letter',
       printBackground: true,
-      displayHeaderFooter: esSoloHeader, // False para partida
+      displayHeaderFooter: false, // <--- Activado por decreto para que muestre el footer en todos los reportes
       headerTemplate: '<span></span>',
-      footerTemplate: '<span></span>',
-      margin: esSoloHeader
-        ? { top: '12mm', bottom: '22mm', left: '10mm', right: '10mm' }
-        : { top: '0px', bottom: '0px', left: '0px', right: '0px' },
+      footerTemplate: footerHtmlTemplate, // <--- Nuestra cenefa grande en Base64
+      margin: {
+        top: '12mm',
+        bottom: '32mm', // <--- Margen reservado abajo para que la cenefa grandota quepa con holgura
+        left: '12mm',
+        right: '12mm'
+      },
       preferCSSPageSize: true,
       ...pdfOptions
     };
