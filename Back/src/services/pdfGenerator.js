@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
+const { PDFDocument } = require('pdf-lib');
 
 const imgToBase64 = (filePath) => {
   if (!fs.existsSync(filePath)) return null;
@@ -29,9 +30,6 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     }
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
-    console.log("=== RUTA DE LA PLANTILLA ===", templatePath);
-    console.log("=== ¿TIENE CENEFA EL HTML? ===", templateHtml.includes("cenefa-contenedor") || templateHtml.includes("institutional-footer"));
-
 
     handlebars.registerHelper('primeraMayuscula', function (str) {
       if (!str) return '';
@@ -42,7 +40,6 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const compiledTemplate = handlebars.compile(templateHtml);
 
     const bannerBase64 = imgToBase64(bannerPath);
-    const pieBase64 = imgToBase64(piePath);
 
     const usuarioPie =
       (data && (data.usuario || data.nombreUsuario || data.user)) || 'ADMINISTRADOR';
@@ -60,7 +57,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       usuarioPie,
       fechaPie,
       bannerBase64,
-      pieBase64
+      pieBase64: null // No inyectamos en HTML para evitar duplicados o desfases
     });
 
     browser = await puppeteer.launch({
@@ -71,8 +68,13 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    // Detección del tipo de reporte
+    // Detección de reportes
     const nombreMin = templateName.toLowerCase().trim();
+
+    const esReporteConPie =
+      nombreMin.includes('partida') ||
+      nombreMin.includes('proveedor') ||
+      nombreMin.includes('kardex');
 
     const esSoloHeader =
       nombreMin.includes('existencia') ||
@@ -80,28 +82,16 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       nombreMin.includes('todas') ||
       nombreMin.includes('salida');
 
-      // 1. INYECCIÓN ESTRICTA: 'partida' NUNCA debe cargar reportes-con-pie.css
-    if (esSoloHeader && fs.existsSync(cssSoloHeaderPath)) {
-      await page.addStyleTag({ path: cssSoloHeaderPath });
-    } else if (nombreMin.includes('kardex') && fs.existsSync(cssConPiePath)) {
+    // Inyección de CSS correspondiente
+    if (esReporteConPie && fs.existsSync(cssConPiePath)) {
       await page.addStyleTag({ path: cssConPiePath });
-    }
-    // Si es reporteEntradasPartida, NO entra aquí y no carga ningún CSS externo.
-
-    // Compras por partida es autónomo: NO debe cargar estilos externos con position:fixed
-    const usaCssExterno = esSoloHeader
-      ? cssSoloHeaderPath
-      : nombreMin.includes('kardex')
-      ? cssConPiePath
-      : null;
-
-    if (usaCssExterno && fs.existsSync(usaCssExterno)) {
-      await page.addStyleTag({ path: usaCssExterno });
+    } else if (esSoloHeader && fs.existsSync(cssSoloHeaderPath)) {
+      await page.addStyleTag({ path: cssSoloHeaderPath });
     }
 
     await page.emulateMediaType('print');
 
-    // Esperar imágenes
+    // Esperar imágenes antes de imprimir
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
       await Promise.all(
@@ -115,22 +105,52 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
-    // Opciones de Puppeteer:
-    // Para compras por partida se desactiva displayHeaderFooter y se respeta el tamaño del CSS
-   const defaultOptions = {
+    const defaultOptions = {
       format: 'Letter',
       printBackground: true,
-      displayHeaderFooter: esSoloHeader, // False para partida
-      headerTemplate: '<span></span>',
-      footerTemplate: '<span></span>',
-      margin: esSoloHeader
-        ? { top: '12mm', bottom: '22mm', left: '10mm', right: '10mm' }
-        : { top: '0px', bottom: '0px', left: '0px', right: '0px' },
+      displayHeaderFooter: false,
       preferCSSPageSize: true,
+      margin: {
+        top: '0px',
+        bottom: '0px',
+        left: '0px',
+        right: '0px'
+      },
       ...pdfOptions
     };
 
-    const pdfBuffer = await page.pdf(defaultOptions);
+    let pdfBuffer = await page.pdf(defaultOptions);
+
+    // Estampado de cenefa con pdf-lib solo en la última página
+    if (esReporteConPie && fs.existsSync(piePath)) {
+      const pdfDoc = await PDFDocument.load(pdfBuffer);
+      const paginas = pdfDoc.getPages();
+      const ultimaPagina = paginas[paginas.length - 1];
+
+      const imagenBytes = fs.readFileSync(piePath);
+      const imagenEmbed = piePath.toLowerCase().endsWith('.png')
+        ? await pdfDoc.embedPng(imagenBytes)
+        : await pdfDoc.embedJpg(imagenBytes);
+
+      const { width } = ultimaPagina.getSize();
+
+      const anchoDeseado = width * 0.92;
+      const escala = anchoDeseado / imagenEmbed.width;
+      const altoCalculado = imagenEmbed.height * escala;
+
+      const posX = (width - anchoDeseado) / 2;
+      const posY = 18; // 18pt (~6mm) del margen inferior físico
+
+      ultimaPagina.drawImage(imagenEmbed, {
+        x: posX,
+        y: posY,
+        width: anchoDeseado,
+        height: altoCalculado
+      });
+
+      pdfBuffer = Buffer.from(await pdfDoc.save());
+    }
+
     return pdfBuffer;
 
   } catch (error) {
