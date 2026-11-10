@@ -19,11 +19,7 @@ export const environment = {
     appId: "1:707598495946:web:1708c22c2aa5aa904c4433",
     measurementId: "G-X89XNXH6TT"
   },
-<<<<<<< HEAD
     uri_api: 'http://172.16.0.100:3010'
-=======
-    uri_api: 'http://172.16.0.148:3010'
->>>>>>> d14a6ef5e3ba6a9e5f7c5f68fa090d3b12096837
    //uri_api:   'http://172.16.0.148:3000'
    //uri_api:   'http://localhost:3010'
   // uri_api: 'http://172.16.0.4:3001'

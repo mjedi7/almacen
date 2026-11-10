@@ -10,3 +10,20 @@ h3{
 .banner{
     background-color: aquamarine;
 }
+
+       .logo-container {
+            display: flex;
+            align-items: center;
+            letter-spacing: -2px; 
+            font-size: 60px; /* Tamaño grande para el ejemplo */
+            font-weight: 700;
+            justify-content: center;            
+        }
+
+        .color-green {
+            color: #00843D; /* Verde corporativo */
+        }
+
+        .color-orange {
+            color: #F26522; /* Naranja corporativo */
+        }
