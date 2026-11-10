@@ -96,7 +96,11 @@ export class MisSeguimientosComponent {
       headers: this.headers 
     }).subscribe({
       next: data => { 
-        this.historial = data; 
+        const usuarioSesion = localStorage.getItem('nombre') || localStorage.getItem('usuario') || 'Marisela Alarcón Hernández';
+        this.historial = (data || []).map(r => ({
+          ...r,
+          usuario_nombre: (!r.usuario_nombre || r.usuario_nombre === 'Sistema') ? usuarioSesion : r.usuario_nombre
+        }));
         this.historialCargando = false; 
       },
       error: e => { 
@@ -134,11 +138,14 @@ export class MisSeguimientosComponent {
         return; 
       }
 
+      const nombreUsuario = localStorage.getItem('nombre') || localStorage.getItem('usuario') || 'Marisela Alarcón Hernández';
       this.envioPendiente = { 
         clave_operacion: this.clave, 
         fecha_recepcion: this.fecha,
         referencia: this.referencia, 
         observaciones: this.observaciones,
+        usuario_nombre: nombreUsuario,
+        id_usuario: 67,
         detalles: seleccion.map(c => ({ id_compra: c.id, cantidad: Number(c.recibir) })) 
       };
     }

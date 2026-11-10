@@ -35,6 +35,7 @@ import { CargarExistenciasComponent } from './cargar-existencias/cargar-existenc
 import { ListarArticulosPartidaComponent } from './listar-articulos-partida/listar-articulos-partida.component';
 import { RegistrarPartidaComponent } from './registrar-partida/registrar-partida.component';
 import { RegistrarProveedorComponent } from './registrar-proveedor/registrar-proveedor.component';
+import { EncargadosPlantelComponent } from './encargados-plantel/encargados-plantel.component';
 
 
 @NgModule({
@@ -59,7 +60,8 @@ import { RegistrarProveedorComponent } from './registrar-proveedor/registrar-pro
     CargarExistenciasComponent,
     ListarArticulosPartidaComponent,
     RegistrarPartidaComponent,
-    RegistrarProveedorComponent
+    RegistrarProveedorComponent,
+    EncargadosPlantelComponent
   ],
   imports: [
     BrowserModule,

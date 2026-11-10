@@ -5,7 +5,9 @@ node_modules/
 <<<<<<< HEAD
 Back/.env
 .env
+
 =======
+>>>>>>> d14a6ef5e3ba6a9e5f7c5f68fa090d3b12096837
 # compiled output
 dist/
 tmp/
@@ -63,12 +65,17 @@ src/environments/environment.ts
 src/environments/environment.development.ts
 !src/environments/environment.example.ts
 
-# --- Archivos específicos solicitados ---
+
 Front/src/environments/environment.ts
 Front/src/environments/environment.prod.ts
-Front/package.json
-Front/package-lock.json
 
+<<<<<<< HEAD
+# Archivos de respaldo
+*.old
+*.bad
+*.backup
+*.bak
+=======
 Back/package.json
 Back/package-lock.json
->>>>>>> main
+>>>>>>> d14a6ef5e3ba6a9e5f7c5f68fa090d3b12096837

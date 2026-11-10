@@ -29,6 +29,7 @@ import { AltaArticuloComponent } from '../registrar-articulo/alta-articulo.compo
 import { ListarArticulosPartidaComponent } from '../listar-articulos-partida/listar-articulos-partida.component';
 import { RegistrarPartidaComponent } from '../registrar-partida/registrar-partida.component';
 import { RegistrarProveedorComponent } from '../registrar-proveedor/registrar-proveedor.component';
+import { EncargadosPlantelComponent } from '../encargados-plantel/encargados-plantel.component';
 
 
 
@@ -45,6 +46,7 @@ const routes: Routes = [
             {path: 'generar-documento',component:GenerarDocumentoComponent,canActivate:[AuthGuard]},
             {path: 'mis-seguimientos',component:MisSeguimientosComponent,canActivate:[AuthGuard]},
             {path: 'lista-usuarios', component: ListaUsuariosComponent, canActivate: [AuthGuard, AdminGuard]},
+            {path: 'encargados-plantel', component: EncargadosPlantelComponent, canActivate: [AuthGuard, AdminGuard]},
             {path: 'por-contestar', component:PorContestarComponent,canActivate:[AuthGuard]},
             {path: 'estadistico-general', component:EstadisticoGeneralComponent,canActivate:[AuthGuard]},
             {path: 'cambio-password', component: CambioPasswordComponent, canActivate: [AuthGuard]},

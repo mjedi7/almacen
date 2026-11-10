@@ -17,10 +17,8 @@ const reporteKardex = async (req, res) => {
     const idParamInt = parseInt(idParamRaw, 10) || 0;
     const partidaInt = parseInt(clavePartidaRaw, 10) || 0;
 
-    // Declaración correcta de los parámetros para las consultas
     const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
 
-    // 1. Consultas SQL usando tablas reales en lugar de la vista v_entradas_kardex
     const queryEncabezado = `
       SELECT 
         par.clave AS clave_partida,
@@ -58,21 +56,10 @@ const reporteKardex = async (req, res) => {
       LIMIT 1
     `;
 
-    // Primero obtenemos el encabezado para conocer el id_articulo exacto
     const resEncabezadoTemp = await pool.query(queryEncabezado, params);
     if (!resEncabezadoTemp.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
     const headerDataTemp = resEncabezadoTemp.rows[0];
 
-    // --- DEPURACIÓN RÁPIDA ---
-    console.log("=== DEBUG KÁRDEX ===");
-    console.log("Artículo encontrado ID:", headerDataTemp.id_articulo);
-    console.log("Clave de artículo:", headerDataTemp.clave_articulo);
-
-    const testMovs = await pool.query('SELECT COUNT(*) FROM movimientosdg WHERE id_articulo = $1', [headerDataTemp.id_articulo]);
-    console.log("Movimientos directos en movimientosdg con id_articulo:", testMovs.rows[0].count);
-    // -------------------------
-
-    // Consulta de detalle corregida sin duplicar el alias 'art'
     const queryDetalle = `
       SELECT 
         mdg.folio_transferencia AS "folio",
@@ -112,7 +99,6 @@ const reporteKardex = async (req, res) => {
       ORDER BY c.fecha_compra ASC, c.id ASC
     `;
 
-    // Ejecutamos todas las consultas en paralelo de forma limpia y segura
     const [resEncabezado, resDetalle, resEntradas] = await Promise.all([
       pool.query(queryEncabezado, params),
       pool.query(queryDetalle, params),
@@ -122,7 +108,6 @@ const reporteKardex = async (req, res) => {
     const headerData = resEncabezado.rows[0] || {};
     const movimientosDb = resDetalle.rows;
 
-    // 2. Cálculos y formateo
     const totalSalidas = movimientosDb.reduce((acc, curr) => acc + Number(curr.ventas_acumuladas || 0), 0);
     const totalEntradas = resEntradas.rows.reduce((acc, curr) => acc + Number(curr.cantidad || 0), Number(headerData.total_entradas_compras || 0));
 
@@ -174,10 +159,9 @@ const reporteKardex = async (req, res) => {
       }
     };
 
-    // 3. Generación del buffer vertical vía pdfGenerator service
-    const pdfBuffer = await generarPDF('reporteKardex.html', templateData, { landscape: false });
+    // Llamada al servicio estandarizado de PDF (Asegúrate de que el archivo se llame reporteKardex.html)
+    const pdfBuffer = await generarPDF('reporteKardex.html', templateData);
 
-    // Limpiamos el nombre del artículo para que el archivo descargado coincida con lo que espera el cliente
     const nombreArticuloLimpio = (headerData.nom_articulo || 'articulo')
       .toLowerCase()
       .normalize('NFD')

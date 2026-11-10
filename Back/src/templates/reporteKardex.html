@@ -4,57 +4,315 @@
 <head>
   <meta charset="UTF-8">
   <title>Kárdex de Almacén</title>
+  <style>
+    @page {
+      size: letter portrait;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body.report {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8.5pt;
+      color: #000;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Contenedor flexible que absorbe el espacio y empuja el footer al fondo */
+    .contenido-flexible {
+      flex: 1;
+    }
+
+    /* Banner superior */
+    .report-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .report-banner img {
+      width: 100%;
+      max-width: 92%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Encabezados */
+    .report-heading {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .report-heading__institution {
+      font-size: 10pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .report-heading__title {
+      font-size: 11.5pt;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    /* Ficha técnica (Metadatos del artículo) */
+    .report-meta {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 8.5pt;
+      border: 1px solid #000;
+    }
+
+    .report-meta td {
+      padding: 4px 6px;
+      vertical-align: middle;
+      border: 1px solid #000;
+    }
+
+    .report-meta__label {
+      font-weight: bold;
+      background-color: #f0f4f8;
+    }
+
+    /* Subtítulos de sección */
+    h3 {
+      font-size: 9.5pt;
+      margin: 12px 0 6px 0;
+      text-transform: uppercase;
+      border-bottom: 1px solid #000;
+      padding-bottom: 2px;
+    }
+
+    /* Tablas de detalle (Entradas / Movimientos) */
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+      margin-bottom: 10px;
+      page-break-inside: auto;
+    }
+
+    .report-table thead {
+      display: table-header-group;
+    }
+
+    .report-table tr {
+      page-break-inside: avoid;
+    }
+
+    .report-table th {
+      background-color: #f0f4f8;
+      border: 1px solid #000;
+      padding: 4.5px 5px;
+      font-size: 8.5pt;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .report-table td {
+      border: 1px solid #000;
+      padding: 3.5px 6px;
+      font-size: 8pt;
+    }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+    .font-bold { font-weight: bold; }
+    .nowrap { white-space: nowrap; }
+
+    .empty-state {
+      text-align: center;
+      font-style: italic;
+      color: #555;
+      padding: 10px;
+    }
+
+    /* Totales y Cierre alineados a la izquierda */
+    .bloque-final-cierre {
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 8px;
+      text-align: left;
+      font-size: 9.5pt;
+      line-height: 1.5;
+      page-break-inside: avoid;
+    }
+
+    /* Footer institucional anclado al piso de la página */
+    .footer-institucional-html {
+      margin-top: auto; /* Empuja el bloque al fondo absoluto */
+      padding-top: 15px;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+
+    .footer-institucional-html img {
+      width: 100%;
+      max-height: 35mm; /* Tamaño imponente */
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 
 <body class="report">
 
-  <!-- Banner superior -->
-  {{#if bannerBase64}}
-  <div class="report-banner">
-    <img src="{{bannerBase64}}" alt="Banner Institucional">
-  </div>
-  {{/if}}
+  <!-- CONTENEDOR FLEXIBLE PRINCIPAL -->
+  <div class="contenido-flexible">
 
-  <!-- Encabezado institucional -->
-  <header class="report-heading">
-    <p class="report-heading__institution">
-      Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
-    </p>
-    <p class="font-bold" style="font-size: 8.5pt; margin-bottom: 2px;">
-      DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
-    </p>
-    <h1 class="report-heading__title">
-      KÁRDEX DE ALMACÉN
-    </h1>
-  </header>
+    <!-- Banner superior -->
+    {{#if bannerBase64}}
+    <div class="report-banner">
+      <img src="{{bannerBase64}}" alt="Banner Institucional">
+    </div>
+    {{/if}}
 
+<<<<<<< HEAD
+    <!-- Encabezado institucional del Kárdex -->
+    <header class="report-heading">
+      <p class="report-heading__institution">
+        Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
+      </p>
+      <p class="font-bold" style="font-size: 8.5pt; margin-bottom: 3px;">
+        DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
+      </p>
+      <h1 class="report-heading__title">
+        KÁRDEX DE ALMACÉN
+      </h1>
+    </header>
+=======
   <!-- Ficha técnica del Artículo -->
   <table class="report-meta">
     <tbody>
       <tr>
         <td class="report-meta__label nowrap" style="width: 15%;">Descripción:</td>
         <td style="width: 45%;">{{header.nom_articulo}}</td>
+>>>>>>> bbd6cc969e99d00b71cfe72172cc49bb8183dfc5
 
-        <td class="report-meta__label nowrap" style="width: 18%; text-align: left;">Clave artículo:</td>
-        <td style="width: 22%; text-align: left;">{{header.clave_completa}}</td>
-      </tr>
-      <tr>
-        <td class="report-meta__label nowrap">Unidad medida:</td>
-        <td>{{header.unidad_medida}}</td>
+    <!-- Ficha técnica del Artículo -->
+    <table class="report-meta">
+      <tbody>
+        <tr>
+          <td class="report-meta__label" style="width: 15%;">Descripción:</td>
+          <td style="width: 35%;">{{header.nom_articulo}}</td>
+          <td class="report-meta__label" style="width: 15%;">Clave artículo:</td>
+          <td style="width: 35%;">{{header.clave_completa}}</td>
+        </tr>
+        <tr>
+          <td class="report-meta__label">Unidad entrada:</td>
+          <td>{{header.unidad_medida}}</td>
+          <td class="report-meta__label">Última entrada:</td>
+          <td>{{header.fecha_ult_compra}}</td>
+        </tr>
+        <tr>
+          <td class="report-meta__label">Unidad salida:</td>
+          <td>{{header.unidad_medida}}</td>
+          <td class="report-meta__label">Tipo costeo:</td>
+          <td><strong>P.E.P.S.</strong></td>
+        </tr>
+        <tr>
+          <td class="report-meta__label" colspan="2"></td>
+          <td class="report-meta__label">Costo promedio:</td>
+          <td>$ {{header.costo_promedio}}</td>
+        </tr>
+      </tbody>
+    </table>
 
-        <td class="report-meta__label nowrap" style="text-align: left;">Fecha últ. compra:</td>
-        <td style="text-align: left;">{{header.fecha_ult_compra}}</td>
-      </tr>
-      <tr>
-        <td class="report-meta__label nowrap">Costo promedio:</td>
-        <td>$ {{header.costo_promedio}}</td>
+    <!-- Sección: Entradas y recepciones -->
+    <h3>Entradas y recepciones</h3>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Folio compra</th>
+          <th style="width: 25%;">Movimiento</th>
+          <th style="width: 15%;">Fecha</th>
+          <th style="width: 15%; text-align: right;">Cantidad</th>
+          <th style="width: 15%; text-align: right;">Costo unitario</th>
+          <th style="width: 15%; text-align: right;">Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if entradas.length}}
+        {{#each entradas}}
+        <tr>
+          <td class="text-center">{{this.folio}}</td>
+          <td class="text-left">{{this.tipo}}</td>
+          <td class="text-center">{{this.fecha}}</td>
+          <td class="text-right">{{this.cantidad}}</td>
+          <td class="text-right">${{this.costo}}</td>
+          <td class="text-right">${{this.importe}}</td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr>
+          <td colspan="6" class="empty-state">Sin entradas registradas.</td>
+        </tr>
+        {{/if}}
+      </tbody>
+    </table>
 
-        <td class="report-meta__label nowrap" style="text-align: left;">Tipo costeo:</td>
-        <td style="text-align: left;"><strong>P.E.P.S.</strong></td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- Sección: Salidas registradas (Kárdex) -->
+    <h3>Salidas registradas</h3>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th style="width: 12%;">Doc/Folio</th>
+          <th style="width: 28%;">Plantel / Destino</th>
+          <th style="width: 12%; text-align: right;">Exist. Inicial</th>
+          <th style="width: 12%; text-align: right;">Salida</th>
+          <th style="width: 12%; text-align: right;">Importe Total</th>
+          <th style="width: 12%; text-align: right;">Existencia</th>
+          <th style="width: 12%;">Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if movimientos.length}}
+        {{#each movimientos}}
+        <tr>
+          <td class="text-center">{{this.folio}}</td>
+          <td class="text-left" style="text-transform: uppercase;">{{this.plantel_destino}}</td>
+          <td class="text-right">{{this.existencia_inicial}}</td>
+          <td class="text-right">{{this.ventas_acumuladas}}</td>
+          <td class="text-right nowrap">$ {{this.importe_total}}</td>
+          <td class="text-right font-bold">{{this.existencia}}</td>
+          <td class="text-center">{{this.fecha}}</td>
+        </tr>
+        {{/each}}
+        {{else}}
+        <tr>
+          <td colspan="7" class="empty-state">
+            No hay movimientos registrados para este criterio.
+          </td>
+        </tr>
+        {{/if}}
+      </tbody>
+    </table>
 
+<<<<<<< HEAD
+  </div> <!-- FIN DE CONTENIDO FLEXIBLE -->
+
+
+  <!-- BLOQUE DE CIERRE Y CENEFA (Empujados automáticamente al fondo) -->
+  <div class="footer-institucional-html">
+    <div class="bloque-final-cierre">
+=======
   <!-- Tabla de Movimientos del Kárdex (Suma exacta = 100%) -->
   <table class="report-table">
     <thead>
@@ -94,9 +352,17 @@
   <!-- Resumen de Totales al pie -->
   <div class="bloque-totales">
     <div style="font-size: 8.5pt; line-height: 1.5;">
+>>>>>>> bbd6cc969e99d00b71cfe72172cc49bb8183dfc5
       <div><strong>Total Entradas:</strong> {{totales.entradas}}</div>
       <div><strong>Total Salidas:</strong> {{totales.salidas}}</div>
     </div>
+
+    {{#if pieBase64}}
+    <img src="{{pieBase64}}" alt="Pie institucional">
+    <div style="font-size: 7.5pt; font-family: Arial, sans-serif; color: #000; margin-top: 4px; font-weight: bold;">
+  
+    </div>
+    {{/if}}
   </div>
 
 </body>
