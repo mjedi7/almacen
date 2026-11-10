@@ -8,23 +8,150 @@
 
         <div class="form-row mt-5">
 
-            <!-- Plantel: Se bloquea si ya hay artículos en la lista -->
-            <div class="form-group col-md-4">
-                <label for="inputPassword4">Plantel</label>
-                <select [(ngModel)]="transferencia.plantel" id="areaEmite" class="form-control" name="Plantel"
-                    (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel"
-                    [disabled]="articulosTransferir.length > 0">
-                    <ng-container *ngFor="let plantel of planteles">
-                        <option [value]="plantel.id">{{plantel.descripcion}}</option>
-                    </ng-container>
-                </select>
-                <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo
-                    Obligatorio</small>
+            <!-- BLOQUE DE SELECCIÓN DE PLANTEL / DIRECCIÓN / OTROS (Estilo Existencias) -->
+            <div class="col-md-12 mb-3" [style.pointer-events]="articulosTransferir.length > 0 ? 'none' : 'auto'" [style.opacity]="articulosTransferir.length > 0 ? '0.6' : '1'">
+                <label class="font-weight-bold">Centro de Trabajo / Destino</label>
+                
+                <div class="row">
+                    <!-- PLANTELES -->
+                    <div class="form-group col-md-4 col-sm-12 position-relative">
+                        <label>Planteles</label>
+                        <button
+                            type="button"
+                            class="selector-btn form-control text-left d-flex justify-content-between align-items-center"
+                            [disabled]="categoriaActiva !== null && categoriaActiva !== 'Planteles'"
+                            (click)="toggleMenu('Planteles')">
+                            <span>
+                                <ng-container *ngIf="categoriaActiva === 'Planteles'; else textoPlantel">
+                                    {{ centroSeleccionado?.codigo | number:'2.0-0' }} — {{ centroSeleccionado?.descripcion }}
+                                </ng-container>
+                                <ng-template #textoPlantel>
+                                    Seleccionar plantel...
+                                </ng-template>
+                            </span>
+                            <span>▾</span>
+                        </button>
+
+                        <div class="selector-menu border rounded p-2 bg-white shadow-sm mt-1 w-100" *ngIf="menuPlantelesAbierto" style="position: absolute; z-index: 1000; max-height: 250px; overflow-y: auto;">
+                            <input
+                                type="text"
+                                class="form-control selector-busqueda mb-2"
+                                placeholder="Buscar por número o nombre..."
+                                [(ngModel)]="busquedaPlantelDropdown"
+                                name="buscarPlantelDropdown"
+                                autocomplete="off">
+
+                            <button
+                                type="button"
+                                class="selector-opcion btn btn-light btn-block text-left mb-1 py-1 px-2"
+                                *ngFor="let p of plantelesVisibles"
+                                (click)="seleccionarCentroDropdown(p, 'Planteles')">
+                                {{ p.codigo | number:'2.0-0' }} — {{ p.descripcion }}
+                            </button>
+
+                            <div class="selector-vacio text-muted text-center py-2" *ngIf="plantelesVisibles.length === 0">
+                                No se encontraron planteles.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DIRECCIONES GENERALES -->
+                    <div class="form-group col-md-4 col-sm-12 position-relative" *ngIf="!esAdministrativo">
+                        <label>Dirección general</label>
+                        <button
+                            type="button"
+                            class="selector-btn form-control text-left d-flex justify-content-between align-items-center"
+                            [disabled]="categoriaActiva !== null && categoriaActiva !== 'Direcciones generales'"
+                            (click)="toggleMenu('Direcciones generales')">
+                            <span>
+                                <ng-container *ngIf="categoriaActiva === 'Direcciones generales'; else textoDireccion">
+                                    {{ centroSeleccionado?.descripcion }}
+                                </ng-container>
+                                <ng-template #textoDireccion>
+                                    Seleccionar dirección...
+                                </ng-template>
+                            </span>
+                            <span>▾</span>
+                        </button>
+
+                        <div class="selector-menu border rounded p-2 bg-white shadow-sm mt-1 w-100" *ngIf="menuDireccionesAbierto" style="position: absolute; z-index: 1000; max-height: 250px; overflow-y: auto;">
+                            <input
+                                type="text"
+                                class="form-control selector-busqueda mb-2"
+                                placeholder="Buscar dirección..."
+                                [(ngModel)]="busquedaDireccionDropdown"
+                                name="buscarDireccionDropdown"
+                                autocomplete="off">
+
+                            <button
+                                type="button"
+                                class="selector-opcion btn btn-light btn-block text-left mb-1 py-1 px-2"
+                                *ngFor="let p of direccionesVisibles"
+                                (click)="seleccionarCentroDropdown(p, 'Direcciones generales')">
+                                {{ p.descripcion }}
+                            </button>
+
+                            <div class="selector-vacio text-muted text-center py-2" *ngIf="direccionesVisibles.length === 0">
+                                No se encontraron direcciones.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OTROS -->
+                    <div class="form-group col-md-4 col-sm-12 position-relative" *ngIf="!esAdministrativo">
+                        <label>Otros</label>
+                        <button
+                            type="button"
+                            class="selector-btn form-control text-left d-flex justify-content-between align-items-center"
+                            [disabled]="categoriaActiva !== null && categoriaActiva !== 'Otros'"
+                            (click)="toggleMenu('Otros')">
+                            <span>
+                                <ng-container *ngIf="categoriaActiva === 'Otros'; else textoOtros">
+                                    {{ centroSeleccionado?.descripcion }}
+                                </ng-container>
+                                <ng-template #textoOtros>
+                                    Seleccionar unidad...
+                                </ng-template>
+                            </span>
+                            <span>▾</span>
+                        </button>
+
+                        <div class="selector-menu border rounded p-2 bg-white shadow-sm mt-1 w-100" *ngIf="menuOtrosAbierto" style="position: absolute; z-index: 1000; max-height: 250px; overflow-y: auto;">
+                            <input
+                                type="text"
+                                class="form-control selector-busqueda mb-2"
+                                placeholder="Buscar unidad..."
+                                [(ngModel)]="busquedaOtroDropdown"
+                                name="buscarOtroDropdown"
+                                autocomplete="off">
+
+                            <button
+                                type="button"
+                                class="selector-opcion btn btn-light btn-block text-left mb-1 py-1 px-2"
+                                *ngFor="let p of otrosVisibles"
+                                (click)="seleccionarCentroDropdown(p, 'Otros')">
+                                {{ p.descripcion }}
+                            </button>
+
+                            <div class="selector-vacio text-muted text-center py-2" *ngIf="otrosVisibles.length === 0">
+                                No se encontraron unidades.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón para cambiar de selección si ya eligió uno -->
+                <div class="row mt-2" *ngIf="categoriaActiva !== null && articulosTransferir.length === 0">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="limpiarSeleccion()">
+                            Cambiar selección de centro
+                        </button>
+                    </div>
+                </div>
             </div>
 
-
             <!-- Partida: Se bloquea si no se ha elegido un Plantel -->
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-6">
                 <fieldset [disabled]="!transferencia.plantel" style="border: 0; padding: 0; margin: 0; width: 100%;">
                     <label for="inputPassword4">Partida</label>
                     <select [(ngModel)]="transferencia.partida" id="areaEmite" class="form-control" name="Partida"
@@ -35,28 +162,25 @@
                         </ng-container>
                     </select>
                     <small *ngIf="Partida.invalid && Partida.touched"
-                        class="form-text text-danger animated fadeIn">Campo
-                        Obligatorio</small>
+                        class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
                 </fieldset>
             </div>
 
-            <!-- Producto: Se bloquea si no se ha elegido una Partida -->
             <!-- Producto -->
-            <div class="form-group col-md-4" style="position: relative;">
+            <div class="form-group col-md-6" style="position: relative;">
                 <label for="inputProducto">Producto</label>
                 <input type="text" class="form-control" id="inputProducto" name="Producto" autocomplete="off"
                     [(ngModel)]="productoBuscado" (input)="filtrarProductos()" (click)="validarProducto()"
                     [ngModelOptions]="{standalone: true}" placeholder="Escribe el nombre del artículo" required ngModel
                     #Producto="ngModel" />
-                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
-                    Obligatorio</small>
+                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
 
                 <!-- UL FLOTANTE AJUSTADO -->
                 <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
                     position: absolute;
-                    z-index: 99; /* Reducido para que no tape elementos críticos de abajo si se solapan */
+                    z-index: 99;
                     width: 100%;
-                    max-height: 250px; /* Reducido un poquito para que no sea tan gigante */
+                    max-height: 250px;
                     overflow-y: auto;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     background-color: white;

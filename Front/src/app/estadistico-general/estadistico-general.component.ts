@@ -53,6 +53,30 @@ export class EstadisticoGeneralComponent implements OnInit, AfterViewInit, OnDes
   sumagenerados: number = 0;
   mostrarBotonTransferir: boolean = false;
 
+
+  plantelesFiltrados: any[] = [];
+  plantelesLista: any[] = [];
+  direccionesLista: any[] = [];
+  otrosLista: any[] = [];
+
+  // Búsqueda independiente para cada categoría
+  busquedaPlantelDropdown: string = '';
+  busquedaDireccionDropdown: string = '';
+  busquedaOtroDropdown: string = '';
+
+  // Estado de los menús desplegables
+  menuPlantelesAbierto: boolean = false;
+  menuDireccionesAbierto: boolean = false;
+  menuOtrosAbierto: boolean = false;
+
+  // Categoría activa actualmente
+  categoriaActiva: string | null = null;
+  opcionSeleccionado: number = 0;
+
+  // Identificar usuarios administrativos (rango 3)
+  esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
+
+
   constructor(private traer: TraerDatosService, private cdr: ChangeDetectorRef) { }
 
   public chart: Chart;
@@ -86,6 +110,90 @@ export class EstadisticoGeneralComponent implements OnInit, AfterViewInit, OnDes
       dtInstance.destroy();
       this.dtTrigger.next(null);
     });
+  }
+
+  // Getter para obtener el centro seleccionado actual
+  get centroSeleccionado(): any {
+    return this.planteles.find(
+      (p: any) => Number(p.id) === Number(this.opcionSeleccionado)
+    );
+  }
+
+  // Getters para filtrar las opciones en tiempo real
+  get plantelesVisibles(): any[] {
+    const texto = this.busquedaPlantelDropdown.trim().toLocaleLowerCase('es');
+    if (!texto) return this.plantelesLista;
+
+    if (/^\d+$/.test(texto)) {
+      const codigoBuscado = Number(texto);
+      return this.plantelesLista.filter((p: any) => Number(p.codigo) === codigoBuscado);
+    }
+
+    return this.plantelesLista.filter((p: any) =>
+      String(p.descripcion || '').toLocaleLowerCase('es').includes(texto)
+    );
+  }
+
+  get direccionesVisibles(): any[] {
+    const texto = this.busquedaDireccionDropdown.trim().toLocaleLowerCase('es');
+    return this.direccionesLista.filter((p: any) =>
+      String(p.descripcion || '').toLocaleLowerCase('es').includes(texto)
+    );
+  }
+
+  get otrosVisibles(): any[] {
+    const texto = this.busquedaOtroDropdown.trim().toLocaleLowerCase('es');
+    return this.otrosLista.filter((p: any) =>
+      String(p.descripcion || '').toLocaleLowerCase('es').includes(texto)
+    );
+  }
+
+  // Control para abrir o cerrar menús
+  toggleMenu(categoria: string): void {
+    if (this.categoriaActiva !== null && this.categoriaActiva !== categoria) {
+      return;
+    }
+
+    this.menuPlantelesAbierto = categoria === 'Planteles' && !this.menuPlantelesAbierto;
+    this.menuDireccionesAbierto = categoria === 'Direcciones generales' && !this.menuDireccionesAbierto;
+    this.menuOtrosAbierto = categoria === 'Otros' && !this.menuOtrosAbierto;
+  }
+
+  // Seleccionar un centro de trabajo desde el menú desplegable
+  seleccionarCentroDropdown(centro: any, categoria: string): void {
+    this.opcionSeleccionado = Number(centro.id);
+    this.transferencia.plantel = Number(centro.id);
+    this.categoriaActiva = categoria;
+
+    this.busquedaPlantelDropdown = '';
+    this.busquedaDireccionDropdown = '';
+    this.busquedaOtroDropdown = '';
+
+    this.menuPlantelesAbierto = false;
+    this.menuDireccionesAbierto = false;
+    this.menuOtrosAbierto = false;
+
+    // Ejecutamos tu lógica existente cuando se selecciona un plantel
+    this.plantelSeleccionado();
+  }
+
+  // Limpiar la selección para cambiar de categoría
+  limpiarSeleccion(): void {
+    this.opcionSeleccionado = 0;
+    this.transferencia.plantel = null;
+    this.categoriaActiva = null;
+
+    this.busquedaPlantelDropdown = '';
+    this.busquedaDireccionDropdown = '';
+    this.busquedaOtroDropdown = '';
+
+    this.menuPlantelesAbierto = false;
+    this.menuDireccionesAbierto = false;
+    this.menuOtrosAbierto = false;
+
+    // Limpiamos los datos del administrativo asociado si aplica
+    this.datosAdmin = [];
+    this.transferencia.recibio = '';
   }
 
   filtrarProductos() {
@@ -319,10 +427,49 @@ opcionSeleccionadaX() {
       });
   }
 
-  traerPlanteles() {
+traerPlanteles() {
+    const plantelUsuario = localStorage.getItem('centro_trabajo');
+
+    // Mantenemos tu ruta o adaptamos si requiere el parámetro (en existencias usabas /traerPlanteles/${plantelUsuario})
     this.traer.http.get(`${this.API_URL}/traerPlanteles`)
       .subscribe((res: any) => {
-        this.planteles = res;
+        const normalizar = (texto: any): string =>
+          String(texto || '')
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('es');
+
+        const otrosValidos = ['almacen general', 'sutcecytev'];
+
+        this.planteles = res.map((p: any) => {
+          const codigo = Number(p.codigo);
+          const descripcion = normalizar(p.descripcion);
+          let categoria = 'Direcciones generales';
+
+          if (codigo >= 1 && codigo <= 31) {
+            categoria = 'Planteles';
+          } else if (otrosValidos.includes(descripcion)) {
+            categoria = 'Otros';
+          }
+
+          return { ...p, codigo, categoria };
+        });
+
+        // Ordenar planteles por código numérico
+        this.plantelesLista = this.planteles
+          .filter((p: any) => p.categoria === 'Planteles')
+          .sort((a: any, b: any) => a.codigo - b.codigo);
+
+        // Direcciones generales en orden alfabético
+        this.direccionesLista = this.planteles
+          .filter((p: any) => p.categoria === 'Direcciones generales')
+          .sort((a: any, b: any) => String(a.descripcion || '').trim().localeCompare(String(b.descripcion || '').trim(), 'es', { sensitivity: 'base' }));
+
+        // Otros en orden alfabético
+        this.otrosLista = this.planteles
+          .filter((p: any) => p.categoria === 'Otros')
+          .sort((a: any, b: any) => String(a.descripcion || '').trim().localeCompare(String(b.descripcion || '').trim(), 'es', { sensitivity: 'base' }));
       });
   }
 
