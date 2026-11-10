@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { PDFDocument } = require('pdf-lib');
 
+// Convierte imágenes a Base64 para incrustación directa
 const imgToBase64 = (filePath) => {
   if (!fs.existsSync(filePath)) return null;
   const ext = path.extname(filePath).replace('.', '').toLowerCase();
@@ -16,10 +17,17 @@ const imgToBase64 = (filePath) => {
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
-// Rutas a las hojas de estilo desacopladas
-const cssConPiePath = path.join(__dirname, '../templates/css/reportes-con-pie.css');
-const cssConFirmasPath = path.join(__dirname, '../templates/css/reportes-con-firmas.css');
-const cssSoloHeaderPath = path.join(__dirname, '../templates/css/reportes-solo-header.css');
+// Función que busca el archivo CSS en rutas alternativas para evitar fallos de lectura
+const buscarRutaCss = (nombreCss) => {
+  const rutasPosibles = [
+    path.join(__dirname, `../templates/css/${nombreCss}`),
+    path.join(__dirname, `../../templates/css/${nombreCss}`),
+    path.join(__dirname, `../reports/css/${nombreCss}`),
+    path.join(process.cwd(), `templates/css/${nombreCss}`),
+    path.join(process.cwd(), `src/templates/css/${nombreCss}`)
+  ];
+  return rutasPosibles.find((ruta) => fs.existsSync(ruta)) || null;
+};
 
 async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
@@ -34,6 +42,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
     const templateHtml = fs.readFileSync(templatePath, 'utf8');
 
+    // Helper Handlebars: Primera letra en mayúscula
     handlebars.registerHelper('primeraMayuscula', function (str) {
       if (!str) return '';
       const texto = String(str).trim();
@@ -43,6 +52,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const compiledTemplate = handlebars.compile(templateHtml);
     const bannerBase64 = imgToBase64(bannerPath);
 
+    // Datos de auditoría para el pie
     const usuarioPie =
       (data && (data.usuario || data.nombreUsuario || data.user)) || 'ADMINISTRADOR';
 
@@ -59,19 +69,11 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       usuarioPie,
       fechaPie,
       bannerBase64,
-      pieBase64: null // No se inyecta en el HTML para evitar desfasamiento visual
+      pieBase64: null // Se maneja vía pdf-lib para evitar desfasamiento
     });
-
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
     // ========================================================
-    // DETECCIÓN Y CLASIFICACIÓN DE REPORTES
+    // 1. DETECCIÓN Y CLASIFICACIÓN DE REPORTES
     // ========================================================
     const nombreMin = templateName.toLowerCase().trim();
 
@@ -83,34 +85,68 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       disenoDetectado = 'con-firmas';
       requiereCenefa = true;
     }
-    // 2. Reportes de solo encabezado (sin cenefa)
+    // 2. Reportes de solo encabezado (barra auditoría y SIN cenefa)
     else if (
       nombreMin.includes('plantel') ||
-      nombreMin.includes('general') ||
-      nombreMin.includes('existencia') ||
-      nombreMin.includes('costo') ||
-      nombreMin.includes('todas') ||
       (nombreMin.includes('salida') && !nombreMin.includes('partida'))
     ) {
       disenoDetectado = 'solo-header';
       requiereCenefa = false;
     }
-    // 3. Reportes estándar con cenefa al pie
+    // 3. Reportes estándar con cenefa al pie (partidas, entradas todas, kardex, proveedor)
     else {
       disenoDetectado = 'con-pie';
       requiereCenefa = true;
     }
 
-    // Si el controlador envió opciones explícitas, tienen prioridad
+    // Opciones pasadas desde el controlador tienen prioridad absoluta
     const {
       tipoDiseno = disenoDetectado, // 'con-firmas' | 'con-pie' | 'solo-header'
       estamparCenefa = requiereCenefa,
       ...opcionesPuppeteer
     } = pdfOptions;
 
+    // ========================================================
+    // 2. LECTURA E INYECCIÓN FÍSICA DEL CSS EN EL HTML
+    // ========================================================
+    let nombreArchivoCss = 'reportes-con-pie.css';
+    if (tipoDiseno === 'con-firmas') {
+      nombreArchivoCss = 'reportes-con-firmas.css';
+    } else if (tipoDiseno === 'solo-header') {
+      nombreArchivoCss = 'reportes-solo-header.css';
+    }
+
+    const rutaCssReal = buscarRutaCss(nombreArchivoCss);
+    let cssAInyectar = '';
+
+    if (rutaCssReal) {
+      console.log(`>>> [PDF-GEN] CSS cargado (${tipoDiseno}):`, rutaCssReal);
+      cssAInyectar = fs.readFileSync(rutaCssReal, 'utf8');
+    } else {
+      console.warn(`>>> [PDF-GEN ALERTA] No se encontró el archivo CSS: ${nombreArchivoCss}`);
+    }
+
+    // Se incrusta el CSS antes de pasarlo a Puppeteer para garantizar aplicación síncrona
+    let htmlParaRender = htmlFinal;
+    if (cssAInyectar) {
+      htmlParaRender = htmlFinal.replace(
+        '</head>',
+        `<style>\n${cssAInyectar}\n</style>\n</head>`
+      );
+    }
+
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    const page = await browser.newPage();
+    
+    // Contenido listo con sus estilos incrustados
+    await page.setContent(htmlParaRender, { waitUntil: 'networkidle0' });
     await page.emulateMediaType('print');
 
-    // Esperar carga completa de imágenes
+    // Esperar imágenes antes de la captura
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
       await Promise.all(
@@ -124,10 +160,26 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       );
     });
 
+    // ========================================================
+    // 3. PIE DE AUDITORÍA PARA SOLO-HEADER
+    // ========================================================
+    const footerSoloHeader = `
+      <div style="width: 100%; font-family: Arial, sans-serif; font-size: 7.5pt; color: #000; padding: 0 14mm; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+        <div>
+          <strong>Usuario:</strong> ${usuarioPie} &nbsp;&nbsp;&nbsp;&nbsp; <strong>Fecha:</strong> ${fechaPie}
+        </div>
+        <div>
+          Pág. &nbsp; <span class="pageNumber"></span>
+        </div>
+      </div>
+    `;
+
     const defaultOptions = {
       format: 'Letter',
       printBackground: true,
-      displayHeaderFooter: false,
+      displayHeaderFooter: tipoDiseno === 'solo-header',
+      headerTemplate: '<div></div>',
+      footerTemplate: tipoDiseno === 'solo-header' ? footerSoloHeader : '<div></div>',
       preferCSSPageSize: true,
       margin: {
         top: '0px',
@@ -141,7 +193,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     let pdfBuffer = await page.pdf(defaultOptions);
 
     // ========================================================
-    // ESTAMPADO DE CENEFA AL PIE DE LA ÚLTIMA HOJA (pdf-lib)
+    // 4. ESTAMPADO DE CENEFA AL PIE CON PDF-LIB
     // ========================================================
     if (estamparCenefa && fs.existsSync(piePath)) {
       const pdfDoc = await PDFDocument.load(pdfBuffer);

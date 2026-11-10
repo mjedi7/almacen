@@ -1,7 +1,6 @@
 @page {
   size: letter portrait;
-  /* Margen inferior de 25mm para reservar el espacio exacto
-     donde se estampa la cenefa en la última hoja */
+  /* Margen inferior de 25mm para reservar el espacio de la cenefa */
   margin: 12mm 12mm 25mm 12mm;
 }
 
@@ -11,14 +10,18 @@
   padding: 0;
 }
 
-html, body {
+body,
+body.report {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8.5pt;
   color: #000;
   background: #fff;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  width: 100%;
 }
 
-/* Banner superior (solo existe en la primera hoja) */
+/* Banner superior controlado */
 .report-banner {
   width: 100%;
   text-align: center;
@@ -26,11 +29,11 @@ html, body {
 }
 
 .report-banner img {
-  width: 100%;
-  max-width: 95%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+  width: 100% !important;
+  max-width: 90% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
 }
 
 /* Encabezados institucionales */
@@ -40,16 +43,17 @@ html, body {
 }
 
 .report-heading__institution {
-  font-size: 11.5pt;
+  font-size: 10pt;
   font-weight: bold;
   text-transform: uppercase;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .report-heading__title {
   font-size: 11pt;
   font-weight: bold;
-  margin-bottom: 3px;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
 }
 
 .report-period {
@@ -58,58 +62,45 @@ html, body {
   margin-bottom: 6px;
 }
 
-/* Ficha técnica y metadatos */
-.report-meta {
-  width: 100%;
-  border-collapse: collapse;
+/* Tablas generales con bordes visibles */
+table.report-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: 1.5px solid #000000 !important;
   margin-bottom: 8px;
-  font-size: 8.5pt;
+  page-break-inside: auto !important;
 }
 
-.report-meta td {
-  padding: 2px 4px;
-  vertical-align: top;
+table.report-table thead {
+  display: table-header-group !important;
 }
 
-.report-meta__label {
-  font-weight: bold;
+table.report-table tr {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
-/* Tabla general de registros */
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #000;
-  margin-bottom: 10px;
-}
-
-.report-table thead {
-  display: table-header-group;
-}
-
-.report-table tr {
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-.report-table th {
-  background-color: #f0f4f8;
-  border: 1px solid #000;
+table.report-table th {
+  background-color: #f0f4f8 !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
   padding: 4px 5px;
   font-size: 8pt;
   font-weight: bold;
   text-align: center;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
+  vertical-align: middle;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
 }
 
-.report-table td {
-  border: 1px solid #000;
+table.report-table td {
+  border: 1px solid #000000 !important;
   padding: 3px 5px;
   font-size: 7.8pt;
+  vertical-align: middle;
 }
 
-/* Clases de alineación y formato */
+/* Alineaciones */
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 .text-left { text-align: left; }
@@ -124,12 +115,12 @@ html, body {
   padding: 12px;
 }
 
-/* Bloques de totales y cierres */
+/* Bloque de totales al pie */
 .bloque-totales {
   width: 100%;
   page-break-inside: avoid !important;
   break-inside: avoid !important;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .totales-flex {

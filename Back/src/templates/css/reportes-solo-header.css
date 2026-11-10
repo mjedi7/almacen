@@ -1,6 +1,6 @@
 @page {
   size: letter portrait;
-  margin: 12mm 14mm 22mm 14mm;
+  margin: 10mm 12mm 18mm 12mm;
 }
 
 * {
@@ -9,7 +9,6 @@
   padding: 0;
 }
 
-/* Body en flujo normal */
 body.report {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8.5pt;
@@ -24,58 +23,65 @@ body.report {
 .report-banner {
   width: 100%;
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .report-banner img {
   width: 100%;
   height: auto !important;
-  max-width: 92%;
+  max-width: 90%;
   display: block;
   margin: 0 auto;
 }
 
-/* Títulos institucionales */
+/* Encabezados institucionales */
 .report-heading {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .report-institution {
-  font-size: 10.5pt;
+  font-size: 11pt;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 2px;
 }
 
 .report-name {
-  font-size: 10pt;
+  font-size: 11pt;
   font-weight: bold;
   letter-spacing: 0.3px;
   margin-bottom: 2px;
 }
 
 .report-title {
-  font-size: 11pt;
+  font-size: 9.5pt;
   font-weight: bold;
   text-transform: uppercase;
 }
 
-/* Tablas */
+.report-section {
+  margin-bottom: 12px;
+}
+
+/* ========================================================
+   TABLAS CON FONDO AZUL TENUE EN ENCABEZADOS Y BORDES NEGROS
+   ======================================================== */
+table.table-header,
 table.table-detalle {
   width: 100%;
   border-collapse: collapse !important;
-  border: 1px solid #000 !important;
+  border: 1.5px solid #000000 !important;
   margin-bottom: 0;
-  page-break-inside: auto !important;
 }
 
+table.table-header {
+  margin-bottom: 6px !important;
+}
+
+table.table-header thead,
 table.table-detalle thead {
   display: table-header-group !important;
-}
-
-table.table-detalle tbody {
-  display: table-row-group !important;
 }
 
 table.table-detalle tr {
@@ -83,11 +89,13 @@ table.table-detalle tr {
   break-inside: avoid !important;
 }
 
+/* Cabeceras coloreadas */
+table.table-header th,
 table.table-detalle th {
-  background-color: #f0f4f8 !important;
+  background-color: #e3eefa !important;
   color: #000000 !important;
-  border: 1px solid #000000 !important;
-  padding: 5px 6px;
+  border: 1.2px solid #000000 !important;
+  padding: 4px 6px;
   font-size: 8.5pt;
   font-weight: bold;
   text-align: center;
@@ -96,21 +104,25 @@ table.table-detalle th {
   print-color-adjust: exact !important;
 }
 
+table.table-header td,
 table.table-detalle td {
-  border: 1px solid #000 !important;
-  padding: 4px 6px;
+  border: 1px solid #000000 !important;
+  padding: 3px 6px;
   font-size: 8pt;
   vertical-align: middle;
 }
 
+/* Mayúscula inicial en el texto del artículo */
+table.table-detalle td.text-left::first-letter {
+  text-transform: uppercase;
+}
+
 /* Alineaciones */
-.cen { text-align: center; }
-.num { text-align: right; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-left { text-align: left; }
-.font-bold { font-weight: bold; }
-.nowrap { white-space: nowrap; }
+.cen, .text-center { text-align: center; }
+.num, .text-right  { text-align: right; }
+.text-left         { text-align: left; }
+.font-bold         { font-weight: bold; }
+.nowrap            { white-space: nowrap; }
 
 .empty-state {
   text-align: center;
@@ -118,4 +130,80 @@ table.table-detalle td {
   font-size: 8.5pt;
   color: #555;
   padding: 14px !important;
+}
+
+/* ========================================================
+   SECCIÓN DE TOTALES AL PIE (Última hoja)
+   ======================================================== */
+table.totales-contenedor {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: none !important;
+  margin-top: 14px;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
+table.totales-contenedor td {
+  border: none !important;
+  padding: 0 !important;
+}
+
+td.totales-col-izquierda {
+  width: 58% !important;
+  vertical-align: top !important;
+  font-size: 8.5pt;
+  line-height: 1.5;
+}
+
+.totales-conteos__fila {
+  margin-top: 4px;
+}
+
+td.totales-col-derecha {
+  width: 42% !important;
+  vertical-align: top !important;
+}
+
+table.tabla-desglose {
+  width: 100% !important;
+  max-width: 250px !important;
+  border-collapse: collapse !important;
+  border: none !important;
+  margin-left: auto !important;
+}
+
+table.tabla-desglose td {
+  border: none !important;
+  font-size: 8.5pt;
+  padding: 1.5px 4px;
+  vertical-align: middle;
+}
+
+.tabla-desglose__etiqueta {
+  text-align: right;
+  font-weight: bold;
+  width: 42%;
+}
+
+.tabla-desglose__valor {
+  text-align: right;
+  white-space: nowrap;
+  width: 58%;
+}
+
+tr.tabla-desglose__fila-total td {
+  border-top: 1.5px solid #000 !important;
+  padding-top: 3px;
+}
+
+.tabla-desglose__etiqueta-total {
+  text-align: right;
+  font-weight: bold;
+}
+
+.tabla-desglose__valor-total {
+  text-align: right;
+  font-weight: bold;
+  white-space: nowrap;
 }

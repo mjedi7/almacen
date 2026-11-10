@@ -4,132 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Existencias y Costos Actuales</title>
-  <style>
-    @page {
-      size: letter portrait;
-      /* 18mm abajo reserva el espacio para el pie y activa el salto automático a la hoja 2 */
-      margin: 10mm 12mm 18mm 12mm;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body.report {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 8pt;
-      color: #000;
-      background: #fff;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    /* Banner institucional superior */
-    .report-banner {
-      width: 100%;
-      text-align: center;
-      margin-bottom: 4px;
-    }
-
-    .report-banner img {
-      width: 100%;
-      height: auto !important;
-      max-width: 88%;
-      display: block;
-      margin: 0 auto;
-    }
-
-    /* Encabezados institucionales */
-    .report-heading {
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .report-heading__institution {
-      font-size: 9pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-
-    .report-heading__title {
-      font-size: 10.5pt;
-      font-weight: bold;
-      letter-spacing: 0.3px;
-      margin-bottom: 2px;
-    }
-
-    .report-heading__subtitle {
-      font-size: 9.5pt;
-      font-weight: bold;
-    }
-
-    /* Tablas con bordes negros sólidos en todas las celdas */
-    table.report-table {
-      width: 100%;
-      border-collapse: collapse !important;
-      border: 1.5px solid #000 !important;
-      margin-bottom: 8px;
-      page-break-inside: auto;
-    }
-
-    table.report-table thead {
-      display: table-header-group !important; /* Repite la cabecera en cada página */
-    }
-
-    table.report-table tr {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-    }
-
-    table.report-table th {
-      background-color: #ffffff;
-      border: 1px solid #000 !important;
-      padding: 3.5px 5px;
-      font-size: 8.5pt;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    table.report-table td {
-      border: 1px solid #000 !important; /* Dibuja cada celda de la cuadrícula */
-      padding: 2.5px 5px;
-      font-size: 8pt;
-      vertical-align: middle;
-    }
-
-    /* Alineaciones */
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .text-left { text-align: left; }
-    .font-bold { font-weight: bold; }
-    .nowrap { white-space: nowrap; }
-
-    .empty-state {
-      text-align: center;
-      font-style: italic;
-      font-size: 8.5pt;
-      color: #555;
-      padding: 14px !important;
-    }
-
-    /* Pie: Usuario a la izquierda y número de página al extremo derecho */
-    .footer-simple {
-      position: fixed;
-      bottom: -11mm;
-      left: 0;
-      right: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 8pt;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #000;
-    }
-  </style>
 </head>
 
 <body class="report">
@@ -141,7 +15,7 @@
   </div>
   {{/if}}
 
-  <!-- Encabezado -->
+  <!-- Encabezados institucionales -->
   <header class="report-heading">
     <p class="report-heading__institution">
       Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
@@ -149,7 +23,7 @@
     <h1 class="report-heading__title">
       EXISTENCIAS Y COSTOS ACTUALES
     </h1>
-    <p class="report-heading__subtitle">
+    <p class="report-period">
       Almacén General
     </p>
   </header>
@@ -158,8 +32,8 @@
   <table class="report-table" style="margin-bottom: 8px;">
     <thead>
       <tr>
-        <th style="width: 12%;">Partidas</th>
-        <th style="width: 58%;">Nombre Partida</th>
+        <th style="width: 14%;">Partida</th>
+        <th style="width: 56%; text-align: left; padding-left: 6px;">Nombre Partida</th>
         <th style="width: 15%;">Productos</th>
         <th style="width: 15%;">Proveedores</th>
       </tr>
@@ -167,7 +41,7 @@
     <tbody>
       <tr>
         <td class="text-center font-bold">{{#if partida.clave}}{{partida.clave}}{{else}}21101{{/if}}</td>
-        <td class="text-left">{{#if partida.descripcion}}{{partida.descripcion}}{{else}}Material y Útiles de Oficina{{/if}}</td>
+        <td class="text-left" style="padding-left: 6px;">{{#if partida.descripcion}}{{partida.descripcion}}{{else}}Material y Útiles de Oficina{{/if}}</td>
         <td class="text-center">{{#if filtroProductos}}{{filtroProductos}}{{else}}Todos{{/if}}</td>
         <td class="text-center">{{#if filtroProveedores}}{{filtroProveedores}}{{else}}Todos{{/if}}</td>
       </tr>
@@ -179,21 +53,21 @@
     <thead>
       <tr>
         <th style="width: 18%;">Clave</th>
-        <th style="width: 44%;">Artículo</th>
-        <th style="width: 12%; text-align: right;">Costo</th>
+        <th style="width: 44%; text-align: left; padding-left: 6px;">Artículo</th>
+        <th style="width: 12%; text-align: right; padding-right: 6px;">Costo</th>
         <th style="width: 10%; text-align: center;">Existencia</th>
-        <th style="width: 16%; text-align: right;">Costo total</th>
+        <th style="width: 16%; text-align: right; padding-right: 6px;">Costo total</th>
       </tr>
     </thead>
     <tbody>
       {{#if hayRegistros}}
         {{#each registros}}
         <tr>
-          <td class="text-center">{{this.clave}}</td>
-          <td class="text-left">{{this.articulo}}</td>
-          <td class="text-right nowrap">$ {{this.costo}}</td>
+          <td class="text-center nowrap">{{this.clave}}</td>
+          <td class="text-left" style="padding-left: 6px;">{{this.articulo}}</td>
+          <td class="text-right nowrap" style="padding-right: 6px;">$ {{this.costo}}</td>
           <td class="text-center font-bold">{{this.existencia}}</td>
-          <td class="text-right nowrap">$ {{this.costoTotal}}</td>
+          <td class="text-right nowrap font-bold" style="padding-right: 6px;">$ {{this.costoTotal}}</td>
         </tr>
         {{/each}}
       {{else}}
@@ -206,11 +80,32 @@
     </tbody>
   </table>
 
-  <!-- Pie con Usuario y Número de Página horizontal -->
-  <footer class="footer-simple">
-    <div><strong>Usuario:</strong> {{usuarioPie}}</div>
-    <div>Pág. 1</div>
-  </footer>
+  <!-- Bloque de totales al cierre -->
+  <div class="bloque-totales">
+    <div class="totales-flex">
+      <div>
+        Registros encontrados: <strong>{{totalRegistros}}</strong>
+      </div>
+      <div>
+        <table class="tabla-totales">
+          <tbody>
+            <tr>
+              <td class="text-right font-bold">Subtotal:</td>
+              <td class="text-right nowrap">{{totales.subtotal}}</td>
+            </tr>
+            <tr>
+              <td class="text-right font-bold">I.V.A.:</td>
+              <td class="text-right nowrap">{{totales.iva}}</td>
+            </tr>
+            <tr style="border-top: 1.5px solid #000;">
+              <td class="text-right font-bold">Total:</td>
+              <td class="text-right nowrap font-bold">{{totales.total}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
 </body>
 

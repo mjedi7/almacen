@@ -20,7 +20,7 @@
     <p class="report-heading__institution">
       Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
     </p>
-    <p class="font-bold" style="font-size: 9pt; margin-bottom: 2px;">
+    <p class="font-bold" style="font-size: 8.5pt; margin-bottom: 2px;">
       DIRECCIÓN ADMINISTRATIVA - DEPTO. DE RECURSOS MATERIALES Y SERVICIOS GENERALES
     </p>
     <h1 class="report-heading__title">
@@ -32,8 +32,8 @@
   <table class="report-meta">
     <tbody>
       <tr>
-        <td class="report-meta__label nowrap" style="width: 14%;">Descripción:</td>
-        <td style="width: 46%;">{{header.nom_articulo}}</td>
+        <td class="report-meta__label nowrap" style="width: 15%;">Descripción:</td>
+        <td style="width: 45%;">{{header.nom_articulo}}</td>
 
         <td class="report-meta__label nowrap" style="width: 18%; text-align: left;">Clave artículo:</td>
         <td style="width: 22%; text-align: left;">{{header.clave_completa}}</td>
@@ -55,30 +55,30 @@
     </tbody>
   </table>
 
-  <!-- Tabla de Movimientos del Kárdex -->
+  <!-- Tabla de Movimientos del Kárdex (Suma exacta = 100%) -->
   <table class="report-table">
     <thead>
       <tr>
-        <th style="width: 12%;">Doc/Folio</th>
-        <th style="width: 28%;">Plantel / Destino</th>
-        <th style="width: 12%; text-align: right;">Exist. Inicial</th>
-        <th style="width: 12%; text-align: right;">Salidas Acum.</th>
-        <th style="width: 12%; text-align: right;">Importe Total</th>
+        <th style="width: 10%;">Doc/Folio</th>
+        <th style="width: 26%;">Plantel / Destino</th>
+        <th style="width: 13%; text-align: right;">Exist. Inicial</th>
+        <th style="width: 13%; text-align: right;">Salidas Acum.</th>
+        <th style="width: 13%; text-align: right;">Importe Total</th>
         <th style="width: 12%; text-align: right;">Existencia</th>
-        <th style="width: 12%;">Fecha</th>
+        <th style="width: 13%;">Fecha</th>
       </tr>
     </thead>
     <tbody>
       {{#if movimientos.length}}
       {{#each movimientos}}
       <tr>
-        <td class="text-center">{{this.folio}}</td>
+        <td class="text-center nowrap">{{this.folio}}</td>
         <td class="text-left" style="text-transform: uppercase;">{{this.plantel_destino}}</td>
         <td class="text-right">{{this.existencia_inicial}}</td>
         <td class="text-right">{{this.ventas_acumuladas}}</td>
         <td class="text-right nowrap">${{this.importe_total}}</td>
         <td class="text-right font-bold">{{this.existencia}}</td>
-        <td class="text-center">{{this.fecha}}</td>
+        <td class="text-center nowrap">{{this.fecha}}</td>
       </tr>
       {{/each}}
       {{else}}
@@ -93,7 +93,7 @@
 
   <!-- Resumen de Totales al pie -->
   <div class="bloque-totales">
-    <div style="font-size: 9pt; line-height: 1.6;">
+    <div style="font-size: 8.5pt; line-height: 1.5;">
       <div><strong>Total Entradas:</strong> {{totales.entradas}}</div>
       <div><strong>Total Salidas:</strong> {{totales.salidas}}</div>
     </div>
