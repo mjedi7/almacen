@@ -1,4 +1,4 @@
-console.log('>>> [DEBUG] CARGANDO ARCHIVO:', __filename);
+//console.log('>>> [DEBUG] CARGANDO ARCHIVO:', __filename);
 const cors = require('cors');
 require('dotenv').config();
 const express = require('express');
@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 
 // IMPORTACIÓN DEL CONTROLADOR DE SALIDAS
 const { generarReporteSalidasXPartida } = require('./controllers/reporteSalidasPartida.controller');
-const { reporteKardex } = require('./controllers/reporteKardex.controller'); // <--- AÑADE ESTA LÍNEA
+const { reporteKardex } = require('./controllers/reporteKardex.controller');
 
 const app = express();
 const port = process.env.PORT || 3010;
