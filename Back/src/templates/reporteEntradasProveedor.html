@@ -8,60 +8,50 @@
 
 <body class="report">
 
+  <!-- Banner superior -->
   {{#if bannerBase64}}
   <div class="report-banner">
     <img src="{{bannerBase64}}" alt="Banner institucional">
   </div>
   {{/if}}
 
+  <!-- Encabezados -->
   <header class="report-heading">
     <p class="report-heading__institution">
       Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
     </p>
-
     <h1 class="report-heading__title">
       {{titulo}}
     </h1>
-
     <p class="report-period">
-      {{tipoReporte}}
+      {{#if tipoReporte}}{{tipoReporte}}{{else}}Por proveedor{{/if}}
     </p>
   </header>
 
-  <!-- Metadatos organizados en 4 columnas alineadas a la izquierda -->
+  <!-- Metadatos -->
   <table class="report-meta">
     <tbody>
       <tr>
-        <!-- Columna 1 y 2: Proveedor -->
         <td class="report-meta__label" style="width: 12%;">Proveedor:</td>
         <td style="width: 48%;">{{proveedor.razonSocial}}</td>
 
-        <!-- Columna 3 y 4: Tipo de reporte -->
         <td class="report-meta__label" style="width: 18%; text-align: left;">Tipo de reporte:</td>
         <td style="width: 22%; text-align: left;">Por proveedor</td>
       </tr>
       <tr>
-        <!-- Columna 1 y 2: Período -->
         <td class="report-meta__label">Período:</td>
         <td>Del {{fechaInicio}} al {{fechaFin}}</td>
 
-        <!-- Columna 3 y 4: Fecha del reporte alineada con Tipo de reporte -->
         <td class="report-meta__label" style="text-align: left;">Fecha del reporte:</td>
         <td style="text-align: left;">{{fechaReporte}}</td>
       </tr>
     </tbody>
   </table>
 
-  <!-- Registros de Compras -->
+  <!-- Tabla de Compras -->
   <table class="report-table">
     <thead>
       <tr>
-<<<<<<< HEAD
-=======
-
-        <th style="width: 14%;">Folio</th>
-        <th style="width: 36%;">Proveedor</th>
->>>>>>> nacho
         <th style="width: 14%;">Folio Factura</th>
         <th style="width: 36%;">Partida / Concepto</th>
         <th style="width: 12%;">Fecha</th>
@@ -70,64 +60,54 @@
         <th style="width: 14%; text-align: right;">Total</th>
       </tr>
     </thead>
-
     <tbody>
       {{#if hayRegistros}}
-        {{#each registros}}
-        <tr>
-          <td class="text-center">{{this.folioFactura}}</td>
-          <td class="text-left">{{#if this.partida}}{{this.partida}}{{else}}{{this.proveedor}}{{/if}}</td>
-          <td class="text-center">{{this.fechaCompra}}</td>
-          <td class="text-right nowrap">{{this.importe}}</td>
-          <td class="text-right nowrap">{{this.impuesto}}</td>
-          <td class="text-right nowrap font-bold">{{this.total}}</td>
-        </tr>
-        {{/each}}
+      {{#each registros}}
+      <tr>
+        <td class="text-center">{{this.folioFactura}}</td>
+        <td class="text-left">{{#if this.partida}}{{this.partida}}{{else}}{{this.proveedor}}{{/if}}</td>
+        <td class="text-center">{{this.fechaCompra}}</td>
+        <td class="text-right nowrap">{{this.importe}}</td>
+        <td class="text-right nowrap">{{this.impuesto}}</td>
+        <td class="text-right nowrap font-bold">{{this.total}}</td>
+      </tr>
+      {{/each}}
       {{else}}
-        <tr>
-          <td colspan="6" class="empty-state">
-            No se encontraron compras para el proveedor y el período seleccionados.
-          </td>
-        </tr>
+      <tr>
+        <td colspan="6" class="empty-state">
+          No se encontraron compras para el proveedor y el período seleccionados.
+        </td>
+      </tr>
       {{/if}}
     </tbody>
   </table>
 
-  <!-- Resumen de registros -->
-  <div class="report-results">
-    <div class="report-count">
-      Registros encontrados: <strong>{{totalRegistros}}</strong>
+  <!-- Bloque de Totales -->
+  <div class="bloque-totales">
+    <div class="totales-flex">
+      <div>
+        Registros encontrados: <strong>{{totalRegistros}}</strong>
+      </div>
+      <div>
+        <table class="tabla-totales">
+          <tbody>
+            <tr>
+              <td class="text-right font-bold">Subtotal:</td>
+              <td class="text-right nowrap">{{totales.subtotal}}</td>
+            </tr>
+            <tr>
+              <td class="text-right font-bold">I.V.A.:</td>
+              <td class="text-right nowrap">{{totales.iva}}</td>
+            </tr>
+            <tr style="border-top: 1.5px solid #000;">
+              <td class="text-right font-bold">Total:</td>
+              <td class="text-right nowrap font-bold">{{totales.total}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
-  <!-- Bloque flotante de Totales (controlado por document-footer en CSS) -->
-  <footer class="document-footer">
-    <div class="document-footer__content">
-      <table class="totals-table">
-        <tbody>
-          <tr>
-            <td class="text-right font-bold">Subtotal:</td>
-            <td class="text-right nowrap">{{totales.subtotal}}</td>
-          </tr>
-          <tr>
-            <td class="text-right font-bold">I.V.A.:</td>
-            <td class="text-right nowrap">{{totales.iva}}</td>
-          </tr>
-          <tr class="totals-table__total">
-            <td class="text-right font-bold">Total:</td>
-            <td class="text-right nowrap font-bold">{{totales.total}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </footer>
-
-  <!-- Membrete oficial pegado al fondo físico -->
-  {{#if pieBase64}}
-  <div class="institutional-footer">
-    <img src="{{pieBase64}}" alt="Pie institucional">
-  </div>
-  {{/if}}
 
 </body>
 

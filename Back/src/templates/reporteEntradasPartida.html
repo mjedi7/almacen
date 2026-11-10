@@ -7,8 +7,9 @@
   <style>
     @page {
       size: letter portrait;
-      /* Margen inferior amplio para dar espacio libre al footer fijo en cada hoja */
-      margin: 10mm 12mm 28mm 12mm;
+      /* Margen seguro: 25mm abajo garantiza que el texto/totales 
+         nunca toquen el área donde se estampa la cenefa */
+      margin: 12mm 12mm 25mm 12mm;
     }
 
     * {
@@ -17,14 +18,13 @@
       padding: 0;
     }
 
-    body.report {
+    body {
       font-family: Arial, Helvetica, sans-serif;
       font-size: 8.5pt;
       color: #000;
       background: #fff;
     }
 
-    /* Banner superior */
     .report-banner {
       width: 100%;
       text-align: center;
@@ -33,16 +33,15 @@
 
     .report-banner img {
       width: 100%;
-      max-width: 92%;
+      max-width: 95%;
       height: auto;
       display: block;
       margin: 0 auto;
     }
 
-    /* Encabezados */
     .report-heading {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .report-heading__institution {
@@ -53,42 +52,38 @@
     }
 
     .report-heading__title {
-      font-size: 11.5pt;
+      font-size: 11pt;
       font-weight: bold;
       margin-bottom: 3px;
     }
 
     .report-period {
-      font-size: 9pt;
+      font-size: 8.5pt;
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    /* Metadatos */
     .report-meta {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-size: 8.5pt;
     }
 
     .report-meta td {
-      padding: 2.5px 4px;
+      padding: 2px 4px;
       vertical-align: top;
     }
 
     .report-meta__label {
       font-weight: bold;
-      width: 12%;
     }
 
-    /* Tabla de registros */
     .report-table {
       width: 100%;
       border-collapse: collapse;
       border: 1px solid #000;
-      page-break-inside: auto;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .report-table thead {
@@ -97,13 +92,14 @@
 
     .report-table tr {
       page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .report-table th {
       background-color: #f0f4f8;
       border: 1px solid #000;
-      padding: 4.5px 5px;
-      font-size: 8.5pt;
+      padding: 4px 5px;
+      font-size: 8pt;
       font-weight: bold;
       text-align: center;
       -webkit-print-color-adjust: exact;
@@ -112,8 +108,8 @@
 
     .report-table td {
       border: 1px solid #000;
-      padding: 3.5px 6px;
-      font-size: 8pt;
+      padding: 3px 5px;
+      font-size: 7.8pt;
     }
 
     .text-center { text-align: center; }
@@ -130,15 +126,11 @@
       padding: 12px;
     }
 
-    /* ========================================================
-       SECCIÓN DE CIERRE (Totales)
-       ======================================================== */
-    .bloque-final-cierre {
+    .bloque-totales {
       width: 100%;
       page-break-inside: avoid !important;
       break-inside: avoid !important;
-      margin-top: 15px;
-      margin-bottom: 15px;
+      margin-top: 6px;
     }
 
     .totales-flex {
@@ -155,64 +147,37 @@
     }
 
     .tabla-totales td {
-      padding: 2.5px 6px;
+      padding: 2px 6px;
       font-size: 8.5pt;
-    }
-
-    /* ========================================================
-       CENEFA INSTITUCIONAL FIJA AL PIE (Se repite impecable por hoja)
-       ======================================================== */
-    .footer-institucional-html {
-      position: fixed;
-      bottom: -4mm;
-      left: 0;
-      right: 0;
-      width: 100%;
-      text-align: center;
-      background: #fff;
-      padding-top: 4px;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-    }
-
-    .footer-institucional-html img {
-      width: 100%;
-      max-height: 25mm; /* Tamaño elegante y bien proporcionado */
-      object-fit: contain;
-      display: block;
-      margin: 0 auto;
     }
   </style>
 </head>
 
-<body class="report">
+<body>
 
-  <!-- Banner superior -->
   {{#if bannerBase64}}
   <div class="report-banner">
     <img src="{{bannerBase64}}" alt="Banner institucional">
   </div>
   {{/if}}
 
-  <!-- Encabezados institucionales -->
   <header class="report-heading">
     <p class="report-heading__institution">
       Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
     </p>
     <h1 class="report-heading__title">
-      RESUMEN DE COMPRAS
+      {{titulo}}
     </h1>
     <p class="report-period">
       {{#if tipoReporte}}{{tipoReporte}}{{else}}Por partida{{/if}}
     </p>
   </header>
 
-  <!-- Metadatos de la consulta -->
   <table class="report-meta">
     <tbody>
       <tr>
-        <td class="report-meta__label" style="width: 10%;">Partida:</td>
-        <td style="width: 50%;">{{partida.clave}} — {{partida.descripcion}}</td>
+        <td class="report-meta__label" style="width: 12%;">Partida:</td>
+        <td style="width: 48%;">{{partida.clave}} — {{partida.descripcion}}</td>
 
         <td class="report-meta__label" style="width: 18%; text-align: left;">Proveedores:</td>
         <td style="width: 22%; text-align: left;">{{#if proveedores}}{{proveedores}}{{else}}Todos{{/if}}</td>
@@ -227,7 +192,6 @@
     </tbody>
   </table>
 
-  <!-- Tabla de Compras -->
   <table class="report-table">
     <thead>
       <tr>
@@ -261,8 +225,7 @@
     </tbody>
   </table>
 
-  <!-- CIERRE FINAL (Totales al flujo normal) -->
-  <div class="bloque-final-cierre">
+  <div class="bloque-totales">
     <div class="totales-flex">
       <div>
         Registros encontrados: <strong>{{totalRegistros}}</strong>
@@ -287,17 +250,6 @@
       </div>
     </div>
   </div>
-
-  <!-- CENEFA INSTITUCIONAL FIJA AL PIE (Única y posicionada correctamente) -->
-  {{#if pieBase64}}
-  <div class="footer-institucional-html">
-    <img src="{{pieBase64}}" alt="Pie institucional">
-    <div style="font-size: 7.5pt; font-family: Arial, sans-serif; color: #000; margin-top: 2px; font-weight: bold;">
-      Carrillo Puerto #21, Col. Centro C.P 91000 Xalapa, Vesracruz. Tel. (228) 8421600<br>
-      <span style="font-weight: normal;">www.cecytev.edu.mx — POR AMOR A VERACRUZ</span>
-    </div>
-  </div>
-  {{/if}}
 
 </body>
 

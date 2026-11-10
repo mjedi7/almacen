@@ -2,10 +2,6 @@
 node_modules/
 **/node_modules/
 
-<<<<<<< HEAD
-Back/.env
-.env
-=======
 # compiled output
 dist/
 tmp/
@@ -71,4 +67,3 @@ Front/package-lock.json
 
 Back/package.json
 Back/package-lock.json
->>>>>>> main
