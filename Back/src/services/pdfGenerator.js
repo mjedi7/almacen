@@ -12,10 +12,13 @@ const imgToBase64 = (filePath) => {
   return `data:image/${mimeType};base64,${bitmap.toString('base64')}`;
 };
 
+// Rutas a imágenes institucionales
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
+// Rutas a las hojas de estilo desacopladas
 const cssConPiePath = path.join(__dirname, '../templates/css/reportes-con-pie.css');
+const cssConFirmasPath = path.join(__dirname, '../templates/css/reportes-con-firmas.css');
 const cssSoloHeaderPath = path.join(__dirname, '../templates/css/reportes-solo-header.css');
 
 async function generarPDF(templateName, data, pdfOptions = {}) {
@@ -38,7 +41,6 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     });
 
     const compiledTemplate = handlebars.compile(templateHtml);
-
     const bannerBase64 = imgToBase64(bannerPath);
 
     const usuarioPie =
@@ -57,7 +59,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       usuarioPie,
       fechaPie,
       bannerBase64,
-      pieBase64: null // No inyectamos en HTML para evitar duplicados o desfases
+      pieBase64: null // No se inyecta en el HTML para evitar desfasamiento visual
     });
 
     browser = await puppeteer.launch({
@@ -68,30 +70,47 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const page = await browser.newPage();
     await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
 
-    // Detección de reportes
+    // ========================================================
+    // DETECCIÓN Y CLASIFICACIÓN DE REPORTES
+    // ========================================================
     const nombreMin = templateName.toLowerCase().trim();
 
-    const esReporteConPie =
-      nombreMin.includes('partida') ||
-      nombreMin.includes('proveedor') ||
-      nombreMin.includes('kardex');
+    let disenoDetectado = 'con-pie';
+    let requiereCenefa = true;
 
-    const esSoloHeader =
+    // 1. Reportes con firmas institucionales
+    if (nombreMin.includes('listasurtido') || nombreMin.includes('surtido')) {
+      disenoDetectado = 'con-firmas';
+      requiereCenefa = true;
+    }
+    // 2. Reportes de solo encabezado (sin cenefa)
+    else if (
+      nombreMin.includes('plantel') ||
+      nombreMin.includes('general') ||
       nombreMin.includes('existencia') ||
       nombreMin.includes('costo') ||
       nombreMin.includes('todas') ||
-      nombreMin.includes('salida');
-
-    // Inyección de CSS correspondiente
-    if (esReporteConPie && fs.existsSync(cssConPiePath)) {
-      await page.addStyleTag({ path: cssConPiePath });
-    } else if (esSoloHeader && fs.existsSync(cssSoloHeaderPath)) {
-      await page.addStyleTag({ path: cssSoloHeaderPath });
+      (nombreMin.includes('salida') && !nombreMin.includes('partida'))
+    ) {
+      disenoDetectado = 'solo-header';
+      requiereCenefa = false;
     }
+    // 3. Reportes estándar con cenefa al pie
+    else {
+      disenoDetectado = 'con-pie';
+      requiereCenefa = true;
+    }
+
+    // Si el controlador envió opciones explícitas, tienen prioridad
+    const {
+      tipoDiseno = disenoDetectado, // 'con-firmas' | 'con-pie' | 'solo-header'
+      estamparCenefa = requiereCenefa,
+      ...opcionesPuppeteer
+    } = pdfOptions;
 
     await page.emulateMediaType('print');
 
-    // Esperar imágenes antes de imprimir
+    // Esperar carga completa de imágenes
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
       await Promise.all(
@@ -116,13 +135,15 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
         left: '0px',
         right: '0px'
       },
-      ...pdfOptions
+      ...opcionesPuppeteer
     };
 
     let pdfBuffer = await page.pdf(defaultOptions);
 
-    // Estampado de cenefa con pdf-lib solo en la última página
-    if (esReporteConPie && fs.existsSync(piePath)) {
+    // ========================================================
+    // ESTAMPADO DE CENEFA AL PIE DE LA ÚLTIMA HOJA (pdf-lib)
+    // ========================================================
+    if (estamparCenefa && fs.existsSync(piePath)) {
       const pdfDoc = await PDFDocument.load(pdfBuffer);
       const paginas = pdfDoc.getPages();
       const ultimaPagina = paginas[paginas.length - 1];
@@ -139,7 +160,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       const altoCalculado = imagenEmbed.height * escala;
 
       const posX = (width - anchoDeseado) / 2;
-      const posY = 18; // 18pt (~6mm) del margen inferior físico
+      const posY = 18;
 
       ultimaPagina.drawImage(imagenEmbed, {
         x: posX,
