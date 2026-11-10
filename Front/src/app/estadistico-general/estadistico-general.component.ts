@@ -204,11 +204,16 @@ getListaArticulosTransferir() {
     });
   }
 
+  // Usuario logueado (el mismo de "autorizo"); se envía como query param para el PDF
+  get usuarioLogueado(): string {
+    return encodeURIComponent(localStorage.getItem('nombre') || '');
+  }
+
   generarFormatoListaSurtido(indice: number) {
     const plantel = this.plantelesTransferencia[indice];
 
     this.traer.http.get(
-      this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}`,
+      this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}?usuario=${this.usuarioLogueado}`,
       { responseType: 'text' }
     ).subscribe({
       next: (res: any) => {
@@ -229,7 +234,7 @@ getListaArticulosTransferir() {
     const plantel = this.plantelesTransferencia[indice];
 
     this.traer.http.get(
-      this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}`,
+      this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}?usuario=${this.usuarioLogueado}`,
       { responseType: 'text' }
     ).subscribe({
       next: (res: any) => {

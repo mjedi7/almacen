@@ -11,7 +11,7 @@ const pool = new Pool({
   port: process.env.PORT_BD
 });
 
-const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
+const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos, usuario = '') => {
   const queryEncabezado = `
     SELECT 
       descripcion, 
@@ -87,9 +87,10 @@ const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
     conMontos,
     folioFormateado: String(folio).padStart(5, '0'),
     meta: {
-      plantel: plantelData.descripcion || 'OFICINAS CENTRALES',
+      plantel: plantelData.descripcion || 'Dirección General',
       administrativo: plantelData.administrativo || '',
       director: plantelData.director || '',
+      usuario: usuario,
       fecha: fechaData.fecha ? new Date(fechaData.fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('es-MX')
     },
     articulos,
@@ -104,9 +105,10 @@ const obtenerDatosReporteSurtido = async (idPlantel, folio, conMontos) => {
 const ListaArticulosSurtidos = async (req, res) => {
   const folio = parseInt(req.params.folio, 10);
   const idPlantel = parseInt(req.params.plantel, 10);
+  const usuario = String(req.query.usuario || '').trim();
 
   try {
-    const dataReporte = await obtenerDatosReporteSurtido(idPlantel, folio, true);
+    const dataReporte = await obtenerDatosReporteSurtido(idPlantel, folio, true, usuario);
     const pdfBuffer = await generarPDF('reporteListaSurtido.html', dataReporte);
 
     const folderPath = path.join(__dirname, '/reportes');
@@ -130,9 +132,10 @@ const ListaArticulosSurtidosSinMontos = async (req, res) => {
   
   const folio = parseInt(req.params.folio, 10);
   const idPlantel = parseInt(req.params.plantel, 10);
+  const usuario = String(req.query.usuario || '').trim();
 
   try {
-    const dataReporte = await obtenerDatosReporteSurtido(idPlantel, folio, false);
+    const dataReporte = await obtenerDatosReporteSurtido(idPlantel, folio, false, usuario);
     const pdfBuffer = await generarPDF('reporteListaSurtido.html', dataReporte);
 
     const folderPath = path.join(__dirname, '/reportes');

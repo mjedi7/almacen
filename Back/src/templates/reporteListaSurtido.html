@@ -121,8 +121,23 @@
       justify-content: space-between;
       gap: 12px;
       margin-top: 36px;
-      margin-bottom: 30mm;
+      margin-bottom: 0;
       page-break-inside: avoid;
+    }
+
+    /* Contenido a altura de hoja: el cierre (totales + firmas) se empuja hasta abajo, justo arriba del pie.
+       padding-bottom reserva el alto del pie fijo (max 32mm) */
+    .contenido-pagina {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 36mm;
+    }
+
+    .cierre-reporte {
+      margin-top: auto;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .signature {
@@ -172,6 +187,8 @@
 </head>
 
 <body>
+
+  <div class="contenido-pagina">
 
   <!-- Banner y encabezado -->
   <div class="header-container">
@@ -244,6 +261,8 @@
     </tbody>
   </table>
 
+  <div class="cierre-reporte">
+
   <!-- Totales alineados a la derecha -->
   {{#if conMontos}}
   <div class="totales-derecha-contenedor">
@@ -276,22 +295,26 @@
 
     <div class="signature">
       ENTREGÓ
-      <div class="signature__line">&nbsp;</div>
+      <div class="signature__line">{{#if meta.usuario}}{{meta.usuario}}{{else}}&nbsp;{{/if}}</div>
       <div class="signature__role">ENCARGADO DE ALMACÉN</div>
     </div>
 
     <div class="signature">
       REVISÓ
-      <div class="signature__line">LIC. ISRAEL SOBERANIZ MORALES</div>
+      <div class="signature__line">Lic. Isidro Alejandro García Sixto</div>
       <div class="signature__role">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
     </div>
 
     <div class="signature">
       AUTORIZÓ
-      <div class="signature__line">M.A. ADRIANA P. HERNÁNDEZ HERNÁNDEZ</div>
+      <div class="signature__line">M.A. Adriana P. Hernández Hernández</div>
       <div class="signature__role">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
     </div>
   </section>
+
+  </div><!-- /cierre-reporte -->
+
+  </div><!-- /contenido-pagina -->
 
   <!-- Pie institucional -->
   {{#if pieBase64}}

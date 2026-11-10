@@ -62,7 +62,7 @@ src/environments/environment.ts
 src/environments/environment.development.ts
 !src/environments/environment.example.ts
 
-# --- Archivos específicos solicitados ---
+
 Front/src/environments/environment.ts
 Front/src/environments/environment.prod.ts
 
@@ -71,4 +71,3 @@ Front/src/environments/environment.prod.ts
 *.bad
 *.backup
 *.bak
-

@@ -3,13 +3,25 @@
     <div class="form card-body">
 
         <div class="line-1 anim-typewriter">
-      
-            <!-- <h3 style="text-align: center; font-size: 30px;margin: 0 auto;font-weight: bold;color:#d97103">SICAI</h3>
-            <p style="text-align: center; font-size: 18px;margin: 0 auto;font-weight: bold;color: rgb(151, 149, 148);">Sistema de Control de Almacén e Insumos</p>
-       -->
+
+            <div class="logo-container">
+                <span class="color-green">SIC</span>
+                <span class="color-orange">AI</span>
+            </div>
+
+            <!---
+            <img _ngcontent-uhw-c18="" src="./assets/images/letras_logo.png" width="90px" height="25px" alt="SICAI" class="letras">
+            <h1 style="text-align: center; font-size: 30px;margin: 0 auto;font-weight: bold;color:#d97103">SICAI</h1>
+            -->
+
+            <p style="text-align: center; font-size: 18px;margin: 0 auto;font-weight: bold;color: rgb(59, 70, 68);">Sistema de Control de Almacén e Insumos</p>
+
          </div>
 
+         <br>         
+         
          <img src="./assets/images/sicai_2.2.png" alt="" style="max-width: 70%;max-height: 70%;">
+   
 
       <form (ngSubmit)="buscaUsuario(f,usuario.email,usuario.password); f.resetForm()" #f="ngForm" class="form-horizontal form-material login-form m-t-20">
         
@@ -32,7 +44,7 @@
         <br>
         <button type="submit" style="
 				background-color: #991111; 
-				color: yellow; 
+				<!-- color: #d97103; -->
 				padding: 20px 20px; 
 				border: none; 
 				border-radius: 4px; 
