@@ -15,29 +15,29 @@
   </div>
   {{/if}}
 
-  <!-- Encabezado -->
+  <!-- Encabezado general -->
   <header class="report-heading">
-    <div class="report-institution">
+    <p class="report-heading__institution">
       COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
-    </div>
-    <div class="report-name">
+    </p>
+    <h1 class="report-heading__title">
       EXISTENCIAS Y COSTOS ACTUALES
-    </div>
-    <div class="report-title">
+    </h1>
+    <p class="report-period">
       {{#if tituloAlmacen}}{{tituloAlmacen}}{{else}}Almacén General{{/if}}
-    </div>
+    </p>
   </header>
 
   <!-- Partidas y Artículos -->
   {{#each gruposPartidas}}
-  <section class="report-section">
+  <div style="margin-bottom: 10px;">
 
     <!-- 1. Ficha superior de la Partida -->
-    <table class="table-header">
+    <table class="report-table" style="margin-bottom: 4px;">
       <thead>
         <tr>
-          <th style="width: 12%;">Partida</th>
-          <th style="width: 58%;">Nombre Partida</th>
+          <th style="width: 14%;">Partida</th>
+          <th style="width: 56%; text-align: left; padding-left: 6px;">Nombre Partida</th>
           <th style="width: 15%;">Productos</th>
           <th style="width: 15%;">Proveedores</th>
         </tr>
@@ -45,33 +45,33 @@
       <tbody>
         <tr>
           <td class="text-center font-bold">{{this.clave}}</td>
-          <td class="text-left" style="padding-left: 8px;">{{this.descripcion}}</td>
+          <td class="text-left" style="padding-left: 6px;">{{this.descripcion}}</td>
           <td class="text-center">Todos</td>
           <td class="text-center">Todos</td>
         </tr>
       </tbody>
     </table>
 
-    <!-- 2. Detalle de Artículos -->
-    <table class="table-detalle">
+    <!-- 2. Detalle de Artículos en flujo continuo -->
+    <table class="report-table">
       <thead>
         <tr>
-          <th style="width: 17%;">Clave</th>
-          <th style="width: 47%;">Artículo</th>
-          <th style="width: 11%;">Costo</th>
-          <th style="width: 10%;">Existencia</th>
-          <th style="width: 15%;">Costo total</th>
+          <th style="width: 18%;">Clave</th>
+          <th style="width: 44%; text-align: left; padding-left: 6px;">Artículo</th>
+          <th style="width: 12%; text-align: right; padding-right: 6px;">Costo</th>
+          <th style="width: 10%; text-align: center;">Existencia</th>
+          <th style="width: 16%; text-align: right; padding-right: 6px;">Costo total</th>
         </tr>
       </thead>
       <tbody>
         {{#if this.articulos.length}}
           {{#each this.articulos}}
           <tr>
-            <td class="cen nowrap">{{this.clave}}</td>
-            <td class="text-left">{{this.articulo}}</td>
-            <td class="num nowrap">$ {{this.costo}}</td>
-            <td class="cen font-bold">{{this.existencia}}</td>
-            <td class="num nowrap">$ {{this.costo_total}}</td>
+            <td class="text-center nowrap">{{this.clave}}</td>
+            <td class="text-left" style="padding-left: 6px;">{{this.articulo}}</td>
+            <td class="text-right nowrap" style="padding-right: 6px;">$ {{this.costo}}</td>
+            <td class="text-center font-bold">{{this.existencia}}</td>
+            <td class="text-right nowrap font-bold" style="padding-right: 6px;">$ {{this.costo_total}}</td>
           </tr>
           {{/each}}
         {{else}}
@@ -84,52 +84,50 @@
       </tbody>
     </table>
 
-  </section>
+  </div>
   {{/each}}
 
-  <!-- Resumen de totales -->
+  <!-- Resumen de totales con protección de salto -->
   {{#if granTotal}}
-  <table class="totales-contenedor">
-    <tbody>
-      <tr>
-        <!-- Conteos arriba a la izquierda -->
-        <td class="totales-col-izquierda">
-          <div>
-            <strong>Existencias totales de artículos:</strong> &nbsp; {{existenciasTotales}}
-          </div>
-          <div class="totales-conteos__fila">
-            <strong>Total de registros impresos:</strong> &nbsp; {{totalRegistrosImpresos}}
-          </div>
-        </td>
+  <div class="bloque-totales">
+    <div class="totales-flex">
+      <!-- Conteos a la izquierda -->
+      <div style="font-size: 8.5pt; line-height: 1.6;">
+        <div>
+          <strong>Existencias totales de artículos:</strong> &nbsp; {{existenciasTotales}}
+        </div>
+        <div>
+          <strong>Total de registros impresos:</strong> &nbsp; {{totalRegistrosImpresos}}
+        </div>
+      </div>
 
-        <!-- Desglose de totales pegado a la derecha -->
-        <td class="totales-col-derecha">
-          <table class="tabla-desglose">
-            <tbody>
-              <tr>
-                <td class="tabla-desglose__etiqueta">Subtotal:</td>
-                <td class="tabla-desglose__valor">
-                  ${{#if totales.subtotal}}{{totales.subtotal}}{{else if subtotal}}{{subtotal}}{{else}}{{granTotal}}{{/if}}
-                </td>
-              </tr>
-              <tr>
-                <td class="tabla-desglose__etiqueta">I.V.A.:</td>
-                <td class="tabla-desglose__valor">
-                  ${{#if totales.iva}}{{totales.iva}}{{else if iva}}{{iva}}{{else}}0.00{{/if}}
-                </td>
-              </tr>
-              <tr class="tabla-desglose__fila-total">
-                <td class="tabla-desglose__etiqueta-total">Total:</td>
-                <td class="tabla-desglose__valor-total">
-                  ${{#if totales.total}}{{totales.total}}{{else}}{{granTotal}}{{/if}}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <!-- Desglose a la derecha -->
+      <div>
+        <table class="tabla-totales">
+          <tbody>
+            <tr>
+              <td class="text-right font-bold">Subtotal:</td>
+              <td class="text-right nowrap">
+                ${{#if totales.subtotal}}{{totales.subtotal}}{{else if subtotal}}{{subtotal}}{{else}}{{granTotal}}{{/if}}
+              </td>
+            </tr>
+            <tr>
+              <td class="text-right font-bold">I.V.A.:</td>
+              <td class="text-right nowrap">
+                ${{#if totales.iva}}{{totales.iva}}{{else if iva}}{{iva}}{{else}}0.00{{/if}}
+              </td>
+            </tr>
+            <tr style="border-top: 1.5px solid #000;">
+              <td class="text-right font-bold">Total:</td>
+              <td class="text-right nowrap font-bold">
+                ${{#if totales.total}}{{totales.total}}{{else}}{{granTotal}}{{/if}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   {{/if}}
 
 </body>

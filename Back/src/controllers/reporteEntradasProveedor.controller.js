@@ -165,9 +165,8 @@ const generarReporteEntradasProveedor = async (req, res) => {
       'reporteEntradasProveedor.html',
       datosPlantilla,
       {
-        format: 'Letter',
-        landscape: false,
-        printBackground: true
+        tipoDiseno: 'con-pie',
+        estamparCenefa: true
       }
     );
 
