@@ -1,6 +1,8 @@
 @page {
   size: letter portrait;
-  margin: 12mm 14mm 0mm 14mm !important;
+  /* Margen inferior de 25mm para reservar el espacio exacto
+     donde se estampa la cenefa en la última hoja */
+  margin: 12mm 12mm 25mm 12mm;
 }
 
 * {
@@ -9,18 +11,14 @@
   padding: 0;
 }
 
-body.report {
-  margin: 0;
-  padding: 0;
+html, body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8.5pt;
   color: #000;
   background: #fff;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
 }
 
-/* Banner superior institucional */
+/* Banner superior (solo existe en la primera hoja) */
 .report-banner {
   width: 100%;
   text-align: center;
@@ -29,16 +27,16 @@ body.report {
 
 .report-banner img {
   width: 100%;
-  height: auto !important;
-  max-width: 92%;
+  max-width: 95%;
+  height: auto;
   display: block;
   margin: 0 auto;
 }
 
-/* Encabezados */
+/* Encabezados institucionales */
 .report-heading {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .report-heading__institution {
@@ -49,78 +47,69 @@ body.report {
 }
 
 .report-heading__title {
-  font-size: 11.5pt;
+  font-size: 11pt;
   font-weight: bold;
   margin-bottom: 3px;
-  letter-spacing: 0.5px;
 }
 
 .report-period {
-  font-size: 9pt;
+  font-size: 8.5pt;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-/* Metadatos */
+/* Ficha técnica y metadatos */
 .report-meta {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 8.5pt;
 }
 
 .report-meta td {
-  padding: 2.5px 4px;
+  padding: 2px 4px;
   vertical-align: top;
 }
 
 .report-meta__label {
   font-weight: bold;
-  width: 12%;
 }
 
-/* Tabla de compras */
+/* Tabla general de registros */
 .report-table {
   width: 100%;
-  border-collapse: collapse !important;
-  border: 1px solid #000 !important;
-  margin-bottom: 0;
-  page-break-inside: auto;
+  border-collapse: collapse;
+  border: 1px solid #000;
+  margin-bottom: 10px;
 }
 
 .report-table thead {
-  display: table-header-group !important;
-}
-
-.report-table tbody {
-  display: table-row-group !important;
+  display: table-header-group;
 }
 
 .report-table tr {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .report-table th {
-  background-color: #f0f4f8 !important;
-  color: #000 !important;
-  border: 1px solid #000 !important;
-  padding: 4.5px 5px;
-  font-size: 8.5pt;
+  background-color: #f0f4f8;
+  border: 1px solid #000;
+  padding: 4px 5px;
+  font-size: 8pt;
   font-weight: bold;
   text-align: center;
-  vertical-align: middle;
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .report-table td {
-  border: 1px solid #000 !important;
-  padding: 3.5px 6px;
-  font-size: 8pt;
-  vertical-align: middle;
+  border: 1px solid #000;
+  padding: 3px 5px;
+  font-size: 7.8pt;
 }
 
+/* Clases de alineación y formato */
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 .text-left { text-align: left; }
@@ -132,69 +121,31 @@ body.report {
   font-style: italic;
   font-size: 8.5pt;
   color: #555;
-  padding: 12px !important;
+  padding: 12px;
 }
 
-/* ========================================================
-   SECCIÓN DE CIERRE (TOTALES + CENEFA)
-   Flujo estático: solo se imprime después de la tabla en la última hoja
-   ======================================================== */
-.seccion-cierre-reporte {
-  position: static !important;
+/* Bloques de totales y cierres */
+.bloque-totales {
   width: 100%;
-  margin-top: 15px;
   page-break-inside: avoid !important;
   break-inside: avoid !important;
+  margin-top: 6px;
 }
 
-.totales-contenido {
+.totales-flex {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   width: 100%;
-  margin-bottom: 25px;
 }
 
-.totales-conteo {
-  font-size: 8.5pt;
-  padding-bottom: 2px;
-}
-
-.totals-table {
-  border-collapse: collapse !important;
-  border: none !important;
-  min-width: 250px;
+.tabla-totales {
+  border-collapse: collapse;
+  min-width: 240px;
   margin-left: auto;
 }
 
-.totals-table td {
-  border: none !important;
-  padding: 2.5px 6px;
+.tabla-totales td {
+  padding: 2px 6px;
   font-size: 8.5pt;
-  vertical-align: middle;
-}
-
-.totals-table__total td {
-  border-top: 1.5px solid #000 !important;
-  padding-top: 4px;
-}
-
-/* Cenefa institucional en flujo normal */
-.cenefa-institucional-final {
-  position: static !important;
-  width: 100%;
-  text-align: center;
-  line-height: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.cenefa-institucional-final img {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  max-height: 30mm;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
 }
