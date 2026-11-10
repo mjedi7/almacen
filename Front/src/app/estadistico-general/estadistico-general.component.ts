@@ -53,6 +53,14 @@ export class EstadisticoGeneralComponent implements OnInit, AfterViewInit, OnDes
   sumagenerados: number = 0;
   mostrarBotonTransferir: boolean = false;
 
+
+plantelesFiltrados: any[] = [];
+  plantelesLista: any[] = [];
+  busquedaPlantelDropdown: string = '';
+  menuPlantelesAbierto: boolean = false;
+  opcionSeleccionado: number = 0;
+
+
   constructor(private traer: TraerDatosService, private cdr: ChangeDetectorRef) { }
 
   public chart: Chart;
@@ -86,6 +94,60 @@ export class EstadisticoGeneralComponent implements OnInit, AfterViewInit, OnDes
       dtInstance.destroy();
       this.dtTrigger.next(null);
     });
+  }
+
+  // Getter para obtener el centro seleccionado actual
+  get centroSeleccionado(): any {
+    return this.planteles.find(
+      (p: any) => Number(p.id) === Number(this.opcionSeleccionado)
+    );
+  }
+
+  // Getters para filtrar las opciones en tiempo real
+  get plantelesVisibles(): any[] {
+    const texto = this.busquedaPlantelDropdown.trim().toLocaleLowerCase('es');
+    if (!texto) return this.plantelesLista;
+
+    if (/^\d+$/.test(texto)) {
+      const codigoBuscado = Number(texto);
+      return this.plantelesLista.filter((p: any) => Number(p.codigo) === codigoBuscado);
+    }
+
+    return this.plantelesLista.filter((p: any) =>
+      String(p.descripcion || '').toLocaleLowerCase('es').includes(texto)
+    );
+  }
+
+  // Control para abrir o cerrar menús
+ toggleMenuPlantel(): void {
+    this.menuPlantelesAbierto = !this.menuPlantelesAbierto;
+  }
+
+  // Seleccionar un centro de trabajo desde el menú desplegable
+  seleccionarPlantelDropdown(centro: any): void {
+    this.opcionSeleccionado = Number(centro.id);
+    this.transferencia.plantel = Number(centro.id);
+    this.busquedaPlantelDropdown = '';
+    this.menuPlantelesAbierto = false;
+
+    // Ejecuta tu función existente para cargar datos del plantel
+    this.plantelSeleccionado();
+  }
+
+  // Limpiar la selección para cambiar de categoría
+  limpiarSeleccion(): void {
+    this.opcionSeleccionado = 0;
+    this.transferencia.plantel = null;
+ 
+
+    this.busquedaPlantelDropdown = '';
+  
+
+    this.menuPlantelesAbierto = false;
+
+    // Limpiamos los datos del administrativo asociado si aplica
+    this.datosAdmin = [];
+    this.transferencia.recibio = '';
   }
 
   filtrarProductos() {
@@ -204,11 +266,16 @@ getListaArticulosTransferir() {
     });
   }
 
+  // Usuario logueado (el mismo de "autorizo"); se envía como query param para el PDF
+  get usuarioLogueado(): string {
+    return encodeURIComponent(localStorage.getItem('nombre') || '');
+  }
+
   generarFormatoListaSurtido(indice: number) {
     const plantel = this.plantelesTransferencia[indice];
 
     this.traer.http.get(
-      this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}`,
+      this.API_URL + `/formatoListaArticulosSurtidos/${this.transferencia.consecutivo}/${plantel}?usuario=${this.usuarioLogueado}`,
       { responseType: 'text' }
     ).subscribe({
       next: (res: any) => {
@@ -229,7 +296,7 @@ getListaArticulosTransferir() {
     const plantel = this.plantelesTransferencia[indice];
 
     this.traer.http.get(
-      this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}`,
+      this.API_URL + `/formatoListaArticulosSurtidosSinMontos/${this.transferencia.consecutivo}/${plantel}?usuario=${this.usuarioLogueado}`,
       { responseType: 'text' }
     ).subscribe({
       next: (res: any) => {
@@ -314,10 +381,12 @@ opcionSeleccionadaX() {
       });
   }
 
-  traerPlanteles() {
+traerPlanteles() {
     this.traer.http.get(`${this.API_URL}/traerPlanteles`)
       .subscribe((res: any) => {
         this.planteles = res;
+        // Ordenar planteles por código numérico
+        this.plantelesLista = [...res].sort((a: any, b: any) => Number(a.codigo) - Number(b.codigo));
       });
   }
 
