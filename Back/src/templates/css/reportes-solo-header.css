@@ -14,8 +14,8 @@ body.report {
   font-size: 8.5pt;
   color: #000;
   background: #fff;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
   width: 100%;
 }
 
@@ -68,7 +68,8 @@ body.report {
    TABLAS CON FONDO AZUL TENUE EN ENCABEZADOS Y BORDES NEGROS
    ======================================================== */
 table.table-header,
-table.table-detalle {
+table.table-detalle,
+table.report-table {
   width: 100%;
   border-collapse: collapse !important;
   border: 1.5px solid #000000 !important;
@@ -80,18 +81,21 @@ table.table-header {
 }
 
 table.table-header thead,
-table.table-detalle thead {
+table.table-detalle thead,
+table.report-table thead {
   display: table-header-group !important;
 }
 
-table.table-detalle tr {
+table.table-detalle tr,
+table.report-table tr {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
 
 /* Cabeceras coloreadas */
 table.table-header th,
-table.table-detalle th {
+table.table-detalle th,
+table.report-table th {
   background-color: #e3eefa !important;
   color: #000000 !important;
   border: 1.2px solid #000000 !important;
@@ -105,16 +109,12 @@ table.table-detalle th {
 }
 
 table.table-header td,
-table.table-detalle td {
+table.table-detalle td,
+table.report-table td {
   border: 1px solid #000000 !important;
   padding: 3px 6px;
   font-size: 8pt;
   vertical-align: middle;
-}
-
-/* Mayúscula inicial en el texto del artículo */
-table.table-detalle td.text-left::first-letter {
-  text-transform: uppercase;
 }
 
 /* Alineaciones */
@@ -133,7 +133,7 @@ table.table-detalle td.text-left::first-letter {
 }
 
 /* ========================================================
-   SECCIÓN DE TOTALES AL PIE (Última hoja)
+   SECCIÓN DE TOTALES AL PIE
    ======================================================== */
 table.totales-contenedor {
   width: 100% !important;

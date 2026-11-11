@@ -33,14 +33,14 @@
     <thead>
       <tr>
         <th style="width: 25%;" class="cen">Existencia</th>
-        <th style="width: 75%;" class="text-left">Nombre del artículo</th>
+        <th style="width: 75%;" class="text-left" style="padding-left: 8px;">Nombre del artículo</th>
       </tr>
     </thead>
     <tbody>
       {{#each articulos}}
       <tr>
         <td class="cen font-bold">{{this.existencias}}</td>
-        <td class="text-left">{{this.nombre_producto}}</td>
+        <td class="text-left" style="padding-left: 8px;">{{primeraMayuscula this.nombre_producto}}</td>
       </tr>
       {{else}}
       <tr>
