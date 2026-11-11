@@ -1,3 +1,4 @@
+
 <div class="formulario" style="width: 75%; height: 500px; margin: 0 auto ;">
 
     <div class="Titulo" style="text-align: center;">
@@ -6,20 +7,50 @@
 
     <form (ngSubmit)="agregarArticulo(f)" #f="ngForm" style="margin-top: 50px;">
 
-        <div class="form-row mt-5">
+       <div class="form-row mt-5">
 
-            <!-- Plantel: Se bloquea si ya hay artículos en la lista -->
-            <div class="form-group col-md-4">
-                <label for="inputPassword4">Plantel</label>
-                <select [(ngModel)]="transferencia.plantel" id="areaEmite" class="form-control" name="Plantel"
-                    (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel"
-                    [disabled]="articulosTransferir.length > 0">
-                    <ng-container *ngFor="let plantel of planteles">
-                        <option [value]="plantel.id">{{plantel.descripcion}}</option>
-                    </ng-container>
-                </select>
-                <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo
-                    Obligatorio</small>
+            <!-- PLANTEL CON BUSCADOR INTELIGENTE -->
+            <div class="form-group col-md-4 position-relative" [style.pointer-events]="articulosTransferir.length > 0 ? 'none' : 'auto'" [style.opacity]="articulosTransferir.length > 0 ? '0.6' : '1'">
+                <label for="inputPlantel">Plantel</label>
+                
+                <button
+                    type="button"
+                    class="selector-btn form-control text-left d-flex justify-content-between align-items-center"
+                    (click)="toggleMenuPlantel()">
+                    <span>
+                        <ng-container *ngIf="transferencia.plantel; else textoPlantel">
+                            {{ centroSeleccionado?.codigo | number:'2.0-0' }} — {{ centroSeleccionado?.descripcion }}
+                        </ng-container>
+                        <ng-template #textoPlantel>
+                            Seleccionar plantel...
+                        </ng-template>
+                    </span>
+                    <span>▾</span>
+                </button>
+
+                <div class="selector-menu border rounded p-2 bg-white shadow-sm mt-1 w-100" *ngIf="menuPlantelesAbierto" style="position: absolute; z-index: 1000; max-height: 250px; overflow-y: auto;">
+                    <input
+                        type="text"
+                        class="form-control selector-busqueda mb-2"
+                        placeholder="Buscar por número o nombre..."
+                        [(ngModel)]="busquedaPlantelDropdown"
+                        name="buscarPlantelDropdown"
+                        autocomplete="off">
+
+                    <button
+                        type="button"
+                        class="selector-opcion btn btn-light btn-block text-left mb-1 py-1 px-2"
+                        *ngFor="let p of plantelesVisibles"
+                        (click)="seleccionarPlantelDropdown(p)">
+                        {{ p.codigo | number:'2.0-0' }} — {{ p.descripcion }}
+                    </button>
+
+                    <div class="selector-vacio text-muted text-center py-2" *ngIf="plantelesVisibles.length === 0">
+                        No se encontraron planteles.
+                    </div>
+                </div>
+
+                <small *ngIf="!transferencia.plantel" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
             </div>
 
 
@@ -35,12 +66,10 @@
                         </ng-container>
                     </select>
                     <small *ngIf="Partida.invalid && Partida.touched"
-                        class="form-text text-danger animated fadeIn">Campo
-                        Obligatorio</small>
+                        class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
                 </fieldset>
             </div>
 
-            <!-- Producto: Se bloquea si no se ha elegido una Partida -->
             <!-- Producto -->
             <div class="form-group col-md-4" style="position: relative;">
                 <label for="inputProducto">Producto</label>
@@ -48,15 +77,14 @@
                     [(ngModel)]="productoBuscado" (input)="filtrarProductos()" (click)="validarProducto()"
                     [ngModelOptions]="{standalone: true}" placeholder="Escribe el nombre del artículo" required ngModel
                     #Producto="ngModel" />
-                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo
-                    Obligatorio</small>
+                <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
 
                 <!-- UL FLOTANTE AJUSTADO -->
                 <ul *ngIf="productosFiltrados.length > 0" class="list-group mt-1" style="
                     position: absolute;
-                    z-index: 99; /* Reducido para que no tape elementos críticos de abajo si se solapan */
+                    z-index: 99;
                     width: 100%;
-                    max-height: 250px; /* Reducido un poquito para que no sea tan gigante */
+                    max-height: 250px;
                     overflow-y: auto;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     background-color: white;
@@ -173,3 +201,4 @@
         </tbody>
     </table>
 </div>
+
