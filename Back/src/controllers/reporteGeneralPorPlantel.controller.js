@@ -51,7 +51,7 @@ const ReporteGeneralPorPlantel = async (req, res) => {
       req.query?.usuario ||
       req.body?.usuario ||
       req.headers['x-usuario'] ||
-      ''; // Valor de respaldo si no viene en el token/request
+      'MARISELA'; // Valor de respaldo si no viene en el token/request
 
     // 4. Datos para la plantilla
     const datosPlantilla = {
