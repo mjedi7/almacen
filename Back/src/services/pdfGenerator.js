@@ -29,6 +29,22 @@ const buscarRutaCss = (nombreCss) => {
   return rutasPosibles.find((ruta) => fs.existsSync(ruta)) || null;
 };
 
+// Extractor robusto de nombre de usuario para auditoría
+const resolverUsuarioAuditoria = (data, pdfOptions) => {
+  const candidato =
+    pdfOptions?.usuario ||
+    pdfOptions?.usuarioPie ||
+    data?.usuarioPie ||
+    data?.nombreUsuario ||
+    data?.user ||
+    (typeof data?.usuario === 'string' ? data.usuario : data?.usuario?.nombre || data?.usuario?.username) ||
+    data?.nombre ||
+    '';
+
+  const textoLimpio = String(candidato).trim();
+  return textoLimpio.length > 0 ? textoLimpio : 'ADMINISTRADOR';
+};
+
 async function generarPDF(templateName, data, pdfOptions = {}) {
   let browser = null;
 
@@ -52,12 +68,12 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const compiledTemplate = handlebars.compile(templateHtml);
     const bannerBase64 = imgToBase64(bannerPath);
 
-    // Datos de auditoría para el pie
-    const usuarioPie =
-      (data && (data.usuario || data.nombreUsuario || data.user)) || 'ADMINISTRADOR';
+    // Datos de auditoría para el pie (detección amplia de usuario)
+    const usuarioPie = resolverUsuarioAuditoria(data, pdfOptions);
 
     const fechaPie =
       (data && (data.fechaImpresion || data.fechaReporte)) ||
+      pdfOptions?.fechaPie ||
       new Date().toLocaleDateString('es-MX', {
         day: '2-digit',
         month: '2-digit',
@@ -87,6 +103,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     }
     // 2. Reportes de solo encabezado (barra auditoría y SIN cenefa)
     else if (
+      nombreMin.includes('existencia') ||
       nombreMin.includes('plantel') ||
       (nombreMin.includes('salida') && !nombreMin.includes('partida'))
     ) {
@@ -103,6 +120,9 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const {
       tipoDiseno = disenoDetectado, // 'con-firmas' | 'con-pie' | 'solo-header'
       estamparCenefa = requiereCenefa,
+      usuario: _usuarioOpcion,
+      usuarioPie: _usuarioPieOpcion,
+      fechaPie: _fechaPieOpcion,
       ...opcionesPuppeteer
     } = pdfOptions;
 
@@ -121,6 +141,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
 
     if (rutaCssReal) {
       console.log(`>>> [PDF-GEN] CSS cargado (${tipoDiseno}):`, rutaCssReal);
+      console.log(`>>> [PDF-GEN] Usuario asignado al pie: "${usuarioPie}"`);
       cssAInyectar = fs.readFileSync(rutaCssReal, 'utf8');
     } else {
       console.warn(`>>> [PDF-GEN ALERTA] No se encontró el archivo CSS: ${nombreArchivoCss}`);

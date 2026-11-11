@@ -41,13 +41,26 @@ const ReporteGeneralPorPlantel = async (req, res) => {
         : ''
     }));
 
-    // 3. Datos para la plantilla
+    // 3. Obtener el usuario autenticado dinámicamente
+    // Revisa req.user (JWT/sesión), query params (?usuario=Marisela), headers o body
+    const usuarioSesion =
+      req.user?.nombre ||
+      req.user?.nombre_usuario ||
+      req.user?.usuario ||
+      req.user?.username ||
+      req.query?.usuario ||
+      req.body?.usuario ||
+      req.headers['x-usuario'] ||
+      ''; // Valor de respaldo si no viene en el token/request
+
+    // 4. Datos para la plantilla
     const datosPlantilla = {
       plantel,
-      articulos
+      articulos,
+      usuario: usuarioSesion // Pasa el usuario dinámico al generador
     };
 
-    // 4. Generación centralizada con pdfGenerator
+    // 5. Generación centralizada con pdfGenerator
     const pdfBuffer = await generarPDF(
       'reporteGeneralPorPlantel.html',
       datosPlantilla,
@@ -57,7 +70,7 @@ const ReporteGeneralPorPlantel = async (req, res) => {
       }
     );
 
-    // 5. Servir PDF al navegador
+    // 6. Servir PDF al navegador
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'inline; filename="ReporteGeneralPorPlantel.pdf"',
