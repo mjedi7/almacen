@@ -33,9 +33,9 @@ export class LoginComponent implements OnInit {
     if(localStorage.getItem('token')){
       localStorage.clear();
      }
-
   }
  
+
   buscaUsuario(form:NgForm, email:any,password:any){
 
     if(form.invalid){

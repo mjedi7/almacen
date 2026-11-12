@@ -229,7 +229,8 @@
   width: 0 !important;
   height: 0 !important;
   overflow: hidden !important;
-}
+} 
+
 
 /* Centrar iconos en la barra delgada */
 #main-wrapper.mini-sidebar .sidebar-nav ul li a {
