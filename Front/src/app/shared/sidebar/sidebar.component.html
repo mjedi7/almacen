@@ -1,227 +1,59 @@
-<!-- ============================================================== -->
-<!-- Left Sidebar -->
-<!-- ============================================================== -->
-<aside class="left-sidebar" [class.mini-sidebar-active]="sidebarService.isMini$ | async" style="background-color: #9c0031;">
-    <!-- Sidebar scroll-->
-    <div class="scroll-sidebar" style="background-color: #9c0031;">
-        <!-- Sidebar navigation-->
-        <nav class="sidebar-nav" style="background-color: transparent;">
-            <ul id="sidebarnav" style="background-color: transparent;">
+<aside class="left-sidebar sicai-sidebar" aria-label="Menú principal">
+  <div class="scroll-sidebar">
+    <nav class="sidebar-nav" aria-label="Navegación">
+      <ul id="sidebarnav" class="sicai-menu">
 
-                <!-- ALMACÉN -->
-                <li *ngFor="let item of menuItems" style="margin-top: 15px;">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                        <i class="mdi mdi-store" style="color: #FFFFFF;"></i>
-                        <span class="hide-menu" style="color: #FFFFFF;">
-                            {{ item.titulo }}
-                            <span class="label label-rouded pull-right"
-                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                {{ item.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: #9c0031b6;">
-                        <li *ngFor="let subMenuItem of item.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                • {{ subMenuItem.titulo }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+        <li *ngFor="let item of menuItems" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)">
+            <i class="fa fa-archive" aria-hidden="true"></i><span class="hide-menu">{{ item.titulo }}</span>
+            <span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu" aria-hidden="true"></i>
+          </button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)" [attr.aria-hidden]="!isOpen(item.titulo)">
+            <li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li>
+          </ul>
+        </li>
 
-                <!-- TRANSFERENCIAS -->
-                <li *ngFor="let item3 of menuItems3">
-                    <a *ngIf="vertransferencias" class="has-arrow waves-effect waves-dark" href="#"
-                        aria-expanded="false" style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                        <i class="mdi mdi-repeat" style="color: #FFFFFF;"></i>
-                        <span class="hide-menu" style="color: #FFFFFF;">
-                            {{ item3.titulo }}
-                            <span class="label label-rouded pull-right"
-                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                {{ item3.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: #9c0031;">
-                        <li *ngFor="let subMenuItem of item3.submenu">
-                            <a [routerLink]="subMenuItem.url"
-                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                • {{ subMenuItem.titulo }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+        <li *ngFor="let item of menuItems3" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!vertransferencias || !hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-exchange" aria-hidden="true"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- REQUISICIONES -->
-                <li *ngFor="let item4 of menuItems4">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                        <i class="mdi mdi-file-document" style="color: #FFFFFF;"></i>
-                        <span class="hide-menu" style="color: #FFFFFF;">
-                            {{ item4.titulo }}
-                            <span class="label label-rouded pull-right"
-                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                {{ item4.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color:#9c0031b6;">
-                        <li *ngFor="let subMenuItem of item4.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                • {{ subMenuItem.titulo }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+        <li *ngFor="let item of menuItems4" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-file-text-o"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- MOVIMIENTOS -->
-                <li *ngFor="let item4B of menuItems4B">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                        <i class="mdi mdi-account-switch" style="color: #FFFFFF;"></i>
-                        <span class="hide-menu" style="color: #FFFFFF;">
-                            {{ item4B.titulo }}
-                            <span class="label label-rouded pull-right"
-                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                {{ item4B.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: #9c0031;">
-                        <li *ngFor="let subMenuItem of item4B.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                • {{ subMenuItem.titulo }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+        <li *ngFor="let item of menuItems4B" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!movimientos || !hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-random"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- ARTÍCULOS -->
-                <li *ngFor="let item55 of menuItems55">
-                    <a *ngIf="verArticulos" class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                        <i class="mdi mdi-view-module" style="color: #FFFFFF;"></i>
-                        <span class="hide-menu" style="color: #FFFFFF;">
-                            {{ item55.titulo }}
-                            <span class="label label-rouded pull-right"
-                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                {{ item55.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: #9c0031b6;">
-                        <li *ngFor="let subMenuItem of item55.submenu">
-                            <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                • {{ subMenuItem.titulo }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+        <li *ngFor="let item of menuItems55" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!verArticulos || !hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-cubes"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- REGISTRO -->
-                <ng-container *ngIf="verRegistro">
-                    <li *ngFor="let item7 of menuItems7">
-                        <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                            style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                            <i class="mdi mdi-clipboard" style="color: #FFFFFF;"></i>
-                            <span class="hide-menu" style="color: #FFFFFF;">
-                                {{ item7.titulo }}
-                                <span class="label label-rouded pull-right"
-                                    style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                    {{ item7.submenu.length }}
-                                </span>
-                            </span>
-                        </a>
-                        <ul aria-expanded="false" class="collapse" style="background-color: #9c0031b6;">
-                            <li *ngFor="let subMenuItem of item7.submenu">
-                                <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                    style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                    • {{ subMenuItem.titulo }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ng-container>
+        <li *ngFor="let item of menuItems7" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!verRegistro || !hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-pencil-square-o"></i><span class="hide-menu">Registrar</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- REPORTES -->
-                <ng-container *ngIf="verReportes">
-                    <li *ngFor="let item44 of menuItems44">
-                        <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                            style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                            <i class="mdi mdi-chart-areaspline" style="color: #FFFFFF;"></i>
-                            <span class="hide-menu" style="color: #FFFFFF;">
-                                {{ item44.titulo }}
-                                <span class="label label-rouded pull-right"
-                                    style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                    {{ item44.submenu.length }}
-                                </span>
-                            </span>
-                        </a>
-                        <ul aria-expanded="false" class="collapse" style="background-color: #9c0031b6;">
-                            <li *ngFor="let subMenuItem of item44.submenu">
-                                <a *ngIf="subMenuItem.mostrar" [routerLink]="subMenuItem.url"
-                                    style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                    • {{ subMenuItem.titulo }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ng-container>
+        <li *ngFor="let item of menuItems44" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!verReportes || !hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-bar-chart"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- USUARIOS -->
-                <ng-container *ngIf="muestraUsuarios">
-                    <li *ngFor="let item5 of menuItems5">
-                        <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                            style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                            <i class="mdi mdi-account-multiple" style="color: #FFFFFF;"></i>
-                            <span class="hide-menu" style="color: #FFFFFF;">
-                                {{ item5.titulo }}
-                                <span class="label label-rouded pull-right"
-                                    style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                    {{ item5.submenu.length }}
-                                </span>
-                            </span>
-                        </a>
-                        <ul aria-expanded="false" class="collapse" style="background-color: #9c0031b6;">
-                            <li *ngFor="let subMenuItem of item5.submenu">
-                                <a [routerLink]="subMenuItem.url"
-                                    style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                    • {{ subMenuItem.titulo }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ng-container>
+        <li *ngFor="let item of menuItems5" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!muestraUsuarios || !hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-users"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-                <!-- CONTRASEÑA -->
-                <li *ngFor="let item10 of menuItems10">
-                    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"
-                        style="text-decoration: none; background-color: transparent; color: #FFFFFF;">
-                        <i class="mdi mdi-key" style="color: #FFFFFF;"></i>
-                        <span class="hide-menu" style="color: #FFFFFF;">
-                            {{ item10.titulo }}
-                            <span class="label label-rouded pull-right"
-                                style="background-color: rgba(0, 0, 0, 0.25); color: #FFFFFF; border-radius: 10px; padding: 2px 8px;">
-                                {{ item10.submenu.length }}
-                            </span>
-                        </span>
-                    </a>
-                    <ul aria-expanded="false" class="collapse" style="background-color: #9c0031b6;">
-                        <li *ngFor="let subMenuItem of item10.submenu">
-                            <a [routerLink]="subMenuItem.url"
-                                style="text-decoration: none; color: #E8F5E9; background-color: transparent; display: block; padding-left: 25px;">
-                                • {{ subMenuItem.titulo }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+        <li *ngFor="let item of menuItems10" class="sicai-menu-group" [class.menu-open]="isOpen(item.titulo)" [hidden]="!hasVisibleItems(item)">
+          <button type="button" class="sicai-menu-trigger" (click)="toggleGroup(item.titulo)" [attr.aria-expanded]="isOpen(item.titulo)"><i class="fa fa-key"></i><span class="hide-menu">{{ item.titulo }}</span><span class="sicai-menu-count hide-menu">{{ visibleCount(item) }}</span><i class="fa fa-chevron-down sicai-chevron hide-menu"></i></button>
+          <ul class="sicai-submenu" [class.is-open]="isOpen(item.titulo)"><li *ngFor="let sub of item.submenu"><a *ngIf="sub.mostrar" [routerLink]="sub.url" routerLinkActive="active" (click)="closeMobileSidebar()">{{ sub.titulo }}</a></li></ul>
+        </li>
 
-            </ul>
-        </nav>
-    </div>
+      </ul>
+    </nav>
+  </div>
 </aside>

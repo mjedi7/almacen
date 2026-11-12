@@ -278,3 +278,58 @@ body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .left-sidebar .hide-men
   width: auto !important;
   white-space: nowrap !important;
 }
+/* ==============================================================
+   SICAI SIDEBAR - estilos finales y responsivos
+   El estado mini se controla desde SidebarService / #main-wrapper.
+   ============================================================== */
+#main-wrapper .left-sidebar.sicai-sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: #8f1238 !important;
+    overflow: hidden;
+    transition: width .25s ease, transform .25s ease;
+}
+#main-wrapper:not(.mini-sidebar) .left-sidebar.sicai-sidebar { width: 240px !important; }
+#main-wrapper:not(.mini-sidebar) .page-wrapper { margin-left: 240px !important; }
+#main-wrapper.mini-sidebar .left-sidebar.sicai-sidebar { width: 70px !important; min-width: 70px !important; }
+#main-wrapper.mini-sidebar .page-wrapper { margin-left: 70px !important; }
+#main-wrapper .sicai-sidebar .sidebar-nav { padding: 14px 0 20px; background: transparent !important; }
+#main-wrapper .sicai-sidebar .sicai-menu-trigger { box-sizing: border-box; }
+#main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-trigger { justify-content: center; padding: 0; }
+#main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-trigger > .fa:first-child { margin: 0; }
+#main-wrapper.mini-sidebar .sicai-sidebar .hide-menu { display: none !important; }
+#main-wrapper.mini-sidebar .sicai-sidebar .sicai-submenu { display: none !important; }
+body.mini-sidebar #main-wrapper:not(.mini-sidebar) .left-sidebar.sicai-sidebar { width: 70px !important; min-width: 70px !important; }
+body.mini-sidebar #main-wrapper:not(.mini-sidebar) .page-wrapper { margin-left: 70px !important; }
+body.mini-sidebar #main-wrapper:not(.mini-sidebar) .sicai-sidebar .hide-menu { display: none !important; }
+body.mini-sidebar #main-wrapper:not(.mini-sidebar) .sicai-sidebar .sicai-menu-trigger { justify-content: center; padding: 0; }
+@media (max-width: 767.98px) {
+    #main-wrapper .left-sidebar.sicai-sidebar {
+        position: fixed !important;
+        top: 0; bottom: 0; left: 0;
+        width: 260px !important; min-width: 260px !important;
+        height: 100vh; margin: 0; padding-top: 70px;
+        transform: translateX(-100%);
+        z-index: 1050;
+    }
+    body.show-sidebar #main-wrapper .left-sidebar.sicai-sidebar { transform: translateX(0); }
+    #main-wrapper:not(.mini-sidebar) .page-wrapper,
+    #main-wrapper.mini-sidebar .page-wrapper,
+    body.mini-sidebar #main-wrapper:not(.mini-sidebar) .page-wrapper { margin-left: 0 !important; }
+    #main-wrapper .left-sidebar.sicai-sidebar .hide-menu { display: inline-block !important; }
+    #main-wrapper .left-sidebar.sicai-sidebar .sicai-menu-trigger { justify-content: flex-start !important; padding: 0 13px !important; }
+}
+
+/* Submenús emergentes al pasar sobre un icono en modo compacto. */
+@media (min-width: 768px) {
+    #main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-group,
+    body.mini-sidebar #main-wrapper .sicai-sidebar .sicai-menu-group { position: relative; }
+    #main-wrapper.mini-sidebar .sicai-sidebar .sicai-submenu,
+    body.mini-sidebar #main-wrapper .sicai-sidebar .sicai-submenu {
+        display: none !important; position: absolute; left: 60px; top: 0; width: 220px;
+        padding: 7px !important; border-radius: 7px; background: #74102f; z-index: 1100;
+        box-shadow: 0 8px 24px rgba(0,0,0,.22);
+    }
+    #main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-group:hover > .sicai-submenu,
+    body.mini-sidebar #main-wrapper .sicai-sidebar .sicai-menu-group:hover > .sicai-submenu { display: block !important; }
+}

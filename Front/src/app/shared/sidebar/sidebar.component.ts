@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { SidebarService } from 'src/app/services/sidebar.service';
-import { RegistroService } from 'src/app/services/registro.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -8,54 +7,34 @@ import { RegistroService } from 'src/app/services/registro.service';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-
   menuItems: any[];
-  menuItems2: any[];
   menuItems3: any[];
   menuItems4: any[];
-  menuItems44: any[];
   menuItems4B: any[];
+  menuItems44: any[];
   menuItems55: any[];
-  menuItems6: any[];
   menuItems7: any[];
   menuItems5: any[];
   menuItems10: any[];
 
-  // Almacen
-  resgistraCompra: boolean = true;
-  recargaStock: boolean = true;
-  existencias: boolean = true;
-  cargarexistencias: boolean = true;
+  vertransferencias = false;
+  verReportes = false;
+  verArticulos = false;
+  verRegistro = false;
+  muestraUsuarios = false;
+  movimientos = false;
 
-  // Movimientos
-  movimientos: boolean = true;
+  private openGroups = new Set<string>();
 
-  // Requisiciones
-  generarRequisicion: boolean = false;
-  pendientes: boolean = false;
-  atendidas: boolean = false;
-
-  // Transferencias / Modulos
-  vertransferencias: boolean = false;
-  verReportes: boolean = false;
-  verArticulos: boolean = false;
-  verRegistro: boolean = false;
-  muestraUsuarios: boolean = false;
-
-  constructor(
-    public sidebarService: SidebarService, // public para binding en el template HTML
-    private permodulos: RegistroService
-  ) {
+  constructor(public sidebarService: SidebarService) {
     this.menuItems = sidebarService.menu;
-    this.menuItems2 = sidebarService.menu2;
     this.menuItems3 = sidebarService.menu3;
     this.menuItems4 = sidebarService.menu4;
     this.menuItems4B = sidebarService.menu4B;
     this.menuItems44 = sidebarService.menu44;
     this.menuItems55 = sidebarService.menu55;
-    this.menuItems5 = sidebarService.menu5;
-    this.menuItems6 = sidebarService.menu6;
     this.menuItems7 = sidebarService.menu7;
+    this.menuItems5 = sidebarService.menu5;
     this.menuItems10 = sidebarService.menu10;
   }
 
@@ -64,96 +43,60 @@ export class SidebarComponent implements OnInit {
   }
 
   getpetmisosModulos(): void {
-    const permisoRaw = localStorage.getItem('permiso');
-    const permiso = parseInt(permisoRaw || '0', 10);
-    this.muestraUsuarios = (permiso === 0);
+    const permiso = Number.parseInt(localStorage.getItem('permiso') || '0', 10);
+    this.muestraUsuarios = permiso === 0;
 
     if (permiso === 0 || permiso === 1) {
-      // Almacen
-      if (this.menuItems?.[0]?.submenu) {
-        this.menuItems[0].submenu[0].mostrar = true;
-        this.menuItems[0].submenu[1].mostrar = true;
-        this.menuItems[0].submenu[2].mostrar = true;
-        if (this.menuItems[0].submenu[3]) this.menuItems[0].submenu[3].mostrar = false;
-        if (this.menuItems[0].submenu[4]) this.menuItems[0].submenu[4].mostrar = false;
-      }
-
-      // Transferencias
+      this.setVisible(this.menuItems[0], [true, true, true, false, false]);
       this.vertransferencias = true;
-
-      // Requisiciones
-      if (this.menuItems4?.[0]?.submenu) {
-        this.menuItems4[0].submenu[0].mostrar = false;
-        this.menuItems4[0].submenu[1].mostrar = true;
-      }
-
-      // Artículos
+      this.setVisible(this.menuItems4[0], [false, true]);
       this.verArticulos = true;
-      if (this.menuItems55?.[0]?.submenu?.[0]) {
-        this.menuItems55[0].submenu[0].mostrar = true;
-      }
-      if (this.menuItems55?.[0]?.submenu?.[1]) {
-        this.menuItems55[0].submenu[1].mostrar = true;
-      }
-
-      // Registro (solo tipo 0 y 1)
+      this.setVisible(this.menuItems55[0], [true, true]);
       this.verRegistro = true;
-
-      // Movimientos
       this.movimientos = false;
-      if (this.menuItems6?.[0]?.submenu) {
-        this.menuItems6[0].submenu.forEach((sub: any) => sub.mostrar = false);
-      }
-
-      // Reportes
+      this.setVisible(this.menuItems4B[0], [false]);
       this.verReportes = true;
-      if (this.menuItems44?.[0]?.submenu) {
-        this.menuItems44[0].submenu.forEach((item: any) => {
-          item.mostrar = true;
-        });
-      }
-
+      this.setAllVisible(this.menuItems44[0], true);
     } else if (permiso === 3) {
-      // Almacen
-      if (this.menuItems?.[0]?.submenu) {
-        this.menuItems[0].submenu[0].mostrar = false;
-        this.menuItems[0].submenu[1].mostrar = false;
-        this.menuItems[0].submenu[2].mostrar = true;
-        if (this.menuItems[0].submenu[3]) this.menuItems[0].submenu[3].mostrar = true;
-        if (this.menuItems[0].submenu[4]) this.menuItems[0].submenu[4].mostrar = true;
-      }
-
-      this.cargarexistencias = false;
+      this.setVisible(this.menuItems[0], [false, false, true, true, true]);
       this.vertransferencias = false;
-
-      // Requisiciones
-      if (this.menuItems4?.[0]?.submenu) {
-        this.menuItems4[0].submenu[0].mostrar = true;
-        this.menuItems4[0].submenu[1].mostrar = true;
-      }
-
-      // Movimientos
-      this.movimientos = true;
-      if (this.menuItems6?.[0]?.submenu?.[0]) {
-        this.menuItems6[0].submenu[0].mostrar = true;
-      }
-
-      // Reportes
-      this.verReportes = false;
-      if (this.menuItems44?.[0]?.submenu) {
-        this.menuItems44[0].submenu.forEach((item: any) => {
-          item.mostrar = false;
-        });
-      }
-
-      // Artículos
+      this.setVisible(this.menuItems4[0], [true, true]);
       this.verArticulos = false;
-      if (this.menuItems55?.[0]?.submenu?.[0]) {
-        this.menuItems55[0].submenu[0].mostrar = false;
-      }
-
-      // Registro
+      this.setVisible(this.menuItems55[0], [false, false]);
       this.verRegistro = false;
+      this.movimientos = true;
+      this.setVisible(this.menuItems4B[0], [true]);
+      this.verReportes = false;
+      this.setAllVisible(this.menuItems44[0], false);
     }
+  }
+
+  private setVisible(group: any, values: boolean[]): void {
+    group?.submenu?.forEach((item: any, index: number) => item.mostrar = values[index] ?? false);
+  }
+
+  private setAllVisible(group: any, visible: boolean): void {
+    group?.submenu?.forEach((item: any) => item.mostrar = visible);
+  }
+
+  hasVisibleItems(group: any): boolean {
+    return !!group?.submenu?.some((item: any) => item.mostrar);
+  }
+
+  visibleCount(group: any): number {
+    return group?.submenu?.filter((item: any) => item.mostrar).length || 0;
+  }
+
+  isOpen(title: string): boolean {
+    return this.openGroups.has(title);
+  }
+
+  toggleGroup(title: string): void {
+    if (this.openGroups.has(title)) this.openGroups.delete(title);
+    else this.openGroups.add(title);
+  }
+
+  closeMobileSidebar(): void {
+    document.body.classList.remove('show-sidebar');
   }
 }
