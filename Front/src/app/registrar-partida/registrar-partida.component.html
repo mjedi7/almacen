@@ -1,4 +1,7 @@
-<div class="container-fluid px-4">
+<div class="container-fluid">
+
+  <div class="contenedor-partidas">
+
   <!-- TÍTULO -->
   <div class="text-center" style="margin-top: 30px;">
     <h3><b>Registrar Nueva Partida</b></h3>
@@ -77,7 +80,7 @@
             </div>
 
             <!-- Botones de Acción -->
-            <div class="d-grid gap-2 col-6 mx-auto">
+            <div class="acciones-form">
               <button
                 type="submit"
                 class="btn btn-primary btn-lg shadow-sm"
@@ -87,16 +90,18 @@
                 <i *ngIf="!guardando" class="fa fa-save me-2"></i>
                 {{ guardando ? 'Guardando Partida...' : 'Guardar Partida' }}
               </button>
-
+            
               <button
                 type="button"
                 class="btn btn-outline-secondary"
                 (click)="f.resetForm({ esactivo: true })"
                 [disabled]="guardando"
               >
-                <i class="fa fa-eraser me-2"></i> Limpiar Campos
+                <i class="fa fa-eraser me-2"></i>
+                Limpiar Campos
               </button>
             </div>
+
           </form>
         </div>
       </div>
@@ -149,4 +154,5 @@
       </div>
     </div>
   </div>
+  </div>  
 </div>

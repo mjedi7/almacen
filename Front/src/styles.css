@@ -218,19 +218,25 @@ aside.left-sidebar:not(.mini-sidebar-active) .hide-menu {
 
 
 /* ============================================================== 
-   GESTIÓN DE SUBMENÚS FLOTANTES POR CLIC (EN MODO MINI)
+   GESTIÓN DE SUBMENÚS (ADAPTABLE: MÓVIL/NORMAL VS MODO MINI)
    ============================================================== */
 
-aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li:hover > a {
-  width: 70px !important;
-  background: transparent !important;
+/* 1. MODO NORMAL Y MÓVIL (< 768px o pantalla completa expandida): Despliegue hacia abajo en acordeón */
+.sidebar-nav #sidebarnav > li.active > ul,
+.sidebar-nav #sidebarnav > li.selected > ul {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  left: auto !important;
+  width: 100% !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
+  z-index: 10 !important;
+  padding: 5px 0 !important;
 }
 
-aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li:hover > ul {
-  display: none !important;
-}
-
-/* Despliegue flotante absoluto e independiente hacia la derecha al dar clic */
+/* 2. MODO MINI / COMPACTO: Tarjeta flotante independiente hacia la derecha */
 aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.active > ul,
 aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.selected > ul {
   display: block !important;
@@ -249,10 +255,10 @@ aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.selected > 
   overflow: visible !important;
 }
 
-/* Enlaces para los submenús flotantes */
-aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.active > ul li a,
-aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.selected > ul li a {
-  padding: 12px 20px !important;
+/* Enlaces de los submenús en cualquier modalidad */
+.sidebar-nav #sidebarnav > li.active > ul li a,
+.sidebar-nav #sidebarnav > li.selected > ul li a {
+  padding: 10px 20px !important;
   color: #ffffff !important;
   text-align: left !important;
   display: block !important;
@@ -261,10 +267,10 @@ aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.selected > 
   background: transparent !important;
 }
 
-aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.active > ul li a:hover {
+.sidebar-nav #sidebarnav > li.active > ul li a:hover,
+.sidebar-nav #sidebarnav > li.selected > ul li a:hover {
   background: rgba(0, 0, 0, 0.25) !important;
 }
-
 
 /* ============================================================== 
    BLINDAJE FINAL PARA COMPONENTES DE ANGULAR Y BOOTSTRAP
@@ -289,4 +295,116 @@ app-sidebar.mini-sidebar-active ~ .page-wrapper,
 #main-wrapper.mini-sidebar .page-wrapper {
   margin-left: 70px !important;
   width: calc(100% - 70px) !important;
+}
+
+/* ============================================================== 
+   BLINDAJE RESPONSIVO ABSOLUTO PARA TODOS LOS ÍCONOS DEL SIDEBAR EN MODO MINI
+   ============================================================== */
+
+/* Asegurar que CADA elemento del menú (incluyendo el primero de Almacén) permanezca visible y con 70px de ancho */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li,
+body.mini-sidebar .sidebar-nav #sidebarnav > li {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 70px !important;
+  min-width: 70px !important;
+  height: auto !important;
+}
+
+/* Forzar que todos los enlaces principales muestren su ícono perfectamente centrado y bloqueado */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li > a,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li > a,
+body.mini-sidebar .sidebar-nav #sidebarnav > li > a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 70px !important;
+  padding: 15px 0 !important;
+}
+
+/* Blindar los íconos (MDI) para que nunca se oculten sin importar el tamaño de pantalla */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li > a > i,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li > a > i,
+body.mini-sidebar .sidebar-nav #sidebarnav > li > a > i {
+  display: inline-block !important;
+  visibility: visible !important;
+  font-size: 22px !important;
+  color: #FFFFFF !important;
+  margin: 0 auto !important;
+}
+
+/* ============================================================== 
+   FIJAR ALMACÉN EN LA CIMA ABSOLUTA CUANDO EL SIDEBAR ESTÁ COMPACTO
+   ============================================================== */
+
+/* Si el sidebar está en modo mini, forzamos que el primer <li> se quede arriba fijo */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li:first-child,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li:first-child {
+  position: relative !important;
+  display: block !important;
+  visibility: visible !important;
+  order: -9999 !important; /* Lo empuja obligatoriamente al primer lugar absoluto */
+  margin-top: 0 !important;
+}
+
+/* Asegurar que el contenedor ul #sidebarnav permita este orden flexible */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ============================================================== 
+   BLINDAJE ANTIDESAPARICIÓN PARA ALMACÉN ABAJO DE 768px
+   ============================================================== */
+
+@media (max-width: 767px) {
+  /* Forzar que el contenedor principal del sidebar muestre todos sus ítems */
+  aside.left-sidebar .sidebar-nav #sidebarnav > li,
+  #main-wrapper .sidebar-nav #sidebarnav > li {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Blindar específicamente el primer elemento (Almacén) para que nunca se oculte en móviles */
+  aside.left-sidebar .sidebar-nav #sidebarnav > li:first-child,
+  #main-wrapper .sidebar-nav #sidebarnav > li:first-child {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+  }
+
+  /* Asegurar que su enlace y su ícono sean visibles en pantallas chicas */
+  aside.left-sidebar .sidebar-nav #sidebarnav > li:first-child > a,
+  #main-wrapper .sidebar-nav #sidebarnav > li:first-child > a {
+    display: flex !important;
+    align-items: center !important;
+    visibility: visible !important;
+  }
+
+  aside.left-sidebar .sidebar-nav #sidebarnav > li:first-child > a > i,
+  #main-wrapper .sidebar-nav #sidebarnav > li:first-child > a > i {
+    display: inline-block !important;
+    visibility: visible !important;
+    color: #ffffff !important;
+  }
+}
+
+/* ============================================================== 
+   CORRECCIÓN DEL HEADER FIJO PARA QUE ALMACÉN NO QUEDE OCULTO ARRIBA
+   ============================================================== */
+
+aside.left-sidebar, 
+#main-wrapper .left-sidebar {
+  top: 70px !important; /* Ajusta este valor si tu header es un poco más alto o más bajo */
+  height: calc(100vh - 70px) !important;
+}
+
+.scroll-sidebar {
+  padding-top: 15px !important; /* Espacio extra para que el primer ítem respire y luzca perfecto */
+  padding-bottom: 70px !important;
 }

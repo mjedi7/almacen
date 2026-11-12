@@ -13,3 +13,35 @@
   background-color: #750025 !important;
   color: #fff !important;
 }
+
+.acciones-form {
+  display: flex;
+  flex-direction: column;   /* uno debajo del otro, como lo tienes */
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 420px;         /* ancho del bloque de botones */
+  margin: 0 auto;           /* centra el bloque */
+}
+
+/* Pantallas chicas (menos de 992px): formulario y tabla dentro de un solo contenedor */
+@media (max-width: 991.98px) {
+  .contenedor-partidas {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    overflow: hidden;            /* recorta las esquinas de las barras guinda */
+    margin-bottom: 1.5rem;
+  }
+
+  /* Las tarjetas internas pierden su propio borde y sombra */
+  .contenedor-partidas .card {
+    box-shadow: none !important; /* .shadow de Bootstrap usa !important */
+    border-radius: 0;
+    background: transparent;
+  }
+
+  /* Sin separación entre el formulario y la tabla */
+  .contenedor-partidas [class*="col-"] {
+    margin-bottom: 0 !important; /* anula el mb-4 de las columnas */
+  }
+}

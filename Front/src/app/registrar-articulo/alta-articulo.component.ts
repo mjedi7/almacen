@@ -101,7 +101,7 @@ export class AltaArticuloComponent implements OnInit {
       <div style="text-align: left; font-size: 0.95rem; line-height: 1.6; margin-top: 10px;">
         <p><strong>Partida:</strong> ${textoPartida}</p>
         <p><strong>Clave:</strong> ${this.articulo.clave}</p>
-        <p><strong>Costo Unitario:</strong> $${this.articulo.precio_unitario ?? 0}</p>
+        <!-- <p><strong>Costo Unitario:</strong> $${this.articulo.precio_unitario ?? 0}</p> -->
         <p><strong>Descripción:</strong> ${descripcionLimpia}</p>
         <p><strong>Unidad de Medida:</strong> ${textoUnidad}</p>
       </div>

@@ -1,19 +1,42 @@
-:host {
-  display: block;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+/* ==============================================================
+   INICIO - estilos base + variables por resolución
+   Los tamaños viven en variables (--xxx). Cada @media solo las
+   redefine, así que ajustar una resolución = cambiar números aquí.
+
+   Rangos (ancho de ventana):
+     <= 800px        -> compacto  (800x600 o menores)
+     801px - 1023px  -> base      (tablet / intermedio)
+     >= 1024px       -> escritorio (1024x768 o mayores)
+     >= 1920px       -> pantalla grande (Full HD 1920x1080 o mayores)
+   ============================================================== */
 
 .inicio-page {
+  /* --- Valores base (801px - 1023px) --- */
+  --content-max: 1120px;
+  --logo-text-size: clamp(2.8rem, 5vw, 3.75rem);
+  --title-max: 560px;
+  --title-size: clamp(1rem, 2vw, 2.25rem);
+  --logo-img-max: 170px;
+  --section-gap: 1rem;          /* espacio entre logo, título e imagen */
+  --card-min-h: 92px;
+  --card-pad: 1rem 1.05rem;
+  --card-gap: 0.85rem;
+  --icon-box: 46px;
+  --icon-svg: 25px;
+  --name-size: 0.93rem;
+  --desc-size: 0.75rem;
+  --arrow-size: 1.7rem;
+
   min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.25rem 3rem;
+  padding: 0 !important;
 }
 
 .inicio-content {
   width: 100%;
-  max-width: 1120px;
+  max-width: var(--content-max);
   margin: 0 auto;
   text-align: center;
 }
@@ -23,32 +46,32 @@
   align-items: center;
   justify-content: center;
   letter-spacing: -2px;
-  font-size: clamp(2.8rem, 5vw, 3.75rem);
+  font-size: var(--logo-text-size);
   line-height: 1;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .color-green { color: #00843D; }
 .color-orange { color: #F26522; }
 
 .inicio-title {
-  max-width: 760px;
+  max-width: var(--title-max);
   margin: 0.7rem auto 0;
   color: #3b4644;
-  font-size: clamp(1.45rem, 3vw, 2.15rem);
+  font-size: var(--title-size);
   line-height: 1.25;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .logo-image-wrap {
   display: flex;
   justify-content: center;
-  margin: 1rem auto 1.5rem;
+  margin: var(--section-gap) auto calc(var(--section-gap) * 1.5);
 }
 
 .logo-image {
-  width: 100%;
-  max-width: 340px;
+  width: 50%;
+  max-width: var(--logo-img-max);
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.04));
@@ -56,7 +79,7 @@
 
 .quick-access {
   margin: 0 auto;
-  max-width: 1080px;
+  max-width: calc(var(--content-max) - 40px);
   text-align: left;
 }
 
@@ -71,10 +94,10 @@
 .quick-card {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  min-height: 92px;
+  gap: var(--card-gap);
+  min-height: var(--card-min-h);
   height: 100%;
-  padding: 1rem 1.05rem;
+  padding: var(--card-pad);
   color: #35413d;
   text-decoration: none;
   background: #fff;
@@ -95,17 +118,17 @@
 
 .quick-card-icon {
   display: inline-flex;
-  flex: 0 0 46px;
-  width: 46px;
-  height: 46px;
+  flex: 0 0 var(--icon-box);
+  width: var(--icon-box);
+  height: var(--icon-box);
   align-items: center;
   justify-content: center;
   border-radius: 11px;
 }
 
 .quick-card-icon svg {
-  width: 25px;
-  height: 25px;
+  width: var(--icon-svg);
+  height: var(--icon-svg);
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -127,28 +150,91 @@
 }
 
 .quick-card-name {
-  font-size: 0.93rem;
+  font-size: var(--name-size);
   font-weight: 700;
   line-height: 1.25;
 }
 
 .quick-card-description {
   color: #77817d;
-  font-size: 0.75rem;
+  font-size: var(--desc-size);
   line-height: 1.35;
 }
 
 .quick-card-arrow {
   color: #9aa49f;
-  font-size: 1.7rem;
+  font-size: var(--arrow-size);
   line-height: 1;
 }
 
-@media (max-width: 575.98px) {
-  .inicio-page { padding: 2rem 1rem; }
-  .logo-image { max-width: 280px; }
-  .quick-card { min-height: 82px; }
+
+/* ==============================================================
+   COMPACTO: 800x600 o menores (incluye móviles)
+   ============================================================== */
+@media (max-width: 800px) {
+  .inicio-page {
+    --logo-text-size: clamp(2.2rem, 9vw, 3rem);
+    --title-max: 420px;
+    --title-size: clamp(0.95rem, 3.6vw, 1.15rem);
+    --logo-img-max: 120px;
+    --section-gap: 0.75rem;
+    --card-min-h: 76px;
+    --card-pad: 0.75rem 0.85rem;
+    --card-gap: 0.7rem;
+    --icon-box: 40px;
+    --icon-svg: 22px;
+    --name-size: 0.88rem;
+    --desc-size: 0.72rem;
+    --arrow-size: 1.4rem;
+  }
 }
+
+/* Pantallas bajas (ej. 800x600): menos espacio vertical */
+@media (max-height: 640px) {
+  .inicio-page {
+    min-height: auto;
+    --section-gap: 0.5rem;
+    --logo-img-max: 100px;
+  }
+}
+
+
+/* ==============================================================
+   ESCRITORIO: 1024x768 o mayores
+   ============================================================== */
+@media (min-width: 1024px) {
+  .inicio-page {
+    --logo-img-max: 190px;
+    --section-gap: 1.25rem;
+    --card-min-h: 96px;
+    --name-size: 0.97rem;
+    --desc-size: 0.78rem;
+  }
+}
+
+
+/* ==============================================================
+   PANTALLA GRANDE: 1920x1080 o mayores (Full HD, 2K, 4K)
+   ============================================================== */
+@media (min-width: 1920px) {
+  .inicio-page {
+    --content-max: 1500px;
+    --logo-text-size: 5rem;
+    --title-max: 760px;
+    --title-size: 2rem;
+    --logo-img-max: 360px;
+    --section-gap: 1.75rem;
+    --card-min-h: 120px;
+    --card-pad: 1.3rem 1.4rem;
+    --card-gap: 1.1rem;
+    --icon-box: 58px;
+    --icon-svg: 31px;
+    --name-size: 1.12rem;
+    --desc-size: 0.92rem;
+    --arrow-size: 2.1rem;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .quick-card { transition: none; }
