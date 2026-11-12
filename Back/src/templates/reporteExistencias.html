@@ -36,8 +36,8 @@
     <table class="table-header">
       <thead>
         <tr>
-          <th style="width: 12%;">Partida</th>
-          <th style="width: 58%;">Nombre Partida</th>
+          <th style="width: 14%;">Partida</th>
+          <th style="width: 56%; text-align: left; padding-left: 6px;">Nombre Partida</th>
           <th style="width: 15%;">Productos</th>
           <th style="width: 15%;">Proveedores</th>
         </tr>
@@ -45,7 +45,7 @@
       <tbody>
         <tr>
           <td class="text-center font-bold">{{this.clave}}</td>
-          <td class="text-left" style="padding-left: 8px;">{{this.descripcion}}</td>
+          <td class="text-left" style="padding-left: 6px;">{{this.descripcion}}</td>
           <td class="text-center">Todos</td>
           <td class="text-center">Todos</td>
         </tr>
@@ -56,11 +56,11 @@
     <table class="table-detalle">
       <thead>
         <tr>
-          <th style="width: 17%;">Clave</th>
-          <th style="width: 47%;">Artículo</th>
-          <th style="width: 11%;">Costo</th>
-          <th style="width: 10%;">Existencia</th>
-          <th style="width: 15%;">Costo total</th>
+          <th style="width: 18%;">Clave</th>
+          <th style="width: 44%; text-align: left; padding-left: 6px;">Artículo</th>
+          <th style="width: 12%; text-align: right; padding-right: 6px;">Costo</th>
+          <th style="width: 10%; text-align: center;">Existencia</th>
+          <th style="width: 16%; text-align: right; padding-right: 6px;">Costo total</th>
         </tr>
       </thead>
       <tbody>
@@ -68,10 +68,10 @@
           {{#each this.articulos}}
           <tr>
             <td class="cen nowrap">{{this.clave}}</td>
-            <td class="text-left">{{this.articulo}}</td>
-            <td class="num nowrap">$ {{this.costo}}</td>
+            <td class="text-left" style="padding-left: 6px;">{{primeraMayuscula this.articulo}}</td>
+            <td class="num nowrap" style="padding-right: 6px;">$ {{this.costo}}</td>
             <td class="cen font-bold">{{this.existencia}}</td>
-            <td class="num nowrap">$ {{this.costo_total}}</td>
+            <td class="num nowrap font-bold" style="padding-right: 6px;">$ {{this.costo_total}}</td>
           </tr>
           {{/each}}
         {{else}}

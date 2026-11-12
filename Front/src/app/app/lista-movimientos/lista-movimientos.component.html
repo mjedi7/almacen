@@ -1,57 +1,86 @@
 <div class="formulario">
 
-  <div class="Titulo" style="text-align: center;"> <h3>Lista de salidas</h3></div>
+  <div class="Titulo" style="text-align: center;"> 
+    <h3>Lista de salidas</h3>
+  </div>
   <hr>
 
-  <div class="form-row mt-5">
+  <div class="form-row mt-5 px-4">
 
-    <div class="form-group col-md-3" style="padding-left:120px;">
-        <label for="inputPassword4">Plantel</label>
-        <select [(ngModel)]="opcionSeleccionado" id="areaEmite" class="form-control" name="Plantel" (change)="plantelSeleccionado()" required ngModel #Plantel="ngModel">       
-          <ng-container *ngFor="let plantel of planteles" >
-                <option [value]="plantel.id">{{plantel.descripcion}}</option>
+    <!-- PLANTEL CON BUSCADOR INTELIGENTE -->
+    <div class="form-group col-md-6 position-relative">
+      <label for="inputPlantel">Seleccionar Plantel</label>
+      
+      <button
+        type="button"
+        class="selector-btn form-control text-left d-flex justify-content-between align-items-center"
+        (click)="toggleMenuPlantel()">
+        <span>
+          <ng-container *ngIf="opcionSeleccionado !== 0; else textoPlantel">
+            {{ centroSeleccionado?.codigo | number:'2.0-0' }} — {{ centroSeleccionado?.descripcion }}
           </ng-container>
-          </select>
-          <small *ngIf="Plantel.invalid && Plantel.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-    </div>
+          <ng-template #textoPlantel>
+            Seleccionar plantel...
+          </ng-template>
+        </span>
+        <span>▾</span>
+      </button>
 
+      <div class="selector-menu border rounded p-2 bg-white shadow-sm mt-1 w-100" *ngIf="menuPlantelesAbierto" style="position: absolute; z-index: 1000; max-height: 250px; overflow-y: auto;">
+        <input
+          type="text"
+          class="form-control selector-busqueda mb-2"
+          placeholder="Buscar por número o nombre..."
+          [(ngModel)]="busquedaPlantelDropdown"
+          name="buscarPlantelDropdown"
+          autocomplete="off">
+
+        <button
+          type="button"
+          class="selector-opcion btn btn-light btn-block text-left mb-1 py-1 px-2"
+          *ngFor="let p of plantelesVisibles"
+          (click)="seleccionarPlantelDropdown(p)">
+          {{ p.codigo | number:'2.0-0' }} — {{ p.descripcion }}
+        </button>
+
+        <div class="selector-vacio text-muted text-center py-2" *ngIf="plantelesVisibles.length === 0">
+          No se encontraron planteles.
+        </div>
+      </div>
+
+      <small *ngIf="opcionSeleccionado === 0" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+    </div>
 
   </div>
 
 </div>
 
 <!-- TABLA -->
+<div class="mt-4" style="width: 85%; margin: 0 auto;">
 
-<div class="mt-2" style="width: 85%;margin: 0 auto;" >
-
-    <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
-        <thead>
-            <tr style="color:#000">
-                <th style="text-align:left;width:20px">Folio </th>
-                <th style="text-align:left;width:80px">Fecha</th>
-                <!-- <th style="text-align:center;width:350px">Artículo</th> -->
-                <th style="text-align:center;width:300px">Solicitó</th> 
-                <th style="text-align:center;width:300px">Autorizó</th>
-                <th style="text-align:center;width:300px">Subir Formato</th>
-                  
-            </tr>
-        </thead>
-        <tbody style="font-size: 15px;">
-            <tr *ngFor="let salida of salidas">
-                <td style="text-align:left;">{{salida.folio_solicitud}}</td>
-                <td>{{salida.fecha | date:'dd/MM/yyyy'}}</td>
-                <!-- <td style="text-align:center;text-transform:lowercase;">{{salida.descripcion}}</td>      -->
-                  <td style="text-transform:capitalize">{{salida.nombre_solicita}}</td>
-                <td style="text-align:center;">{{salida.nombre_autoriza}}</td>    
-                <td style="text-align:center;">
-
-                     <input id="file" type="file" style="width: 110px;" (change)="upload($event)" class=" btn btn-primary form-control" multiple="multiple" accept=".pdf" required>
-                     <button class="btn btn-warning" style="margin:4px;" (click)="subirPDF(salida.id)"><i class="mdi mdi-cloud-upload"></i></button>
-                     <button class="btn btn-light" style="margin:4px;" (click)="abrirPDF(salida.ruta)"><i class="mdi mdi-file-pdf fa-1x" style="color: rgb(223, 21, 21);"></i></button>
-                
-                </td>                               
-            </tr>
-        </tbody>
-    </table>
+  <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
+    <thead>
+      <tr style="color:#000">
+        <th style="text-align:left;width:50px">Folio</th>
+        <th style="text-align:left;width:100px">Fecha</th>
+        <th style="text-align:center;width:250px">Solicitó</th> 
+        <th style="text-align:center;width:250px">Autorizó</th>
+        <th style="text-align:center;width:200px">Subir Formato</th>
+      </tr>
+    </thead>
+    <tbody style="font-size: 15px;">
+      <tr *ngFor="let salida of salidas">
+        <td style="text-align:left;">{{salida.folio_solicitud}}</td>
+        <td>{{salida.fecha | date:'dd/MM/yyyy'}}</td>
+        <td style="text-transform:capitalize">{{salida.nombre_solicita}}</td>
+        <td style="text-align:center;">{{salida.nombre_autoriza}}</td>    
+        <td style="text-align:center;">
+          <input id="file" type="file" style="width: 110px; display: inline-block;" (change)="upload($event)" class="btn btn-primary form-control btn-sm" multiple="multiple" accept=".pdf" required>
+          <button class="btn btn-warning btn-sm" style="margin:4px;" (click)="subirPDF(salida.id)" title="Subir PDF"><i class="mdi mdi-cloud-upload"></i></button>
+          <button class="btn btn-light btn-sm" style="margin:4px;" (click)="abrirPDF(salida.ruta)" title="Ver PDF"><i class="mdi mdi-file-pdf fa-1x" style="color: rgb(223, 21, 21);"></i></button>
+        </td>             
+      </tr>
+    </tbody>
+  </table>
    
 </div>

@@ -4,217 +4,34 @@
 <head>
   <meta charset="UTF-8">
   <title>Lista de Surtido</title>
-  <style>
-    @page {
-      size: letter portrait;
-      margin: 0;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0 12mm;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 10pt;
-      color: #000;
-      background: #fff;
-    }
-
-    /* Encabezado institucional */
-    .header-container {
-      width: 100%;
-      text-align: center;
-      margin-top: 8mm;
-      margin-bottom: 12px;
-    }
-
-    .header-banner {
-      width: 100%;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .header-banner img {
-      max-width: 100%;
-      height: 95px;
-      object-fit: contain;
-    }
-
-    .report-institution {
-      font-size: 10pt;
-      font-weight: bold;
-      letter-spacing: 0.3px;
-      margin-bottom: 4px;
-    }
-
-    .document-reference {
-      font-size: 9.5pt;
-      line-height: 1.35;
-      margin-bottom: 14px;
-      text-align: center;
-    }
-
-    /* Tablas formales con estilo Kárdex */
-    .table-custom {
-      width: 100%;
-      border-collapse: collapse !important;
-      border: 1.5px solid #000;
-      margin-bottom: 14px;
-    }
-
-    .table-custom th {
-      background-color: #f7faff;
-      border: 1px solid #000;
-      padding: 6px 8px;
-      font-size: 9.5pt;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .table-custom td {
-      border: 1px solid #000;
-      padding: 6px 8px;
-      font-size: 9.5pt;
-      vertical-align: middle;
-    }
-
-    .text-center { text-align: center; }
-    .text-left { text-align: left; }
-    .text-right { text-align: right; }
-    .nowrap { white-space: nowrap; }
-    .font-bold { font-weight: bold; }
-
-    /* Totales alineados a la derecha */
-    .totales-derecha-contenedor {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 8px;
-      margin-bottom: 24px;
-    }
-
-    .totals-table {
-      width: 250px;
-      border-collapse: collapse;
-      border: 1px solid #000;
-    }
-
-    .totals-table td {
-      padding: 5px 8px;
-      font-size: 9.5pt;
-      border: 1px solid #ccc;
-    }
-
-    .totals-table tr.total-destacado td {
-      border-top: 1.5px solid #000;
-      background-color: #f7faff;
-    }
-
-    /* Firmas espaciadas */
-    .signature-grid {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 36px;
-      margin-bottom: 0;
-      page-break-inside: avoid;
-    }
-
-    /* Contenido a altura de hoja: el cierre (totales + firmas) se empuja hasta abajo, justo arriba del pie.
-       padding-bottom reserva el alto del pie fijo (max 32mm) */
-    .contenido-pagina {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      padding-bottom: 36mm;
-    }
-
-    .cierre-reporte {
-      margin-top: auto;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-
-    .signature {
-      flex: 1;
-      text-align: center;
-      font-size: 8.5pt;
-      font-weight: bold;
-    }
-
-    .signature__line {
-      border-bottom: 1.5px solid #000;
-      margin-top: 40px;
-      margin-bottom: 5px;
-      min-height: 18px;
-      font-size: 8pt;
-      font-weight: normal;
-    }
-
-    .signature__role {
-      font-size: 7.5pt;
-      font-weight: normal;
-      color: #333;
-      line-height: 1.2;
-    }
-
-    /* Pie institucional fijo */
-    .pie-fijo-completo {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      text-align: center;
-      line-height: 0;
-      z-index: 1000;
-    }
-
-    .pie-fijo-completo img {
-      width: 100%;
-      height: auto;
-      max-height: 32mm;
-      object-fit: contain;
-      object-position: bottom center;
-      display: block;
-    }
-  </style>
 </head>
 
-<body>
+<body class="report">
 
-  <div class="contenido-pagina">
+  <!-- Banner superior institucional -->
+  {{#if bannerBase64}}
+  <div class="report-banner">
+    <img src="{{bannerBase64}}" alt="Banner Institucional">
+  </div>
+  {{/if}}
 
-  <!-- Banner y encabezado -->
-  <div class="header-container">
-    {{#if bannerBase64}}
-    <div class="header-banner">
-      <img src="{{bannerBase64}}" alt="Banner Institucional">
-    </div>
-    {{/if}}
-
-    <div class="report-institution">
-      COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
-    </div>
-
-    <div class="document-reference">
+  <!-- Encabezado general -->
+  <header class="report-heading">
+    <h1 class="report-heading__institution">
+      Colegio de Estudios Científicos y Tecnológicos del Estado de Veracruz
+    </h1>
+    <div class="report-heading__sub">
       <span>R.F.C.: CEC941104AN5</span>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <span>REMISIÓN No: <strong>{{folioFormateado}}</strong></span>
-      <br>
-      DIRECCIÓN ADMINISTRATIVA
-      <br>
+    </div>
+    <div class="report-heading__dept">
+      DIRECCIÓN ADMINISTRATIVA<br>
       DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS GENERALES
     </div>
-  </div>
+  </header>
 
-  <!-- Información de entrega -->
-  <table class="table-custom">
+  <!-- Información de entrega / Solicitante -->
+  <table class="table-meta-solicitud">
     <thead>
       <tr>
         <th style="width: 33%;">Entregado a:</th>
@@ -224,104 +41,115 @@
     </thead>
     <tbody>
       <tr>
-        <td class="text-center">{{meta.plantel}}</td>
-        <td class="text-center">{{meta.administrativo}}</td>
-        <td class="text-center">{{meta.fecha}}</td>
+        <td>{{meta.plantel}}</td>
+        <td>{{meta.administrativo}}</td>
+        <td>{{meta.fecha}}</td>
       </tr>
     </tbody>
   </table>
 
-  <!-- Tabla de Artículos -->
-  <table class="table-custom">
+  <!-- Tabla principal de Artículos -->
+  <table class="report-table">
     <thead>
       <tr>
         <th style="width: 10%;">Cantidad</th>
         <th style="width: 18%;">Clave</th>
-        <th style="width: 12%;">Costeo</th>
-        <th>Descripción</th>
+        <th style="width: 10%;">Costeo</th>
+        <th style="text-align: left; padding-left: 6px;">Descripción</th>
         {{#if conMontos}}
-        <th style="width: 13%;">P/U</th>
-        <th style="width: 13%;">Importe</th>
+        <th style="width: 13%; text-align: right; padding-right: 6px;">P/U</th>
+        <th style="width: 13%; text-align: right; padding-right: 6px;">Importe</th>
         {{/if}}
       </tr>
     </thead>
     <tbody>
-      {{#each articulos}}
-      <tr>
-        <td class="text-center">{{this.cantidad}}</td>
-        <td class="text-center">{{this.clave}}</td>
-        <td class="text-center">PEPS</td>
-        <td class="text-left">{{this.descripcion}}</td>
-        {{#if ../conMontos}}
-        <td class="text-right nowrap">${{this.precio_unitario}}</td>
-        <td class="text-right nowrap">${{this.importe_total}}</td>
-        {{/if}}
-      </tr>
-      {{/each}}
+      {{#if articulos.length}}
+        {{#each articulos}}
+        <tr>
+          <td class="text-center">{{this.cantidad}}</td>
+          <td class="text-center nowrap">{{this.clave}}</td>
+          <td class="text-center">P.E.P.S</td>
+          <td class="text-left" style="padding-left: 6px;">{{this.descripcion}}</td>
+          {{#if ../conMontos}}
+          <td class="text-right nowrap" style="padding-right: 6px;">${{this.precio_unitario}}</td>
+          <td class="text-right nowrap font-bold" style="padding-right: 6px;">${{this.importe_total}}</td>
+          {{/if}}
+        </tr>
+        {{/each}}
+      {{else}}
+        <tr>
+          <td colspan="{{#if conMontos}}6{{else}}4{{/if}}" class="empty-state">
+            No se encontraron artículos en esta lista de surtido.
+          </td>
+        </tr>
+      {{/if}}
     </tbody>
   </table>
 
+  <!-- Cierre: Totales y Firmas institucionales unificadas -->
   <div class="cierre-reporte">
 
-  <!-- Totales alineados a la derecha -->
-  {{#if conMontos}}
-  <div class="totales-derecha-contenedor">
-    <table class="totals-table">
-      <tbody>
-        <tr>
-          <td class="text-left font-bold">Subtotal:</td>
-          <td class="text-right nowrap font-bold">${{totales.subtotal}}</td>
-        </tr>
-        <tr>
-          <td class="text-left font-bold">I.V.A. (16%):</td>
-          <td class="text-right nowrap font-bold">${{totales.iva}}</td>
-        </tr>
-        <tr class="total-destacado">
-          <td class="text-left font-bold">Total:</td>
-          <td class="text-right nowrap font-bold">${{totales.total}}</td>
-        </tr>
-      </tbody>
-    </table>
+    {{#if conMontos}}
+    <div class="bloque-totales">
+      <table class="tabla-totales">
+        <tbody>
+          <tr>
+            <td class="text-right font-bold">Subtotal:</td>
+            <td class="text-right nowrap font-bold">${{totales.subtotal}}</td>
+          </tr>
+          <tr>
+            <td class="text-right font-bold">I.V.A. (16%):</td>
+            <td class="text-right nowrap font-bold">${{totales.iva}}</td>
+          </tr>
+          <tr style="border-top: 1.5px solid #000;">
+            <td class="text-right font-bold">Total:</td>
+            <td class="text-right nowrap font-bold">${{totales.total}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {{/if}}
+
+    <!-- Bloque de Firmas estructurado a 4 columnas consistentes -->
+    <section class="bloque-firmas-ultima-hoja">
+      <div class="grid-firmas">
+        
+        <!-- 1. Recibió -->
+        <div class="firma-col">
+          <div class="titulo-rol">RECIBIÓ</div>
+          <div class="linea-firma"></div>
+          <div class="nombre-firmante">{{#if meta.director}}{{meta.director}}{{else}}&nbsp;{{/if}}</div>
+          <div class="puesto-firmante">DIRECTOR / JEFE DEPTO / AUXILIAR</div>
+        </div>
+
+        <!-- 2. Entregó -->
+        <div class="firma-col">
+          <div class="titulo-rol">ENTREGÓ</div>
+          <div class="linea-firma"></div>
+          <div class="nombre-firmante">{{#if meta.usuario}}{{meta.usuario}}{{else}}&nbsp;{{/if}}</div>
+          <div class="puesto-firmante">ENCARGADO DE ALMACÉN</div>
+        </div>
+
+        <!-- 3. Revisó -->
+        <div class="firma-col">
+          <div class="titulo-rol">REVISÓ</div>
+          <div class="linea-firma"></div>
+          <div class="nombre-firmante">Lic. Isidro Alejandro García Sixto</div>
+          <div class="puesto-firmante">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
+        </div>
+
+        <!-- 4. Autorizó -->
+        <div class="firma-col">
+          <div class="titulo-rol">AUTORIZÓ</div>
+          <div class="linea-firma"></div>
+          <div class="nombre-firmante">M.A. Adriana P. Hernández Hernández</div>
+          <div class="puesto-firmante">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
+        </div>
+
+      </div>
+    </section>
+
   </div>
-  {{/if}}
-
-  <!-- Firmas de conformidad -->
-  <section class="signature-grid">
-    <div class="signature">
-      RECIBIÓ
-      <div class="signature__line">{{meta.director}}</div>
-      <div class="signature__role">DIRECTOR / JEFE DEPTO / AUXILIAR</div>
-    </div>
-
-    <div class="signature">
-      ENTREGÓ
-      <div class="signature__line">{{#if meta.usuario}}{{meta.usuario}}{{else}}&nbsp;{{/if}}</div>
-      <div class="signature__role">ENCARGADO DE ALMACÉN</div>
-    </div>
-
-    <div class="signature">
-      REVISÓ
-      <div class="signature__line">Lic. Isidro Alejandro García Sixto</div>
-      <div class="signature__role">JEFE DEL DEPTO. DE REC. MATERIALES Y SERV. GENERALES</div>
-    </div>
-
-    <div class="signature">
-      AUTORIZÓ
-      <div class="signature__line">M.A. Adriana P. Hernández Hernández</div>
-      <div class="signature__role">ENCARGADA DE DESPACHO DE LA DIR. ADMINISTRATIVA</div>
-    </div>
-  </section>
-
-  </div><!-- /cierre-reporte -->
-
-  </div><!-- /contenido-pagina -->
-
-  <!-- Pie institucional -->
-  {{#if pieBase64}}
-  <div class="pie-fijo-completo">
-    <img src="{{pieBase64}}" alt="Pie Institucional">
-  </div>
-  {{/if}}
 
 </body>
 

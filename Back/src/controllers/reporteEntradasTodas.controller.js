@@ -6,7 +6,7 @@ const pool = new Pool({
   user: process.env.USER_BD,
   password: process.env.PASSWORD_BD,
   database: process.env.DATABASE_BD,
-  port: process.env.PORT_BD
+  port: Number(process.env.PORT_BD || 5432)
 });
 
 const formatearFecha = (fecha) => {
@@ -44,11 +44,6 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
  */
 const generarReporteEntradasTodas = async (req, res) => {
   try {
-    console.log(
-      'Authorization recibido:',
-      req.header('Authorization')
-    );
-
     const {
       fechaIni,
       fechaFin,
@@ -115,14 +110,18 @@ const generarReporteEntradasTodas = async (req, res) => {
       costoTotal: formatearMoneda(registro.total || 0).replace('$', '').trim()
     }));
 
+    const fechaReporteFormateada = formatearFecha(fechaReporte);
+
     const datosPlantilla = {
-      usuario: usuario || 'USUARIO NO IDENTIFICADO',
+      usuario: usuario || 'ADMINISTRADOR',
+      nombreUsuario: usuario || 'ADMINISTRADOR',
       titulo: esCompra ? 'RESUMEN DE COMPRAS' : 'RESUMEN DE ENTRADAS',
       documentos: 'Todos',
       proveedores: 'Todos',
       fechaInicio: formatearFecha(fechaIni),
       fechaFin: formatearFecha(fechaFin),
-      fechaReporte: formatearFecha(fechaReporte),
+      fechaReporte: fechaReporteFormateada,
+      fechaImpresion: fechaReporteFormateada, // Garantiza que coincida en el pie de página
       registros,
       hayRegistros: registros.length > 0,
       totalRegistros: registros.length,
@@ -137,9 +136,8 @@ const generarReporteEntradasTodas = async (req, res) => {
       'reporteEntradasTodas.html',
       datosPlantilla,
       {
-        format: 'Letter',
-        printBackground: true,
-        landscape: false
+        tipoDiseno: 'con-pie',
+        estamparCenefa: true
       }
     );
 
