@@ -156,4 +156,6 @@ export class SidebarComponent implements OnInit {
       this.verRegistro = false;
     }
   }
+
+  
 }

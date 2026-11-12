@@ -20,6 +20,12 @@ const customInitFunctions = () => {
         var set = function() {
             var width = (window.innerWidth > 0) ? window.innerWidth : this.screen.width;
             var topOffset = 0;
+            
+            /* ==========================================================================
+               COMENTADO: Evitamos que el script de la plantilla alterne el mini-sidebar 
+               a la fuerza por resolución, dejándoselo totalmente a Angular y tu botón.
+               ========================================================================== */
+            /*
             if (width < 1170) {
                 $("body").addClass("mini-sidebar");
                 $('.navbar-brand span').hide();
@@ -28,6 +34,7 @@ const customInitFunctions = () => {
                 $("body").removeClass("mini-sidebar");
                 $('.navbar-brand span').show();
             }
+            */
 
             var height = ((window.innerHeight > 0) ? window.innerHeight : this.screen.height) - 1;
             height = height - topOffset;
@@ -42,7 +49,7 @@ const customInitFunctions = () => {
 
         // ============================================================== 
         // Theme options
-        // ==============================================================     
+        // ==============================================================    
         $(".sidebartoggler").on('click', function() {
             if ($("body").hasClass("mini-sidebar")) {
                 $("body").trigger("resize");
@@ -99,13 +106,13 @@ const customInitFunctions = () => {
 
         });
         // ============================================================== 
-        //tooltip
+        // tooltip
         // ============================================================== 
         $(function() {
                 $j('[data-toggle="tooltip"]').tooltip();
             })
             // ============================================================== 
-            //Popover
+            // Popover
             // ============================================================== 
         $(function() {
                 $j('[data-toggle="popover"]').popover();
