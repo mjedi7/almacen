@@ -1,7 +1,7 @@
 @page {
   size: letter portrait;
   /* Margen inferior de 25mm para reservar el espacio de la cenefa */
-  margin: 12mm 12mm 25mm 12mm;
+  margin: 10mm 12mm 25mm 12mm;
 }
 
 * {
@@ -43,7 +43,7 @@ body.report {
 }
 
 .report-heading__institution {
-  font-size: 10pt;
+  font-size: 11pt;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 2px;
