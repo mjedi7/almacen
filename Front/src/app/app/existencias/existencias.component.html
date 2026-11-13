@@ -8,53 +8,86 @@
   <!-- Tres categorías en horizontal -->
   <div class="row mt-4">
 
-    <!-- PLANTELES -->
-    <div class="form-group col-md-4 col-sm-12">
-      <label>Planteles</label>
+    
+<!-- PLANTELES -->
+<div class="form-group col-md-4 col-sm-12">
+
+  <label>Planteles</label>
+
+  <!-- Vista fija para administrativos asignados a un plantel -->
+  <div
+    *ngIf="esAdministrativoPlantel; else selectorPlanteles"
+    class="form-control bg-light d-flex justify-content-between align-items-center">
+
+    <span *ngIf="centroSeleccionado; else cargandoPlantel">
+      {{ centroSeleccionado.codigo | number:'2.0-0' }}
+      — {{ centroSeleccionado.descripcion }}
+    </span>
+
+    <ng-template #cargandoPlantel>
+      Cargando plantel...
+    </ng-template>
+
+    <i class="mdi mdi-lock text-muted"></i>
+
+  </div>
+
+  <!-- Selector normal para los demás usuarios -->
+  <ng-template #selectorPlanteles>
+
+    <button
+      type="button"
+      class="selector-btn"
+      [disabled]="categoriaActiva !== null && categoriaActiva !== 'Planteles'"
+      (click)="toggleMenu('Planteles')">
+
+      <span>
+        <ng-container *ngIf="categoriaActiva === 'Planteles'; else textoPlantel">
+          {{ centroSeleccionado?.codigo | number:'2.0-0' }}
+          — {{ centroSeleccionado?.descripcion }}
+        </ng-container>
+
+        <ng-template #textoPlantel>
+          Seleccionar plantel...
+        </ng-template>
+      </span>
+
+      <span>▾</span>
+    </button>
+
+    <div class="selector-menu" *ngIf="menuPlantelesAbierto">
+
+      <input
+        type="text"
+        class="form-control selector-busqueda"
+        placeholder="Buscar por número o nombre..."
+        [(ngModel)]="busquedaPlantelDropdown"
+        name="buscarPlantelDropdown">
 
       <button
         type="button"
-        class="selector-btn"
-        [disabled]="categoriaActiva !== null && categoriaActiva !== 'Planteles'"
-        (click)="toggleMenu('Planteles')">
+        class="selector-opcion"
+        *ngFor="let p of plantelesVisibles"
+        (click)="seleccionarCentro(p, 'Planteles')">
 
-        <span>
-          <ng-container *ngIf="categoriaActiva === 'Planteles'; else textoPlantel">
-            {{ centroSeleccionado?.codigo | number:'2.0-0' }} — {{ centroSeleccionado?.descripcion }}
-          </ng-container>
+        {{ p.codigo | number:'2.0-0' }} — {{ p.descripcion }}
 
-          <ng-template #textoPlantel>
-            Seleccionar plantel...
-          </ng-template>
-        </span>
-
-        <span>▾</span>
       </button>
 
-      <div class="selector-menu" *ngIf="menuPlantelesAbierto">
-        <input
-          type="text"
-          class="form-control selector-busqueda"
-          placeholder="Buscar por número o nombre..."
-          [(ngModel)]="busquedaPlantelDropdown"
-          name="buscarPlantelDropdown">
+      <div
+        class="selector-vacio"
+        *ngIf="plantelesVisibles.length === 0">
 
-        <button
-          type="button"
-          class="selector-opcion"
-          *ngFor="let p of plantelesVisibles"
-          (click)="seleccionarCentro(p, 'Planteles')">
+        No se encontraron planteles.
 
-          {{ p.codigo | number:'2.0-0' }} — {{ p.descripcion }}
-        </button>
-
-        <div
-          class="selector-vacio"
-          *ngIf="plantelesVisibles.length === 0">
-          No se encontraron planteles.
-        </div>
       </div>
+
     </div>
+
+  </ng-template>
+
+</div>
+
 
     <!-- DIRECCIONES GENERALES -->
     <div class="form-group col-md-4 col-sm-12" *ngIf="!esAdministrativo">
@@ -155,7 +188,8 @@
   </div>
 
   <!-- Botón para cambiar de categoría -->
-  <div class="row mb-3" *ngIf="categoriaActiva !== null">
+  <div class="row mb-3"
+     *ngIf="categoriaActiva !== null && !esAdministrativoPlantel">
   <div class="col-12 contenedor-cambiar-seleccion">
     <button
       type="button"

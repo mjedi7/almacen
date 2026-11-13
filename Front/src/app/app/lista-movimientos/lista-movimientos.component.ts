@@ -32,17 +32,27 @@ export class ListaMovimientosComponent implements OnInit {
   constructor(private traer: TraerDatosService) { }
 
   ngOnInit(): void {
-    this.dtOptions = {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      searching: true,
-      processing: true,
-      language: {
-        url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
-      }
-    };
-    this.traerPlanteles();
-  }
+  const centroTrabajo = Number(
+    localStorage.getItem('centro_trabajo') || '0'
+  );
+
+  this.esAdministrativoPlantel =
+    this.esAdministrativo &&
+    centroTrabajo >= 1 &&
+    centroTrabajo <= 31;
+
+  this.dtOptions = {
+    pagingType: 'full_numbers',
+    pageLength: 10,
+    searching: true,
+    processing: true,
+    language: {
+      url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
+    }
+  };
+
+  this.traerPlanteles();
+}
 
   // Getter para obtener el centro seleccionado actual
   get centroSeleccionado(): any {
@@ -50,6 +60,10 @@ export class ListaMovimientosComponent implements OnInit {
       (p: any) => Number(p.id) === Number(this.opcionSeleccionado)
     );
   }
+
+  // Identificar usuarios administrativos
+esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
+esAdministrativoPlantel: boolean = false;
 
   // Getters para filtrar las opciones en tiempo real
   get plantelesVisibles(): any[] {
@@ -82,14 +96,63 @@ export class ListaMovimientosComponent implements OnInit {
   }
 
   // Cargar planteles y ordenarlos por código numérico
-  traerPlanteles() {
-    this.traer.http.get(`${this.API_URL}/traerPlanteles`)
-      .subscribe((res: any) => {
-        this.planteles = res || [];
-        this.plantelesLista = [...this.planteles].sort((a: any, b: any) => Number(a.codigo) - Number(b.codigo));
-      });
-  }
+  // Cargar planteles y seleccionar automáticamente el del administrativo
+traerPlanteles(): void {
+  const centroTrabajo = Number(
+    localStorage.getItem('centro_trabajo') || '0'
+  );
 
+  this.traer.http.get<any[]>(
+    `${this.API_URL}/traerPlanteles`
+  ).subscribe({
+    next: (res: any) => {
+
+      const todosLosPlanteles = Array.isArray(res) ? res : [];
+
+      console.log('Respuesta del backend:', todosLosPlanteles);
+      console.log('Centro de trabajo:', centroTrabajo);
+      console.log('Es administrativo de plantel:', this.esAdministrativoPlantel);
+
+      // Para administrativos, conservar únicamente su plantel asignado.
+      if (this.esAdministrativoPlantel) {
+        this.planteles = todosLosPlanteles.filter(
+          (p: any) => Number(p.id) === centroTrabajo
+        );
+
+        if (this.planteles.length > 0) {
+          const plantelAsignado = this.planteles[0];
+
+          this.opcionSeleccionado = Number(plantelAsignado.id);
+
+          console.log('Plantel asignado:', plantelAsignado);
+
+          // Cargar automáticamente las salidas.
+          this.plantelSeleccionado();
+
+        } else {
+          console.error(
+            'No se encontró el plantel asignado al administrativo:',
+            centroTrabajo
+          );
+        }
+
+      } else {
+        // Los demás usuarios conservan todos los planteles.
+        this.planteles = todosLosPlanteles;
+      }
+
+      this.plantelesFiltrados = [...this.planteles];
+
+      this.plantelesLista = [...this.planteles].sort(
+        (a: any, b: any) => Number(a.codigo) - Number(b.codigo)
+      );
+    },
+
+    error: (err: any) => {
+      console.error('Error al cargar planteles:', err);
+    }
+  });
+}
   // Método que se ejecuta al seleccionar un plantel (puedes adaptarlo a tu servicio de movimientos)
   // Se ejecuta cuando el usuario selecciona un plantel del buscador
   plantelSeleccionado() {

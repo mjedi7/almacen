@@ -1,153 +1,135 @@
-<div class="formulario" style="width: 75%; height: 500px; margin: 0 auto ;">
+<div class="formulario" style="width: 92%; max-width: 1400px; margin: 20px auto 30px auto;">
 
-  <div class="Titulo" style="text-align: center;"> <h3>Usar Artículo</h3></div>
+  <div class="Titulo" style="text-align: center;">
+    <h3><b>Usar Artículo</b></h3>
+    <hr style="width: 90%;">
+  </div>
 
-  <form (ngSubmit)="agregarArticulo(f)" #f="ngForm" style="margin-top: 50px;" >
+  <form (ngSubmit)="agregarArticulo(f)" #f="ngForm" style="margin-top: 25px;">
 
-    <div class="form-row mt-5">
-      
-      <!-- <div class="form-group col-md-4">
-        <label for="inputPassword4">Partida</label>
-        <select [(ngModel)]="usarArticulo.partida" id="areaEmite" class="form-control" name="Partida" (change)="opcionSeleccionadaX()" required ngModel #Partida="ngModel">       
-          <ng-container *ngFor="let partida of  partidas" >
-                <option [value]="partida.id">{{partida.descripcion}}</option>
-          </ng-container>
-          </select>
-          <small *ngIf="Partida.invalid && Partida.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-      </div> -->
+    <!-- FILA 1: Producto, Stock, Cantidad y Fecha -->
+    <div class="form-row row align-items-end">
 
-
-       <div class="form-group col-md-4" style="position: relative;">
-            <label for="inputProducto">Producto</label>
-            <input
-                type="text"
-                class="form-control"
-                id="inputProducto"
-                name="Producto"
-                [(ngModel)]="productoBuscado"
-                (input)="filtrarProductos()"
-                [ngModelOptions]="{standalone: true}"
-                placeholder="Escribe el nombre del artículo"
-                required
-                ngModel #Producto="ngModel"
-            />
-             <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-            <ul
-                *ngIf="productosfiltrados.length > 0"
-            class="list-group mt-1"
-            style="
-                position: absolute;
-                z-index: 1000;
-                width: 100%;
-                max-height: 400px;
-                overflow-y: auto;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                background-color: white;
-                border: 1px solid #ccc;
-            "
-            >
-                <li
-                class="list-group-item list-group-item-action"
-                *ngFor="let producto of productosfiltrados"
-                (click)="seleccionarProducto(producto,producto.id)"
-               
-                >
-                {{ producto.nombre_producto }}
-                </li>
-            </ul>
-        </div>
-
-        <div class="form-group col-md-2">
-            <label for="inputAddress">Stock disponible</label>
-            <input type="number" class="form-control" name="disponible" id="inputAddress" value="{{stockPlantel}}" placeholder="" style="text-align: center;" required readonly >
-            <!-- <small *ngIf="cantidadSolicitar.invalid && cantidadSolicitar.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small> -->
-        </div>
-
-         <div class="form-group col-md-2">
-            <label for="inputAddress">Cantidad solicitada</label>
-            <input [(ngModel)]="usarArticulo.cantidadSolicitar" type="number" class="form-control" name="cantidadSolicitar" id="inputAddress" placeholder="" style="text-align: center;" required #cantidadSolicitar="ngModel" min="1">
-            <small *ngIf="cantidadSolicitar.invalid && cantidadSolicitar.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
-
-         <div class="form-group col-md-2">
-            <label for="inputAddress">Fecha</label>
-            <input [(ngModel)]="usarArticulo.fecha" type="text" class="form-control" name="Fecha" id="inputAddress" readonly placeholder="" style="text-align: center;" required #Fecha="ngModel">
-            <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
-
-     
-</div>
-
-
-    <div class="form-row">
-
+      <div class="form-group col-12 col-md-12 col-lg-5 col-xl-4" style="position: relative;">
+        <label for="inputProducto">Producto</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputProducto"
+          name="Producto"
+          [(ngModel)]="productoBuscado"
+          (input)="filtrarProductos()"
+          placeholder="Escribe el nombre del artículo"
+          autocomplete="off"
+          required
+          #Producto="ngModel"
+        />
+        <small *ngIf="Producto.invalid && Producto.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
         
-         <div class="form-group col-md-3">
-            <label for="inputAddress">Nombre del solicitante</label>
-            <input [(ngModel)]="usarArticulo.nombreSolicitante" type="text" class="form-control" name="solicitante" id="inputAddress" placeholder="" style="text-align: center;" required #solicitante="ngModel">
-            <small *ngIf="solicitante.invalid && solicitante.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
+        <ul
+          *ngIf="productosfiltrados.length > 0"
+          class="list-group mt-1"
+          style="
+            position: absolute;
+            z-index: 1000;
+            width: 95%;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background-color: white;
+            border: 1px solid #ccc;
+          "
+        >
+          <li
+            class="list-group-item list-group-item-action"
+            style="cursor: pointer;"
+            *ngFor="let producto of productosfiltrados"
+            (click)="seleccionarProducto(producto, producto.id)"
+          >
+            {{ producto.nombre_producto }}
+          </li>
+        </ul>
+      </div>
 
-        
-        <div class="form-group col-md-2">
-            <label for="inputAddress">Folio</label>
-            <input type="number" class="form-control" name="folio" value="{{secuenciaConsecutivo}}" id="inputAddress" readonly placeholder="" style="text-align: center;" required >
-            <!-- <small *ngIf="folioTransferencia.invalid && folioTransferencia.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small> -->
-        </div>
+      <div class="form-group col-6 col-sm-4 col-lg-2 col-xl-2">
+        <label for="stockDisponible" style="white-space: nowrap;">Stock disponible</label>
+        <input type="number" class="form-control" name="disponible" id="stockDisponible" [value]="stockPlantel" style="text-align: center;" readonly>
+      </div>
 
-         <div class="form-group col-md-4">
-            <label for="inputAddress">Descripción</label>
-            <input [(ngModel)]="usarArticulo.descripcion" type="text" class="form-control" name="descripcion" id="inputAddress" placeholder="" style="text-align: center;" #descripcion="ngModel">
-            <small *ngIf="descripcion.invalid && descripcion.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
-        </div>
+      <div class="form-group col-6 col-sm-4 col-lg-3 col-xl-3">
+        <label for="cantidadSolicitar" style="white-space: nowrap;">Cantidad solicitada</label>
+        <input [(ngModel)]="usarArticulo.cantidadSolicitar" type="number" class="form-control" name="cantidadSolicitar" id="cantidadSolicitar" style="text-align: center;" required #cantidadSolicitar="ngModel" min="1">
+        <small *ngIf="cantidadSolicitar.invalid && cantidadSolicitar.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
 
- 
-        <div class="boton mt-4" style="margin: 0 auto;text-align: center;">
-            <button style="padding:10px;margin-right: 10px;"type="submit" class="btn btn-light" title="Agregar artículo"><i class="fas fa-cart-plus fa-2x" style="color: rgb(255, 166, 0);"></i></button>
-        </div>
+      <div class="form-group col-12 col-sm-4 col-lg-2 col-xl-3">
+        <label for="fechaUso" style="white-space: nowrap;">Fecha</label>
+        <input [(ngModel)]="usarArticulo.fecha" type="text" class="form-control" name="Fecha" id="fechaUso" readonly style="text-align: center;" required #Fecha="ngModel">
+        <small *ngIf="Fecha.invalid && Fecha.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
 
-       </div> 
-  
-      </form>
+    </div>
+
+    <!-- FILA 2: Solicitante, Folio, Descripción y Botón Agregar -->
+    <div class="form-row row mt-2 align-items-end">
+
+      <div class="form-group col-12 col-md-5 col-lg-4">
+        <label for="nombreSolicitante" style="white-space: nowrap;">Nombre del solicitante</label>
+        <input [(ngModel)]="usarArticulo.nombreSolicitante" type="text" class="form-control" name="solicitante" id="nombreSolicitante" style="text-align: center;" required #solicitante="ngModel">
+        <small *ngIf="solicitante.invalid && solicitante.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+      <div class="form-group col-12 col-sm-4 col-md-2 col-lg-2">
+        <label for="folioUso" style="white-space: nowrap;">Folio</label>
+        <input type="number" class="form-control" name="folio" [value]="secuenciaConsecutivo" id="folioUso" readonly style="text-align: center;">
+      </div>
+
+      <div class="form-group col-12 col-sm-8 col-md-5 col-lg-5">
+        <label for="descripcionUso" style="white-space: nowrap;">Descripción</label>
+        <input [(ngModel)]="usarArticulo.descripcion" type="text" class="form-control" name="descripcion" id="descripcionUso" style="text-align: center;" #descripcion="ngModel">
+      </div>
+
+      <div class="form-group col-12 col-lg-1 text-center">
+        <button type="submit" class="btn btn-light shadow-sm" title="Agregar artículo" style="padding: 6px 14px;">
+          <i class="fas fa-cart-plus fa-2x" style="color: rgb(255, 166, 0); font-size: 26px;"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </form>
 
 </div>
 
-
-<!-- lista de productos de la requisición -->
-
-<div class="titulo" style="margin: 0 auto;text-align: center;margin-top: -160px;width: 75%;" >
-
-    <h5>Lista de artículos a usar</h5>
-    <button *ngIf="mostrarBotonTransferir" class="btn"  style="float: right;" title="Generar Formato" (click)="  confirmarTranferencia()"><i class="mdi mdi-file-pdf fa-2x" style="color: rgb(223, 21, 21);"></i></button>
-
+<!-- Lista de productos de la requisición -->
+<div class="titulo d-flex justify-content-between align-items-center" style="width: 92%; max-width: 1400px; margin: 20px auto 10px auto; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+  <h5 class="mb-0" style="margin: 0 auto;"><b>Lista de artículos a usar</b></h5>
+  <button *ngIf="mostrarBotonTransferir" class="btn btn-light shadow-sm" title="Generar Formato" (click)="confirmarTranferencia()">
+    <i class="mdi mdi-file-pdf fa-2x" style="color: rgb(223, 21, 21);"></i>
+  </button>
 </div>
 
-<div class="mt-2" style="width: 85%;margin: 0 auto;" >
-
-    <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table" style="width: 100%;">
-        <thead>
-            <tr style="color:#000">
-                <th style="width:200px">Artículo</th>
-                <th style="text-align:center;width:80px">Cantidad</th>
-                <th style="text-align:center;width: 80px;">Fecha autorizada</th> 
-                <th style="text-align:center;width: 50px;"></th>
-            </tr>
-        </thead>
-        <tbody style="font-size: 15px;">
-            <tr *ngFor="let articulo of articulosRequisicion">
-                <td>{{articulo.producto}}</td>
-                <td style="text-align:center;">{{articulo.num_articulos_solicitados}}</td>
-                <td style="text-align:center;">{{articulo.fecha | date:'shortDate'}}</td> 
-                <td style="text-align:center;">
-
-                    <button class="btn btn-danger" (click)="eliminarArticulo(articulo.id)"><i class="fas fa-trash"></i></button>
-
-                </td>                 
-            </tr>
-        </tbody>
-    </table>
+<div class="mt-2 mb-5 table-responsive" style="width: 92%; max-width: 1400px; margin: 0 auto;">
+  <table id="articulos" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-bordered table-hover" style="width: 100%;">
+    <thead class="thead-light">
+      <tr style="color:#000">
+        <th>Artículo</th>
+        <th style="text-align: center; width: 120px;">Cantidad</th>
+        <th style="text-align: center; width: 160px;">Fecha autorizada</th>
+        <th style="text-align: center; width: 80px;">Acción</th>
+      </tr>
+    </thead>
+    <tbody style="font-size: 14px;">
+      <tr *ngFor="let articulo of articulosRequisicion">
+        <td>{{articulo.producto}}</td>
+        <td style="text-align: center;">{{articulo.num_articulos_solicitados}}</td>
+        <td style="text-align: center;">{{articulo.fecha | date:'shortDate'}}</td>
+        <td style="text-align: center;">
+          <button type="button" class="btn btn-danger btn-sm" (click)="eliminarArticulo(articulo.id)" title="Eliminar">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
-
-
-
-

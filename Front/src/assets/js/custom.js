@@ -14,26 +14,61 @@ const customInitFunctions = () => {
         jQuery(document).on('click', '.mega-dropdown', function(e) {
             e.stopPropagation()
         });
-        // El estado del Sidebar lo administra Angular (SidebarService).
-        // Se conserva únicamente el cálculo de altura del área de contenido.
-        var setPageHeight = function() {
-            var height = ((window.innerHeight > 0) ? window.innerHeight : this.screen.height) - 1;
-            if (height < 1) height = 1;
-            $(".page-wrapper").css("min-height", height + "px");
-        };
-        $(window).ready(setPageHeight);
-        $(window).on("resize", setPageHeight);
+        // ============================================================== 
+        // This is for the top header part and sidebar part
+        // ==============================================================  
+        var set = function() {
+            var width = (window.innerWidth > 0) ? window.innerWidth : this.screen.width;
+            var topOffset = 0;
+            
+            /* ==========================================================================
+               COMENTADO: Evitamos que el script de la plantilla alterne el mini-sidebar 
+               a la fuerza por resolución, dejándoselo totalmente a Angular y tu botón.
+               ========================================================================== */
+            /*
+            if (width < 1170) {
+                $("body").addClass("mini-sidebar");
+                $('.navbar-brand span').hide();
+                $(".sidebartoggler i").addClass("ti-menu");
+            } else {
+                $("body").removeClass("mini-sidebar");
+                $('.navbar-brand span').show();
+            }
+            */
 
-        // Botón de escritorio: alterna la clase que usa el tema para el modo compacto.
-        $(document).on('click', '.sidebartoggler', function(e) {
-            e.preventDefault();
-            $('body').toggleClass('mini-sidebar');
+            var height = ((window.innerHeight > 0) ? window.innerHeight : this.screen.height) - 1;
+            height = height - topOffset;
+            if (height < 1) height = 1;
+            if (height > topOffset) {
+                $(".page-wrapper").css("min-height", (height) + "px");
+            }
+
+        };
+        $(window).ready(set);
+        $(window).on("resize", set);
+
+        // ============================================================== 
+        // Theme options
+        // ==============================================================    
+        $(".sidebartoggler").on('click', function() {
+            if ($("body").hasClass("mini-sidebar")) {
+                $("body").trigger("resize");
+                $("body").removeClass("mini-sidebar");
+                $('.navbar-brand span').show();
+
+            } else {
+                $("body").trigger("resize");
+                $("body").addClass("mini-sidebar");
+                $('.navbar-brand span').hide();
+
+            }
         });
 
-        // Botón móvil: muestra u oculta el panel lateral.
-        $(document).on('click', '.nav-toggler', function(e) {
-            e.preventDefault();
-            $('body').toggleClass('show-sidebar');
+        // this is for close icon when navigation open in mobile view
+        $(".nav-toggler").click(function() {
+            $("body").toggleClass("show-sidebar");
+            $(".nav-toggler i").toggleClass("ti-menu");
+            $(".nav-toggler i").addClass("ti-close");
         });
 
         $(".search-box a, .search-box .app-search .srh-btn").on('click', function() {
@@ -54,17 +89,41 @@ const customInitFunctions = () => {
         }).trigger('blur');
 
         // ============================================================== 
-        //tooltip
+        // Auto select left navbar
+        // ============================================================== 
+        $(function() {
+            var url = window.location;
+            var element = $('ul#sidebarnav a').filter(function() {
+                return this.href == url;
+            }).addClass('active').parent().addClass('active');
+            while (true) {
+                if (element.is('li')) {
+                    element = element.parent().addClass('in').parent().addClass('active');
+                } else {
+                    break;
+                }
+            }
+
+        });
+        // ============================================================== 
+        // tooltip
         // ============================================================== 
         $(function() {
                 $j('[data-toggle="tooltip"]').tooltip();
             })
             // ============================================================== 
-            //Popover
+            // Popover
             // ============================================================== 
         $(function() {
                 $j('[data-toggle="popover"]').popover();
             })
+            // ============================================================== 
+            // Sidebarmenu
+            // ============================================================== 
+        $(function() {
+            $j('#sidebarnav').AdminMenu();
+        });
+
         // ============================================================== 
         // Perfact scrollbar
         // ============================================================== 
@@ -73,6 +132,7 @@ const customInitFunctions = () => {
         // ============================================================== 
         // Resize all elements
         // ============================================================== 
+        $("body").trigger("resize");
         // ============================================================== 
         // To do list
         // ============================================================== 

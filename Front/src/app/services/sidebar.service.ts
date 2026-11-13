@@ -18,9 +18,13 @@ export class SidebarService {
     this.miniSubject.next(mini);
 
     const wrapper = document.getElementById('main-wrapper');
-    if (wrapper) wrapper.classList.toggle('mini-sidebar', mini);
-    // Mantiene sincronizado el estado usado por el tema Admin Pro.
-    document.body.classList.toggle('mini-sidebar', mini);
+    if (wrapper) {
+      if (mini) {
+        wrapper.classList.add('mini-sidebar');
+      } else {
+        wrapper.classList.remove('mini-sidebar');
+      }
+    }
   }
 
 
@@ -100,7 +104,7 @@ export class SidebarService {
   // REGISTRO (solo id_tipo_usuario 0 y 1)
   menu7: any[] = [
     {
-      titulo: 'Registrar',
+      titulo: 'Registro',
       icono: 'mdi mdi-gauge',
       submenu: [
         { titulo: 'Registrar Nuevo Artículo', url: 'agregar-articulo', mostrar: true },

@@ -24,23 +24,7 @@ export class ExistenciasComponent implements OnInit {
   plantelesFiltrados: any[] = [];
   existencias: any[] = [];
 
-busquedaPlantel: string = '';
-
-filtrarPlanteles(): void {
-  const busqueda = this.busquedaPlantel
-    .trim()
-    .toLocaleLowerCase('es');
-
-  this.plantelesFiltrados = this.planteles.filter((p: any) => {
-    const descripcion = String(p.descripcion || '')
-      .toLocaleLowerCase('es');
-
-    const codigo = String(p.codigo ?? '');
-
-    return descripcion.includes(busqueda) ||
-      (p.categoria === 'Planteles' && codigo.includes(busqueda));
-  });
-}
+  busquedaPlantel: string = '';
 
   opcionSeleccionado: number = 0;
   verSeleccion: number | undefined;
@@ -82,24 +66,32 @@ filtrarPlanteles(): void {
   botonUtilizaArticulo: boolean = false;
 
   // Identificar usuarios administrativos (rango 3)
-esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
+  esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
+  esAdministrativoPlantel: boolean = false;
 
   constructor(private traer: TraerDatosService) {}
 
   ngOnInit(): void {
-    this.traerPlanteles();
-
     const fecha = formatDate(new Date(), 'dd-MM-yyyy', 'en-US');
     this.UsarArticulo.fecha = fecha;
 
     const centroT = localStorage.getItem('centro_trabajo') || '0';
     const centroTrabajoInt = parseInt(centroT, 10);
 
+    // Administrativos cuyo centro de trabajo es un plantel (1 al 31)
+    this.esAdministrativoPlantel =
+      this.esAdministrativo &&
+      centroTrabajoInt >= 1 &&
+      centroTrabajoInt <= 31;
+
     if (centroTrabajoInt >= 1 && centroTrabajoInt <= 31) {
       this.botonUtilizaArticulo = true;
     } else if (centroTrabajoInt > 32) {
       this.botonUtilizaArticulo = false;
     }
+
+    // Cargar los centros después de identificar al usuario
+    this.traerPlanteles();
   }
 
   // Centro de trabajo seleccionado actualmente
@@ -109,31 +101,47 @@ esAdministrativo: boolean = localStorage.getItem('permiso') === '3';
     );
   }
 
-  // Opciones visibles en cada selector
-  
-get plantelesVisibles(): any[] {
-  const texto = this.busquedaPlantelDropdown.trim().toLocaleLowerCase('es');
+  // Filtrar planteles
+  filtrarPlanteles(): void {
+    const busqueda = this.busquedaPlantel
+      .trim()
+      .toLocaleLowerCase('es');
 
-  if (!texto) {
-    return this.plantelesLista;
+    this.plantelesFiltrados = this.planteles.filter((p: any) => {
+      const descripcion = String(p.descripcion || '')
+        .toLocaleLowerCase('es');
+
+      const codigo = String(p.codigo ?? '');
+
+      return descripcion.includes(busqueda) ||
+        (p.categoria === 'Planteles' && codigo.includes(busqueda));
+    });
   }
 
-  // Si se escribe un número, buscar el código exacto.
-  if (/^\d+$/.test(texto)) {
-    const codigoBuscado = Number(texto);
+  // Opciones visibles en cada selector
+  get plantelesVisibles(): any[] {
+    const texto = this.busquedaPlantelDropdown
+      .trim()
+      .toLocaleLowerCase('es');
+
+    if (!texto) {
+      return this.plantelesLista;
+    }
+
+    if (/^\d+$/.test(texto)) {
+      const codigoBuscado = Number(texto);
+
+      return this.plantelesLista.filter((p: any) =>
+        Number(p.codigo) === codigoBuscado
+      );
+    }
 
     return this.plantelesLista.filter((p: any) =>
-      Number(p.codigo) === codigoBuscado
+      String(p.descripcion || '')
+        .toLocaleLowerCase('es')
+        .includes(texto)
     );
   }
-
-  // Si se escribe texto, buscar por nombre del plantel.
-  return this.plantelesLista.filter((p: any) =>
-    String(p.descripcion || '')
-      .toLocaleLowerCase('es')
-      .includes(texto)
-  );
-}
 
   get direccionesVisibles(): any[] {
     const texto = this.busquedaDireccionDropdown
@@ -156,94 +164,124 @@ get plantelesVisibles(): any[] {
   }
 
   // Cargar los centros de trabajo
-  
-traerPlanteles(): void {
-  const plantel = localStorage.getItem('centro_trabajo');
+  traerPlanteles(): void {
+    const centroTrabajo = Number(
+      localStorage.getItem('centro_trabajo')
+    );
 
-  this.traer.http.get<any[]>(
-    `${this.API_URL}/traerPlanteles/${plantel}`
-  ).subscribe({
-    next: (res) => {
+    this.traer.http.get<any[]>(
+      `${this.API_URL}/traerPlanteles/${centroTrabajo}`
+    ).subscribe({
+      next: (res: any) => {
 
-      // Normalizar descripciones para ignorar mayúsculas y acentos.
-      const normalizar = (texto: any): string =>
-        String(texto || '')
-          .trim()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toLocaleLowerCase('es');
+        console.log('Respuesta del backend:', res);
+        console.log('Centro de trabajo:', centroTrabajo);
+        console.log('Permiso:', localStorage.getItem('permiso'));
+        console.log('Es administrativo de plantel:', this.esAdministrativoPlantel);
 
-      
-const direccionesValidas = [
-  'direccion general',
-  'direccion administrativa',
-  'direccion academica',
-  'direccion de planeacion',
-  'direccion de tecnologia educativa',
-  'direccion de vinculacion'
-];
+        if (!Array.isArray(res)) {
+          console.error('La respuesta de traerPlanteles no es un arreglo:', res);
+          return;
+        }
 
-const otrosValidos = [
-  'almacen general',
-  'sutcecytev'
-];
+        // Normalizar descripciones para ignorar mayúsculas y acentos
+        const normalizar = (texto: any): string =>
+          String(texto || '')
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('es');
 
-// Clasificar los registros.
-this.planteles = res.map((p: any) => {
-  const codigo = Number(p.codigo);
-  const descripcion = normalizar(p.descripcion);
+        const otrosValidos = [
+          'almacen general',
+          'sutcecytev'
+        ];
 
-  let categoria = 'Direcciones generales';
+        // Clasificar los registros
+        this.planteles = res.map((p: any) => {
+          const codigo = Number(p.codigo);
+          const id = Number(p.id);
+          const descripcion = normalizar(p.descripcion);
 
-  if (codigo >= 1 && codigo <= 31) {
-    categoria = 'Planteles';
-  } else if (otrosValidos.includes(descripcion)) {
-    categoria = 'Otros';
+          let categoria = 'Direcciones generales';
+
+          if (
+            (codigo >= 1 && codigo <= 31) ||
+            (id >= 1 && id <= 31)
+          ) {
+            categoria = 'Planteles';
+          } else if (otrosValidos.includes(descripcion)) {
+            categoria = 'Otros';
+          }
+
+          return {
+            ...p,
+            codigo: Number.isNaN(codigo) ? null : codigo,
+            categoria
+          };
+        });
+
+        // Planteles: ordenar por código numérico
+        this.plantelesLista = this.planteles
+          .filter((p: any) => p.categoria === 'Planteles')
+          .sort((a: any, b: any) =>
+            Number(a.codigo || a.id) - Number(b.codigo || b.id)
+          );
+
+        // Direcciones generales: ordenar alfabéticamente
+        this.direccionesLista = this.planteles
+          .filter((p: any) => p.categoria === 'Direcciones generales')
+          .sort((a: any, b: any) =>
+            String(a.descripcion || '').trim().localeCompare(
+              String(b.descripcion || '').trim(),
+              'es',
+              { sensitivity: 'base' }
+            )
+          );
+
+        // Otros: únicamente Almacén General y Sutcecytev
+        this.otrosLista = this.planteles
+          .filter((p: any) => p.categoria === 'Otros')
+          .sort((a: any, b: any) =>
+            String(a.descripcion || '').trim().localeCompare(
+              String(b.descripcion || '').trim(),
+              'es',
+              { sensitivity: 'base' }
+            )
+          );
+
+        // Conservar la lista general
+        this.plantelesFiltrados = [...this.planteles];
+
+        // SELECCIÓN AUTOMÁTICA PARA ADMINISTRATIVOS DE PLANTEL
+        if (this.esAdministrativoPlantel) {
+
+          const plantelAsignado = this.planteles.find(
+            (p: any) => Number(p.id) === centroTrabajo
+          );
+
+          console.log('Plantel asignado encontrado:', plantelAsignado);
+          console.log('Planteles procesados:', this.planteles);
+
+          if (plantelAsignado) {
+            this.seleccionarCentro(plantelAsignado, 'Planteles');
+          } else {
+            console.error(
+              'No se encontró el plantel asignado al administrativo.',
+              'Centro de trabajo:',
+              centroTrabajo,
+              'Respuesta:',
+              this.planteles
+            );
+          }
+        }
+      },
+
+      error: (err: any) => {
+        console.error('Error al cargar planteles:', err);
+      }
+    });
   }
-
-  return {
-    ...p,
-    codigo,
-    categoria
-  };
-});
-
-
-      // Planteles: ordenar por código numérico.
-      this.plantelesLista = this.planteles
-        .filter((p: any) => p.categoria === 'Planteles')
-        .sort((a: any, b: any) => a.codigo - b.codigo);
-
-      // Direcciones generales: solo las válidas y en orden alfabético.
-      this.direccionesLista = this.planteles
-        .filter((p: any) => p.categoria === 'Direcciones generales')
-        .sort((a: any, b: any) =>
-          String(a.descripcion || '').trim().localeCompare(
-            String(b.descripcion || '').trim(),
-            'es',
-            { sensitivity: 'base' }
-          )
-        );
-
-      // Otros: únicamente Almacen General y Sutcecytev.
-      this.otrosLista = this.planteles
-        .filter((p: any) => p.categoria === 'Otros')
-        .sort((a: any, b: any) =>
-          String(a.descripcion || '').trim().localeCompare(
-            String(b.descripcion || '').trim(),
-            'es',
-            { sensitivity: 'base' }
-          )
-        );
-
-      // Conservar la lista general utilizada por el código existente.
-      this.plantelesFiltrados = [...this.planteles];
-    },
-    error: (err) => {
-      console.error('Error al cargar planteles:', err);
-    }
-  });
-}
 
   // Abrir o cerrar el menú de una categoría
   toggleMenu(categoria: string): void {
@@ -323,17 +361,18 @@ this.planteles = res.map((p: any) => {
         }
       };
 
-      this.traer.http.get(
+      this.traer.http.get<any>(
         `${this.API_URL}/getExistencias/${idplantel}`
       ).subscribe({
         next: (res: any) => {
           this.existencias = res;
           this.dtTrigger.next(null);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error al obtener existencias:', err);
         }
       });
+
     } catch (error) {
       console.error(error);
     }
@@ -408,7 +447,7 @@ this.planteles = res.map((p: any) => {
             );
           }
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error al asignar artículo:', err);
           Swal.fire(
             'Error',
@@ -440,8 +479,7 @@ this.planteles = res.map((p: any) => {
 
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        
+        'Content-Type': 'application/json'
       }),
       responseType: 'blob' as 'json'
     };
@@ -453,13 +491,11 @@ this.planteles = res.map((p: any) => {
       next: (res: any) => {
         Swal.close();
 
-    
         const nombreArchivo = `Reporte_general_plantel_${this.verSeleccion}.pdf`;
 
-        
         this.descargarArchivo(res, nombreArchivo);
       },
-      error: (err) => {
+      error: (err: any) => {
         Swal.close();
 
         console.error('Error al generar reporte general:', err);
@@ -486,62 +522,61 @@ this.planteles = res.map((p: any) => {
   }
 
   // Descargar formato PDF y Excel
+  descargarExcel(): void {
+    if (!this.verSeleccion || !this.centroSeleccionado) {
+      Swal.fire(
+        'Seleccione un centro de trabajo',
+        'Debe seleccionar un centro de trabajo para descargar su inventario.',
+        'warning'
+      );
+      return;
+    }
 
-descargarExcel(): void {
-  if (!this.verSeleccion || !this.centroSeleccionado) {
-    Swal.fire(
-      'Seleccione un centro de trabajo',
-      'Debe seleccionar un centro de trabajo para descargar su inventario.',
-      'warning'
+    if (!this.existencias || this.existencias.length === 0) {
+      Swal.fire(
+        'Sin existencias',
+        'El centro de trabajo seleccionado no tiene artículos para exportar.',
+        'info'
+      );
+      return;
+    }
+
+    const datosExcel = this.existencias.map((existencia: any) => ({
+      'Partida': existencia.partida,
+      'Artículo': existencia.descripcion,
+      'Existencia': existencia.existencias
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(datosExcel);
+
+    hoja['!cols'] = [
+      { wch: 15 },
+      { wch: 55 },
+      { wch: 15 }
+    ];
+
+    const libro = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      libro,
+      hoja,
+      'Inventario'
     );
-    return;
-  }
 
-  if (!this.existencias || this.existencias.length === 0) {
-    Swal.fire(
-      'Sin existencias',
-      'El centro de trabajo seleccionado no tiene artículos para exportar.',
-      'info'
+    const nombreCentro = String(
+      this.centroSeleccionado.descripcion || 'Centro de trabajo'
+    )
+      .trim()
+      .replace(/[\\/:*?"<>|]/g, '')
+      .replace(/\s+/g, '_');
+
+    const fecha = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
+
+    XLSX.writeFile(
+      libro,
+      `Inventario_${nombreCentro}_${fecha}.xlsx`
     );
-    return;
   }
-
-  const datosExcel = this.existencias.map((existencia: any) => ({
-    'Partida': existencia.partida,
-    'Artículo': existencia.descripcion,
-    'Existencia': existencia.existencias
-  }));
-
-  const hoja = XLSX.utils.json_to_sheet(datosExcel);
-
-  hoja['!cols'] = [
-    { wch: 15 },
-    { wch: 55 },
-    { wch: 15 }
-  ];
-
-  const libro = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(
-    libro,
-    hoja,
-    'Inventario'
-  );
-
-  const nombreCentro = String(
-    this.centroSeleccionado.descripcion || 'Centro de trabajo'
-  )
-    .trim()
-    .replace(/[\\/:*?"<>|]/g, '')
-    .replace(/\s+/g, '_');
-
-  const fecha = formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
-
-  XLSX.writeFile(
-    libro,
-    `Inventario_${nombreCentro}_${fecha}.xlsx`
-  );
-}
 
   descargarFormato(): void {
     const link = document.createElement('a');

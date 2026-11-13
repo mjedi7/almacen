@@ -9,9 +9,7 @@
     cursor: pointer;
 }
 
-
 /* //////////////////////////Tablas//////////////////////////// */
-
 .table-striped {
     border-radius: 10px;
     margin: 0 auto;
@@ -49,22 +47,7 @@
     color: #b40f0f;
 }
 
-.hr-color {
-    background-color: #b40f0f;
-    width: 90%;
-}
-
-.hr-titulos {
-    background-color: #b40f0f;
-    width: 100%;
-}
-
-.hr-titulosreins {
-    background-color: #b40f0f;
-    width: 100%;
-}
-
-.hr-cambiocontrasena {
+.hr-color, .hr-titulos, .hr-titulosreins, .hr-cambiocontrasena {
     background-color: #b40f0f;
     width: 100%;
 }
@@ -77,12 +60,9 @@
     z-index: 1050 !important;
 }
 
-
 /* ============================================================== 
-   TRANSICIÓN SUAVE PARA TOGGLE DE SIDEBAR Y LOGO
+   TRANSICIÓN Y DISTRIBUCIÓN GENERAL
    ============================================================== */
-
-/* Suaviza y alinea el contenedor donde vive el logo */
 .topbar .top-navbar .navbar-header {
     display: flex !important;
     align-items: center !important;
@@ -93,33 +73,16 @@
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-
-
 /* Suaviza la apertura y cierre de la barra lateral */
 .left-sidebar,
 .sidebar-nav,
-.scroll-sidebar {
+.scroll-sidebar,
+.page-wrapper {
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Suaviza los textos del menú al encogerse */
-.sidebar-nav ul li a span.hide-menu {
-    transition: opacity 0.25s ease, max-width 0.3s ease !important;
-}
-
-/* Suaviza el contenido central para que no brinque */
-.page-wrapper {
-    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-
-/* ============================================================== 
-   DISTRIBUCIÓN DEL HEADER Y BANNER RESPONSIVO
-   ============================================================== */
-
-/* Distribuye los elementos de la barra superior */
 .topbar .top-navbar .navbar-collapse {
     display: flex !important;
     align-items: center !important;
@@ -127,7 +90,6 @@
     width: 100% !important;
 }
 
-/* Contenedor flexible del banner institucional */
 .banner-container {
     display: flex !important;
     justify-content: center !important;
@@ -138,7 +100,6 @@
     padding: 0 10px !important;
 }
 
-/* Imagen responsiva */
 .banner-pleca {
     background: transparent !important;
     max-width: 100% !important;
@@ -148,14 +109,12 @@
     object-fit: contain !important;
 }
 
-/* Ocultar banner en pantallas menores a 1100px para evitar encimados */
 @media (max-width: 1100px) {
     .banner-container {
         display: none !important;
     }
 }
 
-/* Contenedor de usuario a la derecha */
 .user-profile-header {
     display: flex !important;
     align-items: center !important;
@@ -165,48 +124,14 @@
 }
 
 
-
 /* ============================================================== 
-   COMPORTAMIENTO TOGGLE SIDEBAR (240px <--> 70px)
+   CONTROL MAESTRO SINCRONIZADO CON ANGULAR ([class.mini-sidebar-active])
    ============================================================== */
 
-/* --- 1. ESTADO EXPANDIDO (NORMAL / 240px) --- */
-#main-wrapper:not(.mini-sidebar) .left-sidebar {
-  width: 240px !important;
-  transition: width 0.25s ease;
-}
-
-#main-wrapper:not(.mini-sidebar) .page-wrapper {
-  margin-left: 240px !important;
-  transition: margin-left 0.25s ease;
-}
-
-#main-wrapper:not(.mini-sidebar) .topbar .top-navbar .navbar-header {
-  width: 240px !important;
-  transition: width 0.25s ease;
-}
-
-#main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a .hide-menu {
-  display: inline-block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  white-space: nowrap !important;
-}
-
-#main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a {
-  display: flex !important;
-  align-items: center !important;
-  text-align: left !important;
-  padding: 10px 15px !important;
-}
-
-#main-wrapper:not(.mini-sidebar) .sidebar-nav ul li a i {
-  margin-right: 12px !important;
-  font-size: 1.2rem !important;
-}
-
-/* --- 2. ESTADO RETRAÍDO (MINI / 70px) --- */
-#main-wrapper.mini-sidebar .left-sidebar {
+/* 1. MODO MINI / COMPACTO (70px) */
+#main-wrapper.mini-sidebar aside.left-sidebar,
+body.mini-sidebar aside.left-sidebar,
+aside.left-sidebar.mini-sidebar-active {
   width: 70px !important;
   transition: width 0.25s ease;
 }
@@ -231,105 +156,282 @@
   width: 0 !important;
   height: 0 !important;
   overflow: hidden !important;
-} 
-
+}
 
 /* Centrar iconos en la barra delgada */
 #main-wrapper.mini-sidebar .sidebar-nav ul li a {
   text-align: center !important;
   display: block !important;
-  padding: 12px 0 !important;
+  visibility: visible !important;
+  overflow: visible !important;
 }
 
-#main-wrapper.mini-sidebar .sidebar-nav ul li a i {
-  margin-right: 0 !important;
-  font-size: 1.4rem !important;
-  display: inline-block !important;
+#main-wrapper.mini-sidebar .scroll-sidebar,
+body.mini-sidebar .scroll-sidebar,
+aside.left-sidebar.mini-sidebar-active .scroll-sidebar,
+aside.left-sidebar.mini-sidebar-active .sidebar-nav,
+aside.left-sidebar.mini-sidebar-active {
+  overflow: visible !important;
 }
 
-/* Si el sidebar está en mini-sidebar, esconder al 100% las letras para que no se corten */
-.mini-sidebar .left-sidebar .sidebar-nav ul li a .hide-menu,
-.mini-sidebar aside.left-sidebar .hide-menu,
-.mini-sidebar #sidebarnav .hide-menu {
+#main-wrapper.mini-sidebar .page-wrapper,
+body.mini-sidebar .page-wrapper,
+aside.left-sidebar.mini-sidebar-active ~ .page-wrapper {
+  margin-left: 70px !important;
+  width: calc(100% - 70px) !important;
+  max-width: calc(100% - 70px) !important;
+}
+
+/* Ocultar textos, flechas y etiquetas cuando esté activo el mini */
+#main-wrapper.mini-sidebar .hide-menu,
+body.mini-sidebar .hide-menu,
+aside.left-sidebar.mini-sidebar-active .hide-menu,
+aside.left-sidebar.mini-sidebar-active .has-arrow::after,
+aside.left-sidebar.mini-sidebar-active .label {
   display: none !important;
   visibility: hidden !important;
   width: 0 !important;
-  height: 0 !important;
   opacity: 0 !important;
-  overflow: hidden !important;
-  font-size: 0 !important;
 }
 
-/* Si NO está en mini-sidebar, mostrar el texto COMPLETO y ancho */
-body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .left-sidebar {
+
+/* 2. MODO EXPANDIDO (240px) */
+#main-wrapper:not(.mini-sidebar) aside.left-sidebar:not(.mini-sidebar-active),
+body:not(.mini-sidebar) aside.left-sidebar:not(.mini-sidebar-active),
+aside.left-sidebar:not(.mini-sidebar-active) {
   width: 240px !important;
   min-width: 240px !important;
+  left: 0 !important;
+  overflow: visible !important;
 }
 
-body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .page-wrapper {
+#main-wrapper:not(.mini-sidebar) .page-wrapper,
+body:not(.mini-sidebar) .page-wrapper,
+aside.left-sidebar:not(.mini-sidebar-active) ~ .page-wrapper {
   margin-left: 240px !important;
+  width: calc(100% - 240px) !important;
+  max-width: calc(100% - 240px) !important;
 }
 
-body:not(.mini-sidebar) #main-wrapper:not(.mini-sidebar) .left-sidebar .hide-menu {
+aside.left-sidebar:not(.mini-sidebar-active) .hide-menu {
   display: inline-block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  font-size: inherit !important;
-  width: auto !important;
-  white-space: nowrap !important;
-}
-/* ==============================================================
-   SICAI SIDEBAR - estilos finales y responsivos
-   El estado mini se controla desde SidebarService / #main-wrapper.
-   ============================================================== */
-#main-wrapper .left-sidebar.sicai-sidebar {
-    width: 240px;
-    min-width: 240px;
-    background: #8f1238 !important;
-    overflow: hidden;
-    transition: width .25s ease, transform .25s ease;
-}
-#main-wrapper:not(.mini-sidebar) .left-sidebar.sicai-sidebar { width: 240px !important; }
-#main-wrapper:not(.mini-sidebar) .page-wrapper { margin-left: 240px !important; }
-#main-wrapper.mini-sidebar .left-sidebar.sicai-sidebar { width: 70px !important; min-width: 70px !important; }
-#main-wrapper.mini-sidebar .page-wrapper { margin-left: 70px !important; }
-#main-wrapper .sicai-sidebar .sidebar-nav { padding: 14px 0 20px; background: transparent !important; }
-#main-wrapper .sicai-sidebar .sicai-menu-trigger { box-sizing: border-box; }
-#main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-trigger { justify-content: center; padding: 0; }
-#main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-trigger > .fa:first-child { margin: 0; }
-#main-wrapper.mini-sidebar .sicai-sidebar .hide-menu { display: none !important; }
-#main-wrapper.mini-sidebar .sicai-sidebar .sicai-submenu { display: none !important; }
-body.mini-sidebar #main-wrapper:not(.mini-sidebar) .left-sidebar.sicai-sidebar { width: 70px !important; min-width: 70px !important; }
-body.mini-sidebar #main-wrapper:not(.mini-sidebar) .page-wrapper { margin-left: 70px !important; }
-body.mini-sidebar #main-wrapper:not(.mini-sidebar) .sicai-sidebar .hide-menu { display: none !important; }
-body.mini-sidebar #main-wrapper:not(.mini-sidebar) .sicai-sidebar .sicai-menu-trigger { justify-content: center; padding: 0; }
-@media (max-width: 767.98px) {
-    #main-wrapper .left-sidebar.sicai-sidebar {
-        position: fixed !important;
-        top: 0; bottom: 0; left: 0;
-        width: 260px !important; min-width: 260px !important;
-        height: 100vh; margin: 0; padding-top: 70px;
-        transform: translateX(-100%);
-        z-index: 1050;
-    }
-    body.show-sidebar #main-wrapper .left-sidebar.sicai-sidebar { transform: translateX(0); }
-    #main-wrapper:not(.mini-sidebar) .page-wrapper,
-    #main-wrapper.mini-sidebar .page-wrapper,
-    body.mini-sidebar #main-wrapper:not(.mini-sidebar) .page-wrapper { margin-left: 0 !important; }
-    #main-wrapper .left-sidebar.sicai-sidebar .hide-menu { display: inline-block !important; }
-    #main-wrapper .left-sidebar.sicai-sidebar .sicai-menu-trigger { justify-content: flex-start !important; padding: 0 13px !important; }
 }
 
-/* Submenús emergentes al pasar sobre un icono en modo compacto. */
-@media (min-width: 768px) {
-    #main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-group,
-    body.mini-sidebar #main-wrapper .sicai-sidebar .sicai-menu-group { position: relative; }
-    #main-wrapper.mini-sidebar .sicai-sidebar .sicai-submenu,
-    body.mini-sidebar #main-wrapper .sicai-sidebar .sicai-submenu {
-        display: none !important; position: absolute; left: 60px; top: 0; width: 220px;
-        padding: 7px !important; border-radius: 7px; background: #74102f; z-index: 1100;
-        box-shadow: 0 8px 24px rgba(0,0,0,.22);
-    }
-    #main-wrapper.mini-sidebar .sicai-sidebar .sicai-menu-group:hover > .sicai-submenu,
-    body.mini-sidebar #main-wrapper .sicai-sidebar .sicai-menu-group:hover > .sicai-submenu { display: block !important; }
+
+/* 3. DISPOSITIVOS MÓVILES Y CELULARES (< 767px) */
+@media (max-width: 767px) {
+  aside.left-sidebar,
+  #main-wrapper .left-sidebar {
+    left: -250px !important;
+    width: 250px !important;
+    transition: left 0.3s ease-in-out !important;
+  }
+
+  body.show-sidebar aside.left-sidebar,
+  #main-wrapper.show-sidebar aside.left-sidebar {
+    left: 0 !important;
+  }
+
+  .page-wrapper,
+  div.page-wrapper,
+  #main-wrapper .page-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+
+/* ============================================================== 
+   GESTIÓN DE SUBMENÚS (ADAPTABLE: MÓVIL/NORMAL VS MODO MINI)
+   ============================================================== */
+
+/* 1. MODO NORMAL Y MÓVIL (< 768px o pantalla completa expandida): Despliegue hacia abajo en acordeón */
+.sidebar-nav #sidebarnav > li.active > ul,
+.sidebar-nav #sidebarnav > li.selected > ul {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  left: auto !important;
+  width: 100% !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
+  z-index: 10 !important;
+  padding: 5px 0 !important;
+}
+
+/* 2. MODO MINI / COMPACTO: Tarjeta flotante independiente hacia la derecha */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.active > ul,
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li.selected > ul {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  left: 70px !important;
+  width: 220px !important;
+  background: #9c0031 !important;
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 0 8px 8px 0 !important;
+  z-index: 999999 !important;
+  padding: 10px 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Enlaces de los submenús en cualquier modalidad */
+.sidebar-nav #sidebarnav > li.active > ul li a,
+.sidebar-nav #sidebarnav > li.selected > ul li a {
+  padding: 10px 20px !important;
+  color: #ffffff !important;
+  text-align: left !important;
+  display: block !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+  background: transparent !important;
+}
+
+.sidebar-nav #sidebarnav > li.active > ul li a:hover,
+.sidebar-nav #sidebarnav > li.selected > ul li a:hover {
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ============================================================== 
+   BLINDAJE FINAL PARA COMPONENTES DE ANGULAR Y BOOTSTRAP
+   ============================================================== */
+
+/* Forzar que el componente contenedor de Angular respete el ancho de 70px en modo mini */
+app-sidebar.mini-sidebar-active,
+app-sidebar[class*="mini-sidebar"] {
+  width: 70px !important;
+  min-width: 70px !important;
+  flex: 0 0 70px !important;
+}
+
+/* Blindar el aside interno sin importar la resolución si el servicio está activo */
+aside.left-sidebar.mini-sidebar-active {
+  width: 70px !important;
+  min-width: 70px !important;
+}
+
+/* Asegurar que el contenido principal nunca invada el espacio del menú colapsado */
+app-sidebar.mini-sidebar-active ~ .page-wrapper,
+#main-wrapper.mini-sidebar .page-wrapper {
+  margin-left: 70px !important;
+  width: calc(100% - 70px) !important;
+}
+
+/* ============================================================== 
+   BLINDAJE RESPONSIVO ABSOLUTO PARA TODOS LOS ÍCONOS DEL SIDEBAR EN MODO MINI
+   ============================================================== */
+
+/* Asegurar que CADA elemento del menú (incluyendo el primero de Almacén) permanezca visible y con 70px de ancho */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li,
+body.mini-sidebar .sidebar-nav #sidebarnav > li {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 70px !important;
+  min-width: 70px !important;
+  height: auto !important;
+}
+
+/* Forzar que todos los enlaces principales muestren su ícono perfectamente centrado y bloqueado */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li > a,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li > a,
+body.mini-sidebar .sidebar-nav #sidebarnav > li > a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 70px !important;
+  padding: 15px 0 !important;
+}
+
+/* Blindar los íconos (MDI) para que nunca se oculten sin importar el tamaño de pantalla */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li > a > i,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li > a > i,
+body.mini-sidebar .sidebar-nav #sidebarnav > li > a > i {
+  display: inline-block !important;
+  visibility: visible !important;
+  font-size: 22px !important;
+  color: #FFFFFF !important;
+  margin: 0 auto !important;
+}
+
+/* ============================================================== 
+   FIJAR ALMACÉN EN LA CIMA ABSOLUTA CUANDO EL SIDEBAR ESTÁ COMPACTO
+   ============================================================== */
+
+/* Si el sidebar está en modo mini, forzamos que el primer <li> se quede arriba fijo */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav > li:first-child,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav > li:first-child {
+  position: relative !important;
+  display: block !important;
+  visibility: visible !important;
+  order: -9999 !important; /* Lo empuja obligatoriamente al primer lugar absoluto */
+  margin-top: 0 !important;
+}
+
+/* Asegurar que el contenedor ul #sidebarnav permita este orden flexible */
+aside.left-sidebar.mini-sidebar-active .sidebar-nav #sidebarnav,
+#main-wrapper.mini-sidebar .sidebar-nav #sidebarnav {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* ============================================================== 
+   BLINDAJE ANTIDESAPARICIÓN PARA ALMACÉN ABAJO DE 768px
+   ============================================================== */
+
+@media (max-width: 767px) {
+  /* Forzar que el contenedor principal del sidebar muestre todos sus ítems */
+  aside.left-sidebar .sidebar-nav #sidebarnav > li,
+  #main-wrapper .sidebar-nav #sidebarnav > li {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Blindar específicamente el primer elemento (Almacén) para que nunca se oculte en móviles */
+  aside.left-sidebar .sidebar-nav #sidebarnav > li:first-child,
+  #main-wrapper .sidebar-nav #sidebarnav > li:first-child {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+  }
+
+  /* Asegurar que su enlace y su ícono sean visibles en pantallas chicas */
+  aside.left-sidebar .sidebar-nav #sidebarnav > li:first-child > a,
+  #main-wrapper .sidebar-nav #sidebarnav > li:first-child > a {
+    display: flex !important;
+    align-items: center !important;
+    visibility: visible !important;
+  }
+
+  aside.left-sidebar .sidebar-nav #sidebarnav > li:first-child > a > i,
+  #main-wrapper .sidebar-nav #sidebarnav > li:first-child > a > i {
+    display: inline-block !important;
+    visibility: visible !important;
+    color: #ffffff !important;
+  }
+}
+
+/* ============================================================== 
+   CORRECCIÓN DEL HEADER FIJO PARA QUE ALMACÉN NO QUEDE OCULTO ARRIBA
+   ============================================================== */
+
+aside.left-sidebar, 
+#main-wrapper .left-sidebar {
+  top: 70px !important; /* Ajusta este valor si tu header es un poco más alto o más bajo */
+  height: calc(100vh - 70px) !important;
+}
+
+.scroll-sidebar {
+  padding-top: 15px !important; /* Espacio extra para que el primer ítem respire y luzca perfecto */
+  padding-bottom: 70px !important;
 }
