@@ -27,14 +27,26 @@
         </li>
       </ul>
 
-      <div style="text-align: center; width: 100%; overflow: visible;">
+   <!--   <div style="text-align: center; width: 100%; overflow: visible;">
   <img 
     class="rounded mx-auto d-block" 
     src="./assets/images/pleca-diglet.jpg"
     alt="Banner institucional" 
     style="width: 550px !important; min-width: 550px !important; height: auto !important;"
   >
-</div>
+</div> --->
+
+<!--CAMBIOS PAAM--->
+<!-- Banner institucional: oculto en celulares y tablets (< 1200px)-->
+      <div class="d-none d-md-block text-center w-100">
+        <img 
+          class="rounded mx-auto" 
+          src="./assets/images/pleca-diglet.jpg"
+          alt="Banner institucional" 
+          style="width: 550px; max-width: 100%; height: auto;"
+        >
+      </div>
+  <!--HASTA AQUI - PAAM--->    
 
       <!-- Datos del perfil -->
       <ul class="navbar-nav my-lg-0">
@@ -61,7 +73,8 @@
         </li>
       </ul>
      
-    <h5 style="text-align:center; white-space:nowrap; flex-shrink:0; margin:0 15px;">
+    <!--<h5 style="text-align:center; white-space:nowrap; flex-shrink:0; margin:0 15px;">--->
+      <h5 class="saludo-usuario text-center mb-0"><!--nueva linea--->
       <strong style="color: brown;">Bienvenido/a</strong><br>
       <span>{{Nombre}}</span>
     </h5>
