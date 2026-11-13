@@ -93,8 +93,6 @@
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-
-
 /* Suaviza la apertura y cierre de la barra lateral */
 .left-sidebar,
 .sidebar-nav,
@@ -231,8 +229,7 @@
   width: 0 !important;
   height: 0 !important;
   overflow: hidden !important;
-} 
-
+}
 
 /* Centrar iconos en la barra delgada */
 #main-wrapper.mini-sidebar .sidebar-nav ul li a {

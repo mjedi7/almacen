@@ -1,71 +1,119 @@
+
 <div class="container">
 
-	<div class="text-center mb-2" style="margin-top: 30px">
-		<h3><b>Registrar Nuevo Artículo</b></h3>
-		<hr>
-	</div>
+  <div class="text-center mb-2" style="margin-top: 30px">
+    <h3><b>Registrar Nuevo Artículo</b></h3>
+    <hr>
+  </div>
 
   <form #f="ngForm" (ngSubmit)="guardarArticulo(f)" class="card p-4 shadow">
 
     <!-- Combo Partidas -->
     <div class="form-group mb-3">
-    
+
       <div class="card-header text-white py-3" style="background-color: #9c0031;">
-        <label for="id_partidas" class="form-label"><b>
+        <label for="id_partidas"><b>
           <i class="fa-solid fa-table-list"></i>
-          Partida</b></label>
+          Partidae
+        </b></label>
       </div>
 
-      <select id="id_partidas" name="id_partidas" class="form-select" [(ngModel)]="articulo.id_partidas"
-        (ngModelChange)="onPartidaChange($event)" required>
-        <option [ngValue]="null" disabled selected>Selecciona una partida...</option>
+      <select
+        id="id_partidas"
+        name="id_partidas"
+        class="form-control"
+        [(ngModel)]="articulo.id_partidas"
+        (ngModelChange)="onPartidaChange($event)"
+        required>
+
+        <option [ngValue]="null" disabled selected>
+          Selecciona una partida...
+        </option>
+
         <option *ngFor="let p of partidas" [ngValue]="p.id">
           {{ p.clave }} - {{ p.descripcion }}
         </option>
+
       </select>
+
       <small *ngIf="f.submitted && f.controls['id_partidas']?.invalid" class="text-danger">
         Obligatorio
       </small>
+
     </div>
 
-    <!-- Fila con Clave, Costo Unitario y Unidad de Medida -->
+    <!-- Fila con Clave y Unidad de Medida -->
     <div class="row mb-3">
+
       <div class="form-group col-md-6">
-        <label for="clave" class="form-label"><b>Clave</b></label>
-        <input type="text" id="clave" name="clave" class="form-control bg-light" [(ngModel)]="articulo.clave"
-          placeholder="001" required readonly />
+        <label for="clave"><b>Clave</b></label>
+
+        <input
+          type="text"
+          id="clave"
+          name="clave"
+          class="form-control bg-light"
+          [(ngModel)]="articulo.clave"
+          placeholder="001"
+          required
+          readonly />
       </div>
 
-
       <div class="form-group col-md-6">
-        <label for="unidad_medida_id" class="form-label"><b>Unidad de Medida</b></label>
-        <select id="unidad_medida_id" class="form-select" name="unidad_medida_id"
-          [(ngModel)]="articulo.unidad_medida_id" required>
-          <option [ngValue]="null" disabled selected>-- Seleccione una unidad --</option>
+        <label for="unidad_medida_id"><b>Unidad de Medida</b></label>
+
+        <select
+          id="unidad_medida_id"
+          class="form-control"
+          name="unidad_medida_id"
+          [(ngModel)]="articulo.unidad_medida_id"
+          required>
+
+          <option [ngValue]="null" disabled selected>
+            -- Seleccione una unidad --
+          </option>
+
           <option *ngFor="let u of unidad_medida" [ngValue]="u.id">
             {{ u.nombre_medida }}
           </option>
+
         </select>
+
         <small *ngIf="f.submitted && f.controls['unidad_medida_id']?.invalid" class="text-danger">
           Obligatorio
         </small>
       </div>
+
     </div>
 
     <!-- Descripción del Artículo -->
     <div class="form-group mb-4">
-      <label for="descripcion" class="form-label"><b>Descripción del Artículo</b></label>
-      <textarea id="descripcion" class="form-control" name="descripcion" [(ngModel)]="articulo.descripcion" rows="4"
+
+      <label for="descripcion"><b>Descripción del Artículo</b></label>
+
+      <textarea
+        id="descripcion"
+        class="form-control"
+        name="descripcion"
+        [(ngModel)]="articulo.descripcion"
+        rows="4"
         required></textarea>
+
       <small *ngIf="f.submitted && f.controls['descripcion']?.invalid" class="text-danger">
         Obligatorio
       </small>
+
     </div>
 
     <!-- Botón de Guardar -->
     <div class="text-center">
-      <button class="btn btn-primary px-4" type="submit" [disabled]="loading || f.invalid">
+      <button
+        class="btn btn-primary px-4"
+        type="submit"
+        [disabled]="loading || f.invalid">
+
         {{ loading ? 'Guardando…' : 'Guardar artículo' }}
+
       </button>
     </div>
 
