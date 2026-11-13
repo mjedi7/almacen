@@ -1,18 +1,12 @@
+
 <div class="container">
 
   <div
     class="titulo"
-    style="
-      margin: 0 auto;
-      text-align: center;
-      margin-top: 50px;
-    "
+    style="margin: 0 auto; text-align: center; margin-top: 50px;"
   >
-
     <h3>
-      <b>
-        Cargar Existencias de Inventario a DG
-      </b>
+      <b>Cargar Existencias de Inventario a DG</b>
     </h3>
 
     <p class="text-muted">
@@ -21,32 +15,25 @@
     </p>
 
     <hr>
-
   </div>
-
 
   <form
     #f="ngForm"
     (ngSubmit)="agregarALista(f)"
-    class="card p-4 shadow mb-4"
+    class="card p-4 mb-4"
   >
-
 
     <!-- Cargar partidas -->
     <div class="form-group mb-3">
 
-      <label
-        for="id_partida"
-        class="form-label"
-      >
+      <label for="id_partida">
         <b>Partida</b>
       </label>
-
 
       <select
         id="id_partida"
         name="id_partida"
-        class="form-select"
+        class="form-control"
         [(ngModel)]="partidaSeleccionadaId"
         (ngModelChange)="onPartidaChange()"
         [disabled]="cargandoPartidas"
@@ -64,103 +51,90 @@
           }}
         </option>
 
-
         <option
           *ngFor="let p of partidas"
           [ngValue]="p.id"
         >
-
           {{ p.clave }} - {{ p.descripcion }}
-
         </option>
 
       </select>
 
     </div>
 
+    <!-- ARTÍCULO Y CANTIDAD -->
+    <div class="row mb-4">
 
-<!-- ARTÍCULO Y CANTIDAD -->
-<div class="row mb-4">
+      <!-- ARTÍCULO -->
+      <div class="form-group col-md-9">
 
-  <!-- ARTÍCULO -->
-  <div class="form-group col-md-9">
+        <label for="id_articulo">
+          <b>Artículo</b>
+        </label>
 
-    <label
-      for="id_articulo"
-      class="form-label"
-    >
-      <b>Artículo</b>
-    </label>
+        <input
+          type="text"
+          id="id_articulo"
+          name="id_articulo"
+          class="form-control"
+          [(ngModel)]="articuloBuscado"
+          (input)="onArticuloInput()"
+          [disabled]="
+            !partidaSeleccionadaId ||
+            cargandoArticulos
+          "
+          list="listaArticulos"
+          autocomplete="off"
+          placeholder="Escriba clave o descripción del artículo..."
+          required
+        >
 
-    <input
-      type="text"
-      id="id_articulo"
-      name="id_articulo"
-      class="form-control"
-      [(ngModel)]="articuloBuscado"
-      (input)="onArticuloInput()"
-      [disabled]="
-        !partidaSeleccionadaId ||
-        cargandoArticulos
-      "
-      list="listaArticulos"
-      autocomplete="off"
-      placeholder="Escriba clave o descripción del artículo..."
-      required
-    >
+        <datalist id="listaArticulos">
 
-    <datalist id="listaArticulos">
+          <option
+            *ngFor="let art of articulos"
+            [value]="art.clave + ' - ' + art.descripcion"
+          >
+          </option>
 
-      <option
-        *ngFor="let art of articulos"
-        [value]="art.clave + ' - ' + art.descripcion"
-      >
-      </option>
+        </datalist>
 
-    </datalist>
+        <small
+          class="text-muted"
+          *ngIf="
+            partidaSeleccionadaId &&
+            !cargandoArticulos &&
+            articulos.length === 0
+          "
+        >
+          No se encontraron artículos activos para esta partida.
+        </small>
 
+      </div>
 
-    <small
-      class="text-muted"
-      *ngIf="
-        partidaSeleccionadaId &&
-        !cargandoArticulos &&
-        articulos.length === 0
-      "
-    >
-      No se encontraron artículos activos para esta partida.
-    </small>
+      <!-- CANTIDAD -->
+      <div class="form-group col-md-3">
 
-  </div>
+        <label for="cantidad">
+          <b>Cantidad</b>
+        </label>
 
+        <input
+          type="number"
+          id="cantidad"
+          name="cantidad"
+          class="form-control"
+          [(ngModel)]="cantidadInput"
+          [disabled]="!articuloSeleccionadoId"
+          min="1"
+          step="1"
+          required
+          placeholder="Cantidad"
+        >
 
-  <!-- CANTIDAD -->
-  <div class="form-group col-md-3">
+      </div>
 
-    <label
-      for="cantidad"
-      class="form-label"
-    >
-      <b>Cantidad</b>
-    </label>
-
-    <input
-      type="number"
-      id="cantidad"
-      name="cantidad"
-      class="form-control"
-      [(ngModel)]="cantidadInput"
-      [disabled]="!articuloSeleccionadoId"
-      min="1"
-      step="1"
-      required
-      placeholder="Cantidad"
-    >
-
-  </div>
-
-</div>
-
+    </div>
 
     <div class="text-center">
 
@@ -183,44 +157,30 @@
 
     </div>
 
-
   </form>
-
-
 
   <!-- Tabla Temporal -->
   <div
-    class="card p-4 shadow mb-5"
+    class="card p-4 mb-5"
     *ngIf="listaTemporal.length > 0"
   >
 
-
     <div
-      class="
-        d-flex
-        justify-content-between
-        align-items-center
-        mb-3
-      "
+      class="d-flex justify-content-between align-items-center mb-3"
     >
 
       <div>
 
         <h5 class="mb-0">
-          <b>
-            Artículos por cargar
-          </b>
+          <b>Artículos por cargar</b>
         </h5>
 
         <small class="text-muted">
-
           {{ listaTemporal.length }}
           artículo(s) diferente(s)
-
         </small>
 
       </div>
-
 
       <button
         type="button"
@@ -236,33 +196,19 @@
 
     </div>
 
-
-
     <div class="table-responsive">
 
-      <table
-        class="
-          table
-          table-hover
-          table-bordered
-        "
-      >
+      <table class="table table-hover table-bordered">
 
         <thead>
 
           <tr>
 
-            <th>
-              Partida
-            </th>
+            <th>Partida</th>
 
-            <th>
-              Clave
-            </th>
+            <th>Clave</th>
 
-            <th>
-              Artículo
-            </th>
+            <th>Artículo</th>
 
             <th
               class="text-center"
@@ -282,7 +228,6 @@
 
         </thead>
 
-
         <tbody>
 
           <tr
@@ -293,48 +238,28 @@
           >
 
             <td>
-
               {{ item.partida_clave }}
               -
               {{ item.partida_descripcion }}
-
             </td>
 
-
             <td>
-
-              <b>
-                {{ item.clave }}
-              </b>
-
+              <b>{{ item.clave }}</b>
             </td>
 
-
             <td>
-
               {{ item.descripcion }}
-
             </td>
-
 
             <td class="text-center">
-
-              <b>
-                {{ item.cantidad }}
-              </b>
-
+              <b>{{ item.cantidad }}</b>
             </td>
-
 
             <td class="text-center">
 
               <button
                 type="button"
-                class="
-                  btn
-                  btn-outline-danger
-                  btn-sm
-                "
+                class="btn btn-outline-danger btn-sm"
                 (click)="eliminarDeLista(i)"
                 title="Eliminar"
               >
@@ -352,8 +277,6 @@
       </table>
 
     </div>
-
-
 
     <!-- Guardar -->
     <div class="text-center mt-3">
@@ -377,8 +300,6 @@
 
     </div>
 
-
   </div>
-
 
 </div>
