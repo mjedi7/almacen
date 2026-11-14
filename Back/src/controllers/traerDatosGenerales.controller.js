@@ -190,7 +190,7 @@ const datosDelProveedor = async(req, res) => {
 
     var id=req.params.id;
 
-    const response = await pool.query('SELECT telefono,direccion FROM cat_proveedores where id='+id);
+    const response = await pool.query('SELECT telefono, direccion FROM cat_proveedores where id='+id);
     res.status(200).json(response.rows);
     
 };
