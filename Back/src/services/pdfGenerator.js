@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
-const { PDFDocument } = require('pdf-lib');
+const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 
 // Convierte imágenes a Base64 para incrustación directa
 const imgToBase64 = (filePath) => {
@@ -17,7 +17,7 @@ const imgToBase64 = (filePath) => {
 const bannerPath = path.join(__dirname, '../../reports/imagenes/banner.png');
 const piePath = path.join(__dirname, '../../reports/imagenes/pie.png');
 
-// Función que busca el archivo CSS en rutas alternativas para evitar fallos de lectura
+// Función que busca el archivo CSS en rutas alternativas
 const buscarRutaCss = (nombreCss) => {
   const rutasPosibles = [
     path.join(__dirname, `../templates/css/${nombreCss}`),
@@ -68,7 +68,7 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const compiledTemplate = handlebars.compile(templateHtml);
     const bannerBase64 = imgToBase64(bannerPath);
 
-    // Datos de auditoría para el pie (detección amplia de usuario)
+    // Datos de auditoría para el pie
     const usuarioPie = resolverUsuarioAuditoria(data, pdfOptions);
 
     const fechaPie =
@@ -85,69 +85,52 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       usuarioPie,
       fechaPie,
       bannerBase64,
-      pieBase64: null // Se maneja vía pdf-lib para evitar desfasamiento
+      pieBase64: null // Se estampa vía pdf-lib
     });
 
     // ========================================================
-    // 1. DETECCIÓN Y CLASIFICACIÓN DE REPORTES
+    // 1. CLASIFICACIÓN DE REPORTES
     // ========================================================
     const nombreMin = templateName.toLowerCase().trim();
 
     let disenoDetectado = 'con-pie';
-    let requiereCenefa = true;
-
-    // 1. Reportes con firmas institucionales
     if (nombreMin.includes('listasurtido') || nombreMin.includes('surtido')) {
       disenoDetectado = 'con-firmas';
-      requiereCenefa = true;
-    }
-    // 2. Reportes de solo encabezado (barra auditoría y SIN cenefa)
-    else if (
-      nombreMin.includes('existencia') ||
-      nombreMin.includes('plantel') ||
-      (nombreMin.includes('salida') && !nombreMin.includes('partida'))
-    ) {
-      disenoDetectado = 'solo-header';
-      requiereCenefa = false;
-    }
-    // 3. Reportes estándar con cenefa al pie (partidas, entradas todas, kardex, proveedor)
-    else {
-      disenoDetectado = 'con-pie';
-      requiereCenefa = true;
     }
 
-    // Opciones pasadas desde el controlador tienen prioridad absoluta
+    let tipoDisenoSolicitado = pdfOptions.tipoDiseno || disenoDetectado;
+    if (tipoDisenoSolicitado === 'solo-header') {
+      tipoDisenoSolicitado = 'con-pie';
+    }
+
     const {
-      tipoDiseno = disenoDetectado, // 'con-firmas' | 'con-pie' | 'solo-header'
-      estamparCenefa = requiereCenefa,
+      estamparCenefa = true,
+      mostrarAuditoria = true,
+      tipoDiseno: _ignorarTipo,
       usuario: _usuarioOpcion,
       usuarioPie: _usuarioPieOpcion,
       fechaPie: _fechaPieOpcion,
       ...opcionesPuppeteer
     } = pdfOptions;
 
+    const tipoDiseno = tipoDisenoSolicitado;
+
     // ========================================================
     // 2. LECTURA E INYECCIÓN FÍSICA DEL CSS EN EL HTML
     // ========================================================
-    let nombreArchivoCss = 'reportes-con-pie.css';
-    if (tipoDiseno === 'con-firmas') {
-      nombreArchivoCss = 'reportes-con-firmas.css';
-    } else if (tipoDiseno === 'solo-header') {
-      nombreArchivoCss = 'reportes-solo-header.css';
-    }
+    const nombreArchivoCss =
+      tipoDiseno === 'con-firmas' ? 'reportes-con-firmas.css' : 'reportes-con-pie.css';
 
     const rutaCssReal = buscarRutaCss(nombreArchivoCss);
     let cssAInyectar = '';
 
     if (rutaCssReal) {
       console.log(`>>> [PDF-GEN] CSS cargado (${tipoDiseno}):`, rutaCssReal);
-      console.log(`>>> [PDF-GEN] Usuario asignado al pie: "${usuarioPie}"`);
       cssAInyectar = fs.readFileSync(rutaCssReal, 'utf8');
     } else {
       console.warn(`>>> [PDF-GEN ALERTA] No se encontró el archivo CSS: ${nombreArchivoCss}`);
     }
 
-    // Se incrusta el CSS antes de pasarlo a Puppeteer para garantizar aplicación síncrona
     let htmlParaRender = htmlFinal;
     if (cssAInyectar) {
       htmlParaRender = htmlFinal.replace(
@@ -162,12 +145,10 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     });
 
     const page = await browser.newPage();
-    
-    // Contenido listo con sus estilos incrustados
     await page.setContent(htmlParaRender, { waitUntil: 'networkidle0' });
     await page.emulateMediaType('print');
 
-    // Esperar imágenes antes de la captura
+    // Esperar carga completa de imágenes
     await page.evaluate(async () => {
       const imagenes = Array.from(document.images);
       await Promise.all(
@@ -182,10 +163,10 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     });
 
     // ========================================================
-    // 3. PIE DE AUDITORÍA PARA SOLO-HEADER
+    // 3. BARRA INFERIOR DE AUDITORÍA PARA PÁGINAS INTERMEDIAS
     // ========================================================
-    const footerSoloHeader = `
-      <div style="width: 100%; font-family: Arial, sans-serif; font-size: 7.5pt; color: #000; padding: 0 14mm; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+    const footerAuditoria = `
+      <div style="width: 100%; font-family: Arial, sans-serif; font-size:7pt; color: #000; padding: 0 14mm 4mm 14mm; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
         <div>
           <strong>Usuario:</strong> ${usuarioPie} &nbsp;&nbsp;&nbsp;&nbsp; <strong>Fecha:</strong> ${fechaPie}
         </div>
@@ -198,9 +179,9 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     const defaultOptions = {
       format: 'Letter',
       printBackground: true,
-      displayHeaderFooter: tipoDiseno === 'solo-header',
+      displayHeaderFooter: mostrarAuditoria,
       headerTemplate: '<div></div>',
-      footerTemplate: tipoDiseno === 'solo-header' ? footerSoloHeader : '<div></div>',
+      footerTemplate: mostrarAuditoria ? footerAuditoria : '<div></div>',
       preferCSSPageSize: true,
       margin: {
         top: '0px',
@@ -214,12 +195,13 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
     let pdfBuffer = await page.pdf(defaultOptions);
 
     // ========================================================
-    // 4. ESTAMPADO DE CENEFA AL PIE CON PDF-LIB
+    // 4. ESTAMPADO DE CENEFA + PIE DE AUDITORÍA EN ÚLTIMA HOJA
     // ========================================================
     if (estamparCenefa && fs.existsSync(piePath)) {
       const pdfDoc = await PDFDocument.load(pdfBuffer);
       const paginas = pdfDoc.getPages();
-      const ultimaPagina = paginas[paginas.length - 1];
+      const totalPaginas = paginas.length;
+      const ultimaPagina = paginas[totalPaginas - 1];
 
       const imagenBytes = fs.readFileSync(piePath);
       const imagenEmbed = piePath.toLowerCase().endsWith('.png')
@@ -233,14 +215,77 @@ async function generarPDF(templateName, data, pdfOptions = {}) {
       const altoCalculado = imagenEmbed.height * escala;
 
       const posX = (width - anchoDeseado) / 2;
-      const posY = 18;
+      // Elevamos la cenefa a Y=30 para dejar libre la franja inferior de auditoría
+      const posY = 30;
 
+      // 1. Estampar cenefa gráfica solo en la última hoja
       ultimaPagina.drawImage(imagenEmbed, {
         x: posX,
         y: posY,
         width: anchoDeseado,
         height: altoCalculado
       });
+
+      // 2. Redibujar encima la línea de Usuario, Fecha y Paginación para que nunca quede tapada
+      if (mostrarAuditoria) {
+        const fontNormal = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const fontSize = 9;
+        const margenLateral = 40; // ~14mm igual que en Puppeteer
+        const yTexto = 14;
+
+        // "Usuario: " en negrita + nombre en normal
+        const etiquetaUsuario = 'Usuario: ';
+        ultimaPagina.drawText(etiquetaUsuario, {
+          x: margenLateral,
+          y: yTexto,
+          size: fontSize,
+          font: fontBold,
+          color: rgb(0, 0, 0)
+        });
+
+        const anchoEtiquetaUsuario = fontBold.widthOfTextAtSize(etiquetaUsuario, fontSize);
+        ultimaPagina.drawText(usuarioPie, {
+          x: margenLateral + anchoEtiquetaUsuario,
+          y: yTexto,
+          size: fontSize,
+          font: fontNormal,
+          color: rgb(0, 0, 0)
+        });
+
+        // "Fecha: " en negrita + fecha en normal
+        const anchoValorUsuario = fontNormal.widthOfTextAtSize(usuarioPie, fontSize);
+        const xFecha = margenLateral + anchoEtiquetaUsuario + anchoValorUsuario + 22;
+        const etiquetaFecha = 'Fecha: ';
+
+        ultimaPagina.drawText(etiquetaFecha, {
+          x: xFecha,
+          y: yTexto,
+          size: fontSize,
+          font: fontBold,
+          color: rgb(0, 0, 0)
+        });
+
+        const anchoEtiquetaFecha = fontBold.widthOfTextAtSize(etiquetaFecha, fontSize);
+        ultimaPagina.drawText(fechaPie, {
+          x: xFecha + anchoEtiquetaFecha,
+          y: yTexto,
+          size: fontSize,
+          font: fontNormal,
+          color: rgb(0, 0, 0)
+        });
+
+        // Paginación alineada a la derecha ("Pág. X")
+        const textoPagina = `Pág.  ${totalPaginas}`;
+        const anchoPagina = fontNormal.widthOfTextAtSize(textoPagina, fontSize);
+        ultimaPagina.drawText(textoPagina, {
+          x: width - margenLateral - anchoPagina,
+          y: yTexto,
+          size: fontSize,
+          font: fontNormal,
+          color: rgb(0, 0, 0)
+        });
+      }
 
       pdfBuffer = Buffer.from(await pdfDoc.save());
     }

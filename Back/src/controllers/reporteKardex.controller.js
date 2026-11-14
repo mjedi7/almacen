@@ -17,6 +17,15 @@ const reporteKardex = async (req, res) => {
     const idParamInt = parseInt(idParamRaw, 10) || 0;
     const partidaInt = parseInt(clavePartidaRaw, 10) || 0;
 
+    // Extracción dinámica del usuario que genera el reporte
+    const usuarioSesion =
+      req.query?.usuario ||
+      req.body?.usuario ||
+      req.user?.nombre ||
+      req.user?.nombre_usuario ||
+      req.user?.usuario ||
+      'ADMINISTRADOR';
+
     const params = [clavePartidaRaw, idParamInt, idParamRaw, partidaInt];
 
     const queryEncabezado = `
@@ -57,7 +66,7 @@ const reporteKardex = async (req, res) => {
     `;
 
     const resEncabezadoTemp = await pool.query(queryEncabezado, params);
-    if (!resEncabezadoTemp.rowCount) return res.status(404).json({error:'Artículo no encontrado.'});
+    if (!resEncabezadoTemp.rowCount) return res.status(404).json({ error: 'Artículo no encontrado.' });
     const headerDataTemp = resEncabezadoTemp.rows[0];
 
     const queryDetalle = `
@@ -137,6 +146,7 @@ const reporteKardex = async (req, res) => {
     });
 
     const templateData = {
+      usuario: usuarioSesion,
       header: {
         nom_articulo: headerData.nom_articulo || 'Sin descripción',
         clave_completa: `${headerData.clave_partida || clavePartidaRaw}-${headerData.clave_articulo || idParamRaw}`,
@@ -159,8 +169,10 @@ const reporteKardex = async (req, res) => {
       }
     };
 
-    // Llamada al servicio estandarizado de PDF (Asegúrate de que el archivo se llame reporteKardex.html)
-    const pdfBuffer = await generarPDF('reporteKardex.html', templateData);
+    const pdfBuffer = await generarPDF('reporteKardex.html', templateData, {
+      tipoDiseno: 'con-pie',
+      estamparCenefa: true
+    });
 
     const nombreArticuloLimpio = (headerData.nom_articulo || 'articulo')
       .toLowerCase()
