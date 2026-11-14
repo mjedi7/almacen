@@ -1,0 +1,69 @@
+<div class="titulo" style="margin: 0 auto; text-align: center; margin-top: 40px;">
+  <h3><b>Reporte de Resumen de Almacén</b></h3>
+  <hr style="width: 80%;">
+</div>
+
+<div class="card p-3 mb-4" style="width: 92%; max-width: 1400px; margin: 0 auto; background-color: #f8f9fa; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+  <h6 class="text-muted m-0">Consulte el resumen dinámico de entradas, saldos y salidas desglosadas por ejercicio fiscal anterior y actual.</h6>
+</div>
+
+<div class="contenedor d-flex justify-content-center align-items-center mb-5" style="width: 92%; max-width: 1400px; margin: 0 auto;">
+  <form (ngSubmit)="GenerarReporteResumen(fResumen)" #fResumen="ngForm" style="width: 100%;">
+    <div class="form-row row mt-3 align-items-end">
+
+      <!-- Fecha Inicial -->
+      <div class="form-group col-12 col-sm-6 col-lg-3 col-xl-3">
+        <label for="fechaIniResumen" style="white-space: nowrap;">Fecha Inicial</label>
+        <input 
+          [(ngModel)]="reporteResumen.fechaIni" 
+          type="date" 
+          class="form-control" 
+          name="FechaIniResumen" 
+          id="fechaIniResumen" 
+          required 
+          #FechaIniResumen="ngModel" 
+          style="min-width: 145px;">
+        <small *ngIf="FechaIniResumen.invalid && FechaIniResumen.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+      <!-- Fecha Final -->
+      <div class="form-group col-12 col-sm-6 col-lg-3 col-xl-3">
+        <label for="fechaFinResumen" style="white-space: nowrap;">Fecha Final</label>
+        <input 
+          [(ngModel)]="reporteResumen.fechaFin" 
+          type="date" 
+          class="form-control" 
+          name="FechaFinResumen" 
+          id="fechaFinResumen" 
+          required 
+          #FechaFinResumen="ngModel" 
+          style="min-width: 145px;">
+        <small *ngIf="FechaFinResumen.invalid && FechaFinResumen.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+      <!-- Fecha del Reporte -->
+      <div class="form-group col-12 col-sm-8 col-md-4 col-lg-4 col-xl-3">
+        <label for="fechaReporteResumen" style="white-space: nowrap;">Fecha del reporte</label>
+        <input 
+          [(ngModel)]="reporteResumen.fechaReporte" 
+          type="date" 
+          class="form-control" 
+          name="FechaReporteResumen" 
+          id="fechaReporteResumen" 
+          required 
+          #FechaReporteResumen="ngModel" 
+          style="min-width: 145px;">
+        <small *ngIf="FechaReporteResumen.invalid && FechaReporteResumen.touched" class="form-text text-danger animated fadeIn">Campo Obligatorio</small>
+      </div>
+
+      <!-- Botón de Generar PDF -->
+      <div class="form-group col-12 col-sm-4 col-md-12 col-lg-2 col-xl-2 text-center">
+        <button type="submit" class="btn btn-light shadow-sm" title="Generar Resumen PDF" style="padding: 4px 12px;">
+          <i class="mdi mdi-file-pdf-box" style="color: #ac0808; font-size: 36px; line-height: 1;"></i>
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
+<hr>

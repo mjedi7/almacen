@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,20 @@ export class GenerarPDFService {
     // Se eliminó ':idPartida?' del path para enviar una URL limpia y válida
     return this.http.get(`${this.API}/reporte/kardex`, {
       params,
+      responseType: 'blob'
+    });
+  }
+
+ descargarResumenAlmacen(data: { fechaIni: string, fechaFin: string, fechaReporte: string, usuario: string }): Observable<Blob> {
+    const rawToken = localStorage.getItem('token') || '';
+    const token = rawToken.startsWith('Bearer ') ? rawToken : `Bearer ${rawToken}`;
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': rawToken ? token : ''
+    });
+
+    return this.http.post(`${this.API}/reporte/resumen-almacen`, data, {
+      headers,
       responseType: 'blob'
     });
   }

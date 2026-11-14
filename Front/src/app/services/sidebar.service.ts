@@ -136,6 +136,11 @@ export class SidebarService {
           titulo: 'Movimiento Por Partida',
           url: 'reporte-movimiento-x-partida',
           mostrar: false
+        },
+        {
+          titulo: 'Resumen de almacén',
+          url: 'reporte-resumen-almacen',
+          mostrar: false
         }
       ]
     }

@@ -14,6 +14,7 @@ const { generarReporteEntradasTodas } = require('../controllers/reporteEntradasT
 const { generarReporteEntradasPartida } = require('../controllers/reporteEntradasPartida.controller');
 const { generarReporteEntradasProveedor } = require('../controllers/reporteEntradasProveedor.controller');
 const {descargarzip} = require('../controllers/descargarZip.controller');
+const {generarReporteResumenAlmacen} = require('../controllers/reporteResumenAlmacen.controller');
 
 // ==========================================
 // RUTAS DE REPORTES
@@ -41,5 +42,9 @@ router.post('/reporte/compras-partida', generarReporteEntradasPartida);
 router.post('/reporte/compras-proveedor', generarReporteEntradasProveedor);
 // Descarga del paquete ZIP
 router.post('/descargarzip', descargarzip);
+
+//Reporte de resumen almacén
+
+router.post('/reporte/resumen-almacen', generarReporteResumenAlmacen)
 
 module.exports = router;
