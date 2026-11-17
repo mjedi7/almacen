@@ -28,20 +28,41 @@
     </h1>
   </header>
 
-  <!-- Ficha técnica del Artículo -->
-  <table class="report-meta">
+  <!-- Ficha técnica completa del Artículo -->
+  <table class="report-table" style="margin-bottom: 10px;">
     <tbody>
       <tr>
-        <td class="report-meta__label nowrap" style="width: 15%;">Descripción:</td>
-        <td style="width: 45%;">{{header.nom_articulo}}</td>
+        <th style="width: 15%; text-align: right; padding-right: 6px;">Descripción:</th>
+        <td style="width: 35%; padding-left: 6px;">{{primeraMayuscula header.nom_articulo}}</td>
+        <th style="width: 15%; text-align: right; padding-right: 6px;">Clave artículo:</th>
+        <td class="font-bold nowrap" style="width: 35%; padding-left: 6px;">{{header.clave_completa}}</td>
+      </tr>
+      <tr>
+        <th style="text-align: right; padding-right: 6px;">Unidad entrada:</th>
+        <td style="padding-left: 6px;">{{header.unidad_medida}}</td>
+        <th style="text-align: right; padding-right: 6px;">Última entrada:</th>
+        <td class="nowrap" style="padding-left: 6px;">{{header.fecha_ult_compra}}</td>
+      </tr>
+      <tr>
+        <th style="text-align: right; padding-right: 6px;">Unidad salida:</th>
+        <td style="padding-left: 6px;">{{header.unidad_medida}}</td>
+        <th style="text-align: right; padding-right: 6px;">Tipo costeo:</th>
+        <td class="font-bold" style="padding-left: 6px;">P.E.P.S.</td>
+      </tr>
+      <tr>
+        <th colspan="2" style="background-color: transparent !important;"></th>
+        <th style="text-align: right; padding-right: 6px;">Costo promedio:</th>
+        <td class="font-bold nowrap" style="padding-left: 6px;">$ {{header.costo_promedio}}</td>
+      </tr>
+    </tbody>
+  </table>
 
-
-  <!-- Título Sección 1: Entradas -->
+  <!-- Sección 1: Entradas -->
   <div style="font-weight: bold; font-size: 8.5pt; text-transform: uppercase; margin: 6px 0 3px 0; border-bottom: 1.2px solid #000; padding-bottom: 2px;">
     Entradas y recepciones
   </div>
 
-  <table class="report-table" style="margin-bottom: 8px;">
+  <table class="report-table" style="margin-bottom: 10px;">
     <thead>
       <tr>
         <th style="width: 15%;">Folio</th>
@@ -72,7 +93,7 @@
     </tbody>
   </table>
 
-  <!-- Título Sección 2: Salidas -->
+  <!-- Sección 2: Salidas -->
   <div style="font-weight: bold; font-size: 8.5pt; text-transform: uppercase; margin: 6px 0 3px 0; border-bottom: 1.2px solid #000; padding-bottom: 2px;">
     Salidas registradas
   </div>
@@ -108,57 +129,13 @@
             No hay movimientos registrados para este criterio.
           </td>
         </tr>
-        {{/if}}
-      </tbody>
-    </table>
-
-
-  </div> <!-- FIN DE CONTENIDO FLEXIBLE -->
-
-
-  <!-- BLOQUE DE CIERRE Y CENEFA (Empujados automáticamente al fondo) -->
-  <div class="footer-institucional-html">
-    <div class="bloque-final-cierre">
-
-  <!-- Tabla de Movimientos del Kárdex (Suma exacta = 100%) -->
-  <table class="report-table">
-    <thead>
-      <tr>
-        <th style="width: 10%;">Doc/Folio</th>
-        <th style="width: 26%;">Plantel / Destino</th>
-        <th style="width: 13%; text-align: right;">Exist. Inicial</th>
-        <th style="width: 13%; text-align: right;">Salidas Acum.</th>
-        <th style="width: 13%; text-align: right;">Importe Total</th>
-        <th style="width: 12%; text-align: right;">Existencia</th>
-        <th style="width: 13%;">Fecha</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#if movimientos.length}}
-      {{#each movimientos}}
-      <tr>
-        <td class="text-center nowrap">{{this.folio}}</td>
-        <td class="text-left" style="text-transform: uppercase;">{{this.plantel_destino}}</td>
-        <td class="text-right">{{this.existencia_inicial}}</td>
-        <td class="text-right">{{this.ventas_acumuladas}}</td>
-        <td class="text-right nowrap">${{this.importe_total}}</td>
-        <td class="text-right font-bold">{{this.existencia}}</td>
-        <td class="text-center nowrap">{{this.fecha}}</td>
-      </tr>
-      {{/each}}
-      {{else}}
-      <tr>
-        <td colspan="7" class="empty-state">
-          No hay movimientos registrados para este criterio.
-        </td>
-      </tr>
       {{/if}}
     </tbody>
   </table>
 
-  <!-- Bloque de totales al cierre (Con clases oficiales de reportes-con-pie.css) -->
+  <!-- Bloque de totales al cierre -->
   <div class="bloque-totales">
-    <div style="font-size: 8.5pt; line-height: 1.5;">
+    <div style="font-size: 8.5pt; line-height: 1.6;">
       <div><strong>Total Entradas:</strong> {{totales.entradas}}</div>
       <div><strong>Total Salidas:</strong> {{totales.salidas}}</div>
     </div>

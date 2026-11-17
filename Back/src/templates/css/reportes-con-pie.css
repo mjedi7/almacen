@@ -1,7 +1,7 @@
 @page {
   size: letter portrait;
-  /* Margen inferior de 25mm para reservar el espacio de la cenefa */
-  margin: 10mm 12mm 25mm 12mm;
+  /* Margen inferior de 30mm: reserva espacio para la cenefa + barra de Usuario/Fecha/Pág. */
+  margin: 12mm 12mm 30mm 12mm;
 }
 
 * {
@@ -36,34 +36,44 @@ body.report {
   margin: 0 auto !important;
 }
 
-/* Encabezados institucionales */
+/* Encabezados institucionales (unificados para todas las plantillas) */
 .report-heading {
   text-align: center;
   margin-bottom: 8px;
 }
 
-.report-heading__institution {
+.report-heading__institution,
+.report-institution {
   font-size: 11pt;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 2px;
 }
 
-.report-heading__title {
+.report-heading__title,
+.report-name {
   font-size: 11pt;
   font-weight: bold;
   letter-spacing: 0.3px;
   margin-bottom: 2px;
 }
 
-.report-period {
+.report-period,
+.report-title {
   font-size: 9pt;
   font-weight: bold;
   margin-bottom: 6px;
+  text-transform: uppercase;
 }
 
-/* Tablas generales con bordes visibles */
-table.report-table {
+.report-section {
+  margin-bottom: 12px;
+}
+
+/* Tablas generales con bordes visibles (soporta report-table, table-header y table-detalle) */
+table.report-table,
+table.table-header,
+table.table-detalle {
   width: 100% !important;
   border-collapse: collapse !important;
   border: 1.5px solid #000000 !important;
@@ -71,16 +81,25 @@ table.report-table {
   page-break-inside: auto !important;
 }
 
-table.report-table thead {
+table.table-header {
+  margin-bottom: 5px !important;
+}
+
+table.report-table thead,
+table.table-header thead,
+table.table-detalle thead {
   display: table-header-group !important;
 }
 
-table.report-table tr {
+table.report-table tr,
+table.table-detalle tr {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
 
-table.report-table th {
+table.report-table th,
+table.table-header th,
+table.table-detalle th {
   background-color: #f0f4f8 !important;
   color: #000000 !important;
   border: 1px solid #000000 !important;
@@ -93,7 +112,9 @@ table.report-table th {
   print-color-adjust: exact !important;
 }
 
-table.report-table td {
+table.report-table td,
+table.table-header td,
+table.table-detalle td {
   border: 1px solid #000000 !important;
   padding: 3px 5px;
   font-size: 7.8pt;
@@ -101,11 +122,11 @@ table.report-table td {
 }
 
 /* Alineaciones */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-left { text-align: left; }
-.font-bold { font-weight: bold; }
-.nowrap { white-space: nowrap; }
+.cen, .text-center { text-align: center; }
+.num, .text-right  { text-align: right; }
+.text-left         { text-align: left; }
+.font-bold         { font-weight: bold; }
+.nowrap            { white-space: nowrap; }
 
 .empty-state {
   text-align: center;
@@ -115,7 +136,7 @@ table.report-table td {
   padding: 12px;
 }
 
-/* Bloque de totales al pie */
+/* Bloque de totales al pie (formato flex) */
 .bloque-totales {
   width: 100%;
   page-break-inside: avoid !important;
@@ -139,4 +160,74 @@ table.report-table td {
 .tabla-totales td {
   padding: 2px 6px;
   font-size: 8.5pt;
+}
+
+/* Bloque de totales al pie (formato tabla usado en Existencias) */
+table.totales-contenedor {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: none !important;
+  margin-top: 10px;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
+table.totales-contenedor td {
+  border: none !important;
+  padding: 0 !important;
+}
+
+td.totales-col-izquierda {
+  width: 58% !important;
+  vertical-align: top !important;
+  font-size: 8.5pt;
+  line-height: 1.5;
+}
+
+.totales-conteos__fila {
+  margin-top: 4px;
+}
+
+td.totales-col-derecha {
+  width: 42% !important;
+  vertical-align: top !important;
+}
+
+table.tabla-desglose {
+  width: 100% !important;
+  max-width: 250px !important;
+  border-collapse: collapse !important;
+  border: none !important;
+  margin-left: auto !important;
+}
+
+table.tabla-desglose td {
+  border: none !important;
+  font-size: 8.5pt;
+  padding: 1.5px 4px;
+  vertical-align: middle;
+}
+
+.tabla-desglose__etiqueta {
+  text-align: right;
+  font-weight: bold;
+  width: 42%;
+}
+
+.tabla-desglose__valor {
+  text-align: right;
+  white-space: nowrap;
+  width: 58%;
+}
+
+tr.tabla-desglose__fila-total td {
+  border-top: 1.5px solid #000 !important;
+  padding-top: 3px;
+}
+
+.tabla-desglose__etiqueta-total,
+.tabla-desglose__valor-total {
+  text-align: right;
+  font-weight: bold;
+  white-space: nowrap;
 }

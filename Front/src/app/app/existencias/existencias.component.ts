@@ -470,6 +470,11 @@ export class ExistenciasComponent implements OnInit {
       return;
     }
 
+    const usuarioSesion =
+      localStorage.getItem('nombre') ||
+      localStorage.getItem('usuario') ||
+      'ADMINISTRADOR'
+
     Swal.fire({
       title: 'Generando Reporte...',
       text: 'Por favor espere un momento',
@@ -485,7 +490,7 @@ export class ExistenciasComponent implements OnInit {
     };
 
     this.traer.http.get(
-      `${this.API_URL}/reporte/general-plantel/${this.verSeleccion}`,
+      `${this.API_URL}/reporte/general-plantel/${this.verSeleccion}?usuario=${encodeURIComponent(usuarioSesion)}`,
       httpOptions
     ).subscribe({
       next: (res: any) => {
