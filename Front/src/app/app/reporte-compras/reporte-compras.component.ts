@@ -198,6 +198,11 @@ GeneraReporteKardex(form: NgForm) {
       return;
     }
 
+    const usuarioSesion =
+      localStorage.getItem('nombre') ||
+      localStorage.getItem('usuario') ||
+      'ADMINISTRADOR';
+
     Swal.fire({
       title: 'Generando Kárdex...',
       text: 'Por favor espere un momento',
@@ -205,37 +210,37 @@ GeneraReporteKardex(form: NgForm) {
       didOpen: () => Swal.showLoading(null)
     });
 
-    // Buscamos el artículo seleccionado en el arreglo para extraer su descripción o nombre
     const articuloObj = this.articulosKardex.find((a: any) => String(a.id) === String(this.reporteKardex.idCostos));
     const nombreArticuloCrudo = articuloObj ? (articuloObj.descripcion || articuloObj.nombre || 'articulo') : 'articulo';
-    
-    // Limpiamos la descripción de caracteres extraños, espacios largos o barras para que el archivo no falle al descargarse
+
     const nombreArticuloLimpio = nombreArticuloCrudo
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Quita acentos
-      .replace(/[^a-zA-Z0-9]/g, '_')   // Cambia todo lo que no sea letra o número por guión bajo
-      .replace(/_+/g, '_');            // Evita guiones bajos repetidos
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .replace(/_+/g, '_');
 
     const nombreArchivo = `Reporte_kardex_partida_${this.reporteKardex.clavePartida}_${nombreArticuloLimpio}.pdf`;
 
-    this.reportesService.descargarKardex(this.reporteKardex.clavePartida, this.reporteKardex.idCostos)
-      .subscribe({
-        next: (pdfBlob: Blob) => {
-          Swal.close();
-          // Forzamos la descarga con el nombre limpio y descriptivo
-          this.descargarArchivo(pdfBlob, nombreArchivo);
-        },
-        error: (err: any) => {
-          Swal.close();
-          console.error('Error al generar Kárdex:', err);
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo generar el reporte de Kárdex. Verifique los datos.',
-            icon: 'error'
-          });
-        }
-      });
+    this.reportesService.descargarKardex(
+      this.reporteKardex.clavePartida,
+      this.reporteKardex.idCostos,
+      usuarioSesion
+    ).subscribe({
+      next: (pdfBlob: Blob) => {
+        Swal.close();
+        this.descargarArchivo(pdfBlob, nombreArchivo);
+      },
+      error: (err: any) => {
+        Swal.close();
+        console.error('Error al generar Kárdex:', err);
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo generar el reporte de Kárdex. Verifique los datos.',
+          icon: 'error'
+        });
+      }
+    });
   }
 
   private descargarArchivo(res: Blob, nombreArchivo: string): void {

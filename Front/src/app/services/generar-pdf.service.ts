@@ -16,18 +16,26 @@ export class GenerarPDFService {
    * Obtiene el PDF del Kardex como Blob binario
    * @param partida Clave de la partida (ej: '21101')
    * @param idCosto ID del costo o artículo (ej: '271')
+   * @param usuario Nombre del usuario autenticado (opcional, por defecto lee localStorage)
    */
-  descargarKardex(partida: string, idCosto: string): Observable<Blob> {
+  descargarKardex(partida: string, idCosto: string, usuario?: string): Observable<Blob> {
+    const usuarioSesion =
+      usuario ||
+      localStorage.getItem('nombre') ||
+      localStorage.getItem('usuario') ||
+      'ADMINISTRADOR';
+
     const params = new HttpParams()
       .set('clavePartida', partida)
-      .set('idCostos', idCosto);
+      .set('idCostos', idCosto)
+      .set('usuario', usuarioSesion);
 
-    // Se eliminó ':idPartida?' del path para enviar una URL limpia y válida
     return this.http.get(`${this.API}/reporte/kardex`, {
       params,
       responseType: 'blob'
     });
   }
+<<<<<<< HEAD
 
  descargarResumenAlmacen(data: { fechaIni: string, fechaFin: string, fechaReporte: string, usuario: string }): Observable<Blob> {
     const rawToken = localStorage.getItem('token') || '';
@@ -43,3 +51,6 @@ export class GenerarPDFService {
     });
   }
 }
+=======
+}
+>>>>>>> julia

@@ -10,7 +10,7 @@ const pool = new Pool({
 });
 
 const ReporteGeneralPorPlantel = async (req, res) => {
-  const idPlantel = parseInt(req.params.idPlantel);
+  const idPlantel = parseInt(req.params.idPlantel, 10);
 
   if (!idPlantel) {
     return res.status(400).json({ message: 'El ID del plantel es obligatorio y debe ser numérico' });
@@ -41,32 +41,34 @@ const ReporteGeneralPorPlantel = async (req, res) => {
         : ''
     }));
 
-    // 3. Obtener el usuario autenticado dinámicamente
-    // Revisa req.user (JWT/sesión), query params (?usuario=Marisela), headers o body
-    const usuarioSesion =
-      req.user?.nombre ||
-      req.user?.nombre_usuario ||
-      req.user?.usuario ||
-      req.user?.username ||
-      req.query?.usuario ||
-      req.body?.usuario ||
-      req.headers['x-usuario'] ||
-      'MARISELA'; // Valor de respaldo si no viene en el token/request
+    // 3. Obtener el usuario autenticado dinámicamente (sin nombres fijos)
+    const usuarioSesion = (
+  req.query?.usuario ||
+  req.body?.usuario ||
+  req.user?.nombre ||
+  req.user?.nombre_usuario ||
+  req.user?.usuario ||
+  req.user?.username ||
+  req.headers['x-usuario'] ||
+  ''
+).toString().trim() || 'ADMINISTRADOR';
 
+
+  console.log('>>> [DEBUG PLANTEL] Query recibida:', req.query);
     // 4. Datos para la plantilla
     const datosPlantilla = {
       plantel,
       articulos,
-      usuario: usuarioSesion // Pasa el usuario dinámico al generador
+      usuario: usuarioSesion
     };
 
-    // 5. Generación centralizada con pdfGenerator
+    // 5. Generación centralizada con diseño estándar con-pie
     const pdfBuffer = await generarPDF(
       'reporteGeneralPorPlantel.html',
       datosPlantilla,
       {
-        tipoDiseno: 'solo-header',
-        estamparCenefa: false
+        tipoDiseno: 'con-pie',
+        estamparCenefa: true
       }
     );
 
