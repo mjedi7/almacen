@@ -40,7 +40,7 @@ const validarFechas = (fechaIni, fechaFin, fechaReporte) => {
 
 /**
  * Genera el reporte dinámico de Resumen de Almacén (Año Actual y Año Anterior).
- * Ruta POST /reporte_resumen_almacen
+ * Ruta POST /reporte/resumen-almacen
  */
 const generarReporteResumenAlmacen = async (req, res) => {
   try {
@@ -51,39 +51,68 @@ const generarReporteResumenAlmacen = async (req, res) => {
       return res.status(400).json({ error: errorValidacion });
     }
 
-    // EXTRAER DINÁMICAMENTE LOS AÑOS A PARTIR DE LA FECHA FIN (o fechaIni)
     const anioActual = parseInt(fechaFin.split('-')[0], 10);
     const anioAnterior = anioActual - 1;
 
-    // Consulta SQL dinámica usando los años calculados
+    // CONSULTA SQL INTEGRANDO LA TABLA ALMACEN, COMPRAS Y MOVIMIENTOS
     const consulta = `
       SELECT 
         cp.clave AS "noPartida",
         cp.descripcion AS "partida",
         
-        -- Saldo inicial Año Anterior (movimientos anteriores a fechaIni del anioAnterior)
-        COALESCE(SUM(CASE WHEN EXTRACT(YEAR FROM m.fecha::date) = $3 AND m.fecha::date < $1::date THEN (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) ELSE 0 END), 0) AS "saldoInicialAnterior",
+        -- Saldo inicial Año Anterior (Existencias en almacén valorizadas con costos al inicio del año anterior)
+        COALESCE((
+          SELECT SUM(COALESCE(alm.existencias, 0) * COALESCE(cos.precio_unitario, 0))
+          FROM almacen alm
+          JOIN costos cos ON cos.id = alm.id_costos
+          WHERE alm.id_partida = cp.id
+            AND alm.fecha_adquisicion::date < ($1::date - INTERVAL '1 year')
+        ), 0) AS "saldoInicialAnterior",
         
-        -- Saldo inicial Año Actual (movimientos anteriores a fechaIni del anioActual)
-        COALESCE(SUM(CASE WHEN EXTRACT(YEAR FROM m.fecha::date) = $4 AND m.fecha::date < $1::date THEN (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) ELSE 0 END), 0) AS "saldoInicialActual",
+        -- Saldo inicial Año Actual (Existencias valorizadas antes de fechaIni)
+        COALESCE((
+          SELECT SUM(COALESCE(alm.existencias, 0) * COALESCE(cos.precio_unitario, 0))
+          FROM almacen alm
+          JOIN costos cos ON cos.id = alm.id_costos
+          WHERE alm.id_partida = cp.id
+            AND alm.fecha_adquisicion::date < $1::date
+        ), 0) AS "saldoInicialActual",
         
-        -- Entradas del periodo en el Año Actual
-        COALESCE(SUM(CASE WHEN m.tipo = 'ENTRADA' AND m.fecha::date BETWEEN $1::date AND $2::date THEN (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) ELSE 0 END), 0) AS "entradasPeriodo",
+        -- Entradas del periodo (Compras realizadas entre fechaIni y fechaFin)
+        COALESCE((
+          SELECT SUM(COALESCE(comp.total_articulos, 0) * COALESCE(cos_c.precio_unitario, 0))
+          FROM compras comp
+          JOIN costos cos_c ON cos_c.id = comp.id_costo
+          JOIN cat_articulos art ON art.id = cos_c.id_articulo
+          WHERE art.id_partidas = cp.id
+            AND comp.fecha_compra::date BETWEEN $1::date AND $2::date
+        ), 0) AS "entradasPeriodo",
         
-        -- Salidas Año Anterior dentro del periodo
-        COALESCE(SUM(CASE WHEN m.tipo = 'SALIDA' AND EXTRACT(YEAR FROM m.fecha::date) = $3 AND m.fecha::date BETWEEN $1::date AND $2::date THEN (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) ELSE 0 END), 0) AS "salidasAnterior",
+        -- Salidas Año Anterior dentro del periodo equivalente
+        COALESCE((
+          SELECT SUM(COALESCE(mov.num_articulos_solicitados, 0) * COALESCE(cos_m.precio_unitario, 0))
+          FROM movimientosdg mov
+          JOIN costos cos_m ON cos_m.id = mov.id_costos
+          JOIN cat_articulos art_m ON art_m.id = mov.id_articulo
+          WHERE art_m.id_partidas = cp.id
+            AND mov.fecha::date BETWEEN ($1::date - INTERVAL '1 year') AND ($2::date - INTERVAL '1 year')
+        ), 0) AS "salidasAnterior",
         
-        -- Salidas Año Actual dentro del periodo
-        COALESCE(SUM(CASE WHEN m.tipo = 'SALIDA' AND EXTRACT(YEAR FROM m.fecha::date) = $4 AND m.fecha::date BETWEEN $1::date AND $2::date THEN (COALESCE(m.num_articulos_solicitados, 0) * COALESCE(c.precio_unitario, 0)) ELSE 0 END), 0) AS "salidasActual"
+        -- Salidas del periodo en el Año Actual
+        COALESCE((
+          SELECT SUM(COALESCE(mov.num_articulos_solicitados, 0) * COALESCE(cos_m.precio_unitario, 0))
+          FROM movimientosdg mov
+          JOIN costos cos_m ON cos_m.id = mov.id_costos
+          JOIN cat_articulos art_m ON art_m.id = mov.id_articulo
+          WHERE art_m.id_partidas = cp.id
+            AND mov.fecha::date BETWEEN $1::date AND $2::date
+        ), 0) AS "salidasActual"
+
       FROM cat_partidas cp
-      LEFT JOIN cat_articulos ca ON ca.id_partidas = cp.id
-      LEFT JOIN movimientosdg m ON m.id_articulo = ca.id
-      LEFT JOIN costos c ON c.id = m.id_costos
-      GROUP BY cp.clave, cp.descripcion
       ORDER BY cp.clave ASC;
     `;
 
-    const resultado = await pool.query(consulta, [fechaIni, fechaFin, anioAnterior, anioActual]);
+    const resultado = await pool.query(consulta, [fechaIni, fechaFin]);
 
     let tSaldoAnterior = 0;
     let tSaldoActual = 0;
@@ -100,8 +129,9 @@ const generarReporteResumenAlmacen = async (req, res) => {
       const salAnt = Number(row.salidasAnterior);
       const salAct = Number(row.salidasActual);
 
-      const saldoFinalAnterior = sInitAnt - salAnt;
-      const saldoFinalActual = sInitAct + entradas - salAct;
+      // Freno en $0.00 usando Math.max para evitar números negativos por desajustes históricos
+      const saldoFinalAnterior = Math.max(0, sInitAnt - salAnt);
+      const saldoFinalActual = Math.max(0, sInitAct + entradas - salAct);
 
       tSaldoAnterior += sInitAnt;
       tSaldoActual += sInitAct;
@@ -157,7 +187,6 @@ const generarReporteResumenAlmacen = async (req, res) => {
       }
     };
 
-    // Generar PDF con orientación horizontal (landscape) mediante Puppeteer
     const pdfBuffer = await generarPDF(
       'reporteResumenAlmacen.html',
       datosPlantilla,
