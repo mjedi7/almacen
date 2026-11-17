@@ -265,8 +265,16 @@ GeneraReporteKardex(form: NgForm) {
       });
   }
 
+  // CORREGIDO: antes leía this.direccionSeleccionada (nunca asignada) y pedía
+  // /traerDatosProveedores/undefined. Ahora lee el proveedor del select y no
+  // hace la petición si no hay uno seleccionado.
   CapturarValor() {
-    const idproveedor = this.direccionSeleccionada;
+    const idproveedor = this.reporte2.idproveedor;
+    if (idproveedor === null || idproveedor === undefined || (idproveedor as any) === '') {
+      this.datosproveedor = [];
+      return;
+    }
+
     this.traer.http.get(`${this.API_URL}/traerDatosProveedores/${idproveedor}`, { headers: this.getAuthHeaders() })
       .subscribe((res: any) => {
         this.datosproveedor = res;
