@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporte de Existencias y Saldos</title>
+</head>
+<body class="report">
+
+  {{#if bannerBase64}}
+  <div class="report-banner">
+    <img src="{{bannerBase64}}" alt="Banner Institucional">
+  </div>
+  {{/if}}
+
+  <header class="report-heading">
+    <div class="report-institution">
+      COLEGIO DE ESTUDIOS CIENTÍFICOS Y TECNOLÓGICOS DEL ESTADO DE VERACRUZ
+    </div>
+    <div class="report-name">
+      REPORTE DE EXISTENCIAS Y SALDOS
+    </div>
+    <div class="report-title">
+      DEL {{fechaInicioTexto}} AL {{fechaFinTexto}}
+    </div>
+  </header>
+
+  <section class="report-section">
+    <table class="table-detalle">
+      <thead>
+        <tr>
+          <th style="width: 14%;">No. Partida</th>
+          <th style="width: 34%; text-align: left; padding-left: 6px;">Concepto</th>
+          <th style="width: 9%; text-align: right; padding-right: 6px;">Exist. {{fechaInicioCorta}}</th>
+          <th style="width: 9%; text-align: right; padding-right: 6px;">Entradas</th>
+          <th style="width: 9%; text-align: right; padding-right: 6px;">Salidas</th>
+          <th style="width: 9%; text-align: right; padding-right: 6px;">Exist. {{fechaFinCorta}}</th>
+          <th style="width: 16%; text-align: right; padding-right: 6px;">Importe {{fechaFinCorta}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if articulos.length}}
+          {{#each articulos}}
+          <tr>
+            <td class="cen nowrap">{{this.partida}}</td>
+            <td class="text-left" style="padding-left: 6px;">{{primeraMayuscula this.concepto}}</td>
+            <td class="num nowrap" style="padding-right: 6px;">{{this.existenciaF1}}</td>
+            <td class="num nowrap" style="padding-right: 6px;">{{this.entradas}}</td>
+            <td class="num nowrap" style="padding-right: 6px;">{{this.salidas}}</td>
+            <td class="num nowrap font-bold" style="padding-right: 6px;">{{this.existenciaF2}}</td>
+            <td class="num nowrap font-bold" style="padding-right: 6px;">$ {{this.importe}}</td>
+          </tr>
+          {{/each}}
+        {{else}}
+          <tr>
+            <td colspan="7" class="empty-state">
+              No hay artículos con movimientos en el periodo seleccionado.
+            </td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </section>
+
+  <table class="totales-contenedor">
+    <tbody>
+      <tr>
+        <td class="totales-col-izquierda">
+          <div>
+            <strong>Existencias totales de artículos:</strong> &nbsp; {{existenciasTotales}}
+          </div>
+          <div class="totales-conteos__fila">
+            <strong>Total de registros impresos:</strong> &nbsp; {{totalRegistros}}
+          </div>
+        </td>
+        <td class="totales-col-derecha">
+          <table class="tabla-desglose">
+            <tbody>
+              <tr>
+                <td class="tabla-desglose__etiqueta">Subtotal:</td>
+                <td class="tabla-desglose__valor">${{subtotal}}</td>
+              </tr>
+              <tr>
+                <td class="tabla-desglose__etiqueta">I.V.A. (16%):</td>
+                <td class="tabla-desglose__valor">${{iva}}</td>
+              </tr>
+              <tr class="tabla-desglose__fila-total">
+                <td class="tabla-desglose__etiqueta-total">Total:</td>
+                <td class="tabla-desglose__valor-total">${{total}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

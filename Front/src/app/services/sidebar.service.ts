@@ -141,7 +141,12 @@ export class SidebarService {
           titulo: 'Resumen de almacén',
           url: 'reporte-resumen-almacen',
           mostrar: false
-        }
+        },
+		  {
+			titulo: 'Existencias y Saldos',
+			url: '/reporte-existencias-saldos',
+			mostrar: false   // se activa por permiso en el sidebar
+		  }
       ]
     }
   ];

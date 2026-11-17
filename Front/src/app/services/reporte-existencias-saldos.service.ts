@@ -1,0 +1,19 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+
+@Injectable({ providedIn: 'root' })
+export class ReporteExistenciasSaldosService {
+  private apiUrl = `${environment.apiUrl}/reporte-existencias-saldos`;
+
+  constructor(private http: HttpClient) {}
+
+  descargarReporte(fechaInicio: string, fechaFin: string): Observable<Blob> {
+    return this.http.post(
+      this.apiUrl,
+      { fechaInicio, fechaFin },
+      { responseType: 'blob' }
+    );
+  }
+}
