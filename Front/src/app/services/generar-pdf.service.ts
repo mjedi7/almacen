@@ -35,7 +35,6 @@ export class GenerarPDFService {
       responseType: 'blob'
     });
   }
-<<<<<<< HEAD
 
  descargarResumenAlmacen(data: { fechaIni: string, fechaFin: string, fechaReporte: string, usuario: string }): Observable<Blob> {
     const rawToken = localStorage.getItem('token') || '';
@@ -51,6 +50,3 @@ export class GenerarPDFService {
     });
   }
 }
-=======
-}
->>>>>>> julia
