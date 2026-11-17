@@ -21,7 +21,7 @@ export const environment = {
   },
 
   //http://172.16.0.100:4200
-    uri_api: 'http://172.16.0.173:3010'
+    uri_api: 'http://172.16.0.148:3010'
    //uri_api:   'http://172.16.0.148:3000'
    //uri_api:   'http://localhost:3010'
   // uri_api: 'http://172.16.0.4:3001'
