@@ -1,0 +1,114 @@
+<div class="reporte-container container my-4">
+  <h2 class="mb-4">Reporte de Existencias y Saldos</h2>
+
+  <!-- Fechas -->
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="fechaInicio" class="font-weight-bold">Fecha inicio</label>
+      <input id="fechaInicio" type="date" class="form-control" [(ngModel)]="fechaInicio" />
+    </div>
+    <div class="form-group col-md-6">
+      <label for="fechaFin" class="font-weight-bold">Fecha fin</label>
+      <input id="fechaFin" type="date" class="form-control" [(ngModel)]="fechaFin" />
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <label for="buscador" class="font-weight-bold">Buscar artículo</label>
+
+      <div class="input-group input-group-lg">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+        </div>
+        <input
+          id="buscador"
+          type="text"
+          class="form-control"
+          [(ngModel)]="terminoBusqueda"
+          (ngModelChange)="onBuscarChange($event)"
+          placeholder="Ej. block, toner, papel..."
+          autocomplete="off"
+        />
+        <div class="input-group-append" *ngIf="terminoBusqueda">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            title="Limpiar búsqueda"
+            (click)="terminoBusqueda = ''; onBuscarChange('')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="buscando" class="text-primary mt-2">
+        <span class="spinner-border spinner-border-sm mr-2"></span>
+        Buscando...
+      </div>
+
+      <!-- Resultados -->
+      <ul *ngIf="resultados.length" class="resultados list-group mt-2">
+        <li
+          *ngFor="let art of resultados"
+          class="list-group-item list-group-item-action d-flex align-items-center"
+          (click)="agregar(art)"
+        >
+          <strong class="text-danger mr-3 text-nowrap">{{ art.clave_completa }}</strong>
+          <span class="mr-3">{{ art.descripcion }}</span>
+          <button type="button" class="btn btn-sm btn-danger ml-auto flex-shrink-0 text-nowrap">
+            <i class="fas fa-plus mr-1"></i>Agregar
+          </button>
+        </li>
+      </ul>
+
+      <div
+        *ngIf="!buscando && terminoBusqueda.length >= 2 && !resultados.length"
+        class="text-muted mt-2"
+      >
+        Sin resultados.
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista temporal -->
+  <div *ngIf="seleccionados.length" class="mb-4">
+    <h3 class="h5">Artículos seleccionados ({{ seleccionados.length }})</h3>
+    <table class="table table-bordered table-hover table-sm">
+      <thead class="thead-light">
+        <tr>
+          <th>Clave</th>
+          <th>Descripción</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let art of seleccionados">
+          <td>{{ art.clave_completa }}</td>
+          <td>{{ art.descripcion | titlecase }}</td>
+          <td class="text-center">
+            <button type="button" class="btn btn-sm btn-danger" title="Quitar" (click)="quitar(art.id)">
+              <i class="fas fa-times"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Botón generar -->
+  <div class="text-center">
+    <button
+      type="button"
+      class="btn btn-danger btn-lg"
+      (click)="generar()"
+      [disabled]="cargando || seleccionados.length === 0"
+    >
+      <i class="fas mr-2" [ngClass]="cargando ? 'fa-spinner fa-spin' : 'fa-file-pdf'"></i>
+      {{ cargando ? 'Generando...' : 'Generar Reporte' }}
+    </button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+</div>

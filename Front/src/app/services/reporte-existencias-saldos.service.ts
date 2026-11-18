@@ -1,18 +1,36 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
+
+export interface ArticuloBusqueda {
+  id: number;
+  clave_completa: string;
+  descripcion: string;
+  partida: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ReporteExistenciasSaldosService {
-  private apiUrl = `${environment.apiUrl}/reporte-existencias-saldos`;
+  private baseUrl = `${environment.uri_api}/api`;
 
   constructor(private http: HttpClient) {}
 
-  descargarReporte(fechaInicio: string, fechaFin: string): Observable<Blob> {
+  buscarArticulos(q: string): Observable<{ articulos: ArticuloBusqueda[] }> {
+    const params = new HttpParams().set('q', q);
+    return this.http.get<{ articulos: ArticuloBusqueda[] }>(
+      `${this.baseUrl}/articulos/buscar`, { params }
+    );
+  }
+
+  descargarReporte(
+    fechaInicio: string,
+    fechaFin: string,
+    idsArticulos: number[]
+  ): Observable<Blob> {
     return this.http.post(
-      this.apiUrl,
-      { fechaInicio, fechaFin },
+      `${this.baseUrl}/reporte-existencias-saldos`,
+      { fechaInicio, fechaFin, idsArticulos },
       { responseType: 'blob' }
     );
   }

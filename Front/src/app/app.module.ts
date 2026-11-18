@@ -37,6 +37,7 @@ import { RegistrarPartidaComponent } from './registrar-partida/registrar-partida
 import { RegistrarProveedorComponent } from './registrar-proveedor/registrar-proveedor.component';
 import { EncargadosPlantelComponent } from './encargados-plantel/encargados-plantel.component';
 import { ReporteResumenAlmacenComponent } from './app/reporte-resumen-almacen/reporte-resumen-almacen/reporte-resumen-almacen.component';
+import { ReporteExistenciasSaldosComponent } from './reporte-existencias-saldos/reporte-existencias-saldos.component';
 
 
 @NgModule({
@@ -63,7 +64,8 @@ import { ReporteResumenAlmacenComponent } from './app/reporte-resumen-almacen/re
     RegistrarPartidaComponent,
     RegistrarProveedorComponent,
     EncargadosPlantelComponent,
-    ReporteResumenAlmacenComponent
+    ReporteResumenAlmacenComponent,
+    ReporteExistenciasSaldosComponent
   ],
   imports: [
     BrowserModule,

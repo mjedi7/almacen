@@ -144,8 +144,8 @@ export class SidebarService {
         },
 		  {
 			titulo: 'Existencias y Saldos',
-			url: '/reporte-existencias-saldos',
-			mostrar: false   // se activa por permiso en el sidebar
+			url: 'reporte-existencias-saldos',
+			mostrar: false
 		  }
       ]
     }

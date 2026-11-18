@@ -8,6 +8,8 @@ const { Pool } = require('pg');
 // IMPORTACIÓN DEL CONTROLADOR DE SALIDAS
 const { generarReporteSalidasXPartida } = require('./controllers/reporteSalidasPartida.controller');
 const { reporteKardex } = require('./controllers/reporteKardex.controller');
+//const { generarReporteExistenciasSaldos } = require('./controllers/reporteExistenciasSaldos.controller');
+const { generarReporteExistenciasSaldos, buscarArticulos } = require('./controllers/reporteExistenciasSaldos.controller');
 
 const app = express();
 const port = process.env.PORT || 3010;
@@ -70,6 +72,18 @@ app.get('/articulos/siguiente-clave/:idPartida', async (req, res) => {
 app.post('/reporte/salidas-partida', (req, res) => {
   console.log('>>> [OK] PETICIÓN LLEGÓ AL ENDPOINT EN INDEX.JS');
   return generarReporteSalidasXPartida(req, res);
+});
+
+// Ruta de Reporte de Existencias Saldos
+app.post('/api/reporte-existencias-saldos', (req, res) => {
+  console.log('>>> [OK] PETICIÓN LLEGÓ AL ENDPOINT EXISTENCIAS-SALDOS');
+  return generarReporteExistenciasSaldos(req, res);
+});
+
+// Ruta de Reporte de Existencias Saldos Busqueda
+app.get('/api/articulos/buscar', (req, res) => {
+  console.log('>>> [OK] BÚSQUEDA DE ARTÍCULOS');
+  return buscarArticulos(req, res);
 });
 
 // ==========================================

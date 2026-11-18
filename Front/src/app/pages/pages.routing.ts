@@ -31,7 +31,7 @@ import { RegistrarPartidaComponent } from '../registrar-partida/registrar-partid
 import { RegistrarProveedorComponent } from '../registrar-proveedor/registrar-proveedor.component';
 import { EncargadosPlantelComponent } from '../encargados-plantel/encargados-plantel.component';
 import { ReporteResumenAlmacenComponent } from '../app/reporte-resumen-almacen/reporte-resumen-almacen/reporte-resumen-almacen.component';
-
+import { ReporteExistenciasSaldosComponent } from '../reporte-existencias-saldos/reporte-existencias-saldos.component';
 
 
 const routes: Routes = [
@@ -70,7 +70,7 @@ const routes: Routes = [
 			{ path: 'listar-articulos-partida', component: ListarArticulosPartidaComponent, canActivate: [AuthGuard] },
 			{ path: 'registrar-partida', component: RegistrarPartidaComponent, canActivate: [AuthGuard] },
 			{ path: 'registrar-proveedor', component: RegistrarProveedorComponent, canActivate: [AuthGuard] },			
-
+            { path: 'reporte-existencias-saldos', component: ReporteExistenciasSaldosComponent, canActivate: [AuthGuard] },
 
         ]
     },

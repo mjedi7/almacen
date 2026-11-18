@@ -42,10 +42,10 @@ PagesComponent
     SharedModule,
     RouterModule,
     ComponentsModule,
-DataTablesModule,
-NgxPaginationModule,
-CmAngularDualListboxModule, 
-AngularDualListBoxModule
+	DataTablesModule,
+	NgxPaginationModule,
+	CmAngularDualListboxModule, 
+	AngularDualListBoxModule
   ],
 
 })

@@ -22,26 +22,21 @@ const fmtMoneda = (n) =>
 
 const generarReporteExistenciasSaldos = async (req, res) => {
   try {
-    const { fechaInicio, fechaFin, usuario } = req.body;
+    const { fechaInicio, fechaFin, usuario, idsArticulos } = req.body;
 
-    // ---- Validaciones ----
     if (!fechaInicio || !fechaFin) {
       return res.status(400).json({ error: 'Debes enviar fechaInicio y fechaFin (YYYY-MM-DD)' });
     }
     if (fechaInicio > fechaFin) {
       return res.status(400).json({ error: 'La fechaInicio no puede ser mayor que fechaFin' });
     }
+    if (!Array.isArray(idsArticulos) || idsArticulos.length === 0) {
+      return res.status(400).json({ error: 'Debes seleccionar al menos un artículo' });
+    }
 
-    // ============================================================
-    // CONSULTA
-    // NOTA: ajusta los JOIN si tu lógica de negocio difiere.
-    // Asume:
-    //   - Entradas = recepciones_compra_detalle entre las 2 fechas
-    //   - Salidas  = movimientos.articulos_disminuir entre las 2 fechas
-    //   - Existencia F2 = almacen.existencias (saldo actual)
-    //   - Existencia F1 = F2 - entradas + salidas
-    //   - Importe  = F2 * costos.precio_unitario * 1.16 (igual que tu controlador)
-    // ============================================================
+    // Filtro por artículos seleccionados
+    const filtroArticulos = `AND ca.id = ANY($3::int[])`;
+
     const query = `
       WITH entradas AS (
         SELECT c.id_almacen, SUM(rcd.cantidad) AS total
@@ -71,10 +66,11 @@ const generarReporteExistenciasSaldos = async (req, res) => {
         LEFT JOIN entradas e ON e.id_almacen = al.id
         LEFT JOIN salidas  s ON s.id_costos  = co.id
       WHERE al.esactivo IS NOT FALSE
+        ${filtroArticulos}
       ORDER BY pa.clave ASC, ca.clave ASC
     `;
 
-    const { rows } = await pool.query(query, [fechaInicio, fechaFin]);
+    const { rows } = await pool.query(query, [fechaInicio, fechaFin, idsArticulos]);
 
     // ---- Cálculos ----
     let subtotal = 0;
@@ -137,6 +133,37 @@ const generarReporteExistenciasSaldos = async (req, res) => {
     console.error('Error generando reporte de existencias y saldos:', error);
     res.status(500).json({ error: 'Error al generar el reporte de existencias y saldos' });
   }
+  
+
 };
 
-module.exports = { generarReporteExistenciasSaldos };
+	const buscarArticulos = async (req, res) => {
+	  try {
+		const { q } = req.query;
+		if (!q || q.trim().length < 2) {
+		  return res.json({ articulos: [] });
+		}
+
+		const termino = `%${q.trim().toLowerCase()}%`;
+		const { rows } = await pool.query(`
+		  SELECT
+			ca.id,
+			pa.clave || '-' || LPAD(ca.clave::text, 3, '0') AS clave_completa,
+			LOWER(ca.descripcion) AS descripcion,
+			pa.clave AS partida
+		  FROM cat_articulos ca
+		  INNER JOIN cat_partidas pa ON pa.id = ca.id_partidas
+		  WHERE ca.esactivo IS TRUE
+			AND (LOWER(ca.descripcion) LIKE $1 OR ca.clave::text LIKE $1)
+		  ORDER BY ca.descripcion ASC
+		  LIMIT 20
+		`, [termino]);
+
+		res.json({ articulos: rows });
+	  } catch (error) {
+		console.error('Error buscando artículos:', error);
+		res.status(500).json({ error: 'Error buscando artículos' });
+	  }
+	};
+
+module.exports = { generarReporteExistenciasSaldos, buscarArticulos };

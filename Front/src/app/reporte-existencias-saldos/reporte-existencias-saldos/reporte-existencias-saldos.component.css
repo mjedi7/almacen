@@ -1,7 +1,0 @@
-.reporte-container { max-width: 480px; margin: 24px auto; font-family: Arial, sans-serif; }
-.form-row { display: flex; gap: 16px; margin: 16px 0; }
-label { display: flex; flex-direction: column; font-weight: bold; }
-input[type="date"] { padding: 6px; margin-top: 4px; }
-button { padding: 10px 20px; cursor: pointer; }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-.error { color: #c00; font-weight: bold; }
