@@ -82,7 +82,7 @@ app.post('/api/reporte-existencias-saldos', (req, res) => {
 
 // Ruta de Reporte de Existencias Saldos Busqueda
 app.get('/api/articulos/buscar', (req, res) => {
-  console.log('>>> [OK] BÚSQUEDA DE ARTÍCULOS');
+  console.log('>>> [OK] Búsqueda de artículos para EXISTENCIAS-SALDOS');
   return buscarArticulos(req, res);
 });
 

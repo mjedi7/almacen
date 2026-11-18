@@ -68,6 +68,58 @@ export class ReporteExistenciasSaldosComponent {
     this.seleccionados = this.seleccionados.filter((a) => a.id !== id);
   }
 
+  private obtenerUsuario(): string {
+    const esCorreo = (v: string) => v.includes('@');
+
+    const extraerNombre = (obj: any): string => {
+      if (!obj || typeof obj !== 'object') return '';
+
+      const completo =
+        obj.nombre_completo || obj.nombreCompleto || obj.fullName || obj.displayName;
+      if (completo && !esCorreo(String(completo))) return String(completo).trim();
+
+      const nombre = obj.nombre || obj.nombres || obj.firstName;
+      const apellidos =
+        obj.apellidos ||
+        obj.apellido ||
+        obj.lastName ||
+        [obj.apellido_paterno, obj.apellido_materno].filter(Boolean).join(' ');
+      if (nombre && !esCorreo(String(nombre))) {
+        return apellidos ? `${nombre} ${apellidos}`.trim() : String(nombre).trim();
+      }
+
+      const nombreUsuario = obj.nombreUsuario || obj.nombre_usuario;
+      if (nombreUsuario && !esCorreo(String(nombreUsuario))) {
+        return String(nombreUsuario).trim();
+      }
+
+      // Nunca devolver correo, email, usuario o username si es un correo
+      return '';
+    };
+
+    const claves = ['nombre', 'nombre_completo', 'usuario', 'user', 'nombreUsuario', 'currentUser'];
+
+    for (const storage of [localStorage, sessionStorage]) {
+      for (const clave of claves) {
+        const valor = storage.getItem(clave);
+        if (!valor) continue;
+
+        try {
+          const obj = JSON.parse(valor);
+          if (typeof obj === 'string') {
+            if (!esCorreo(obj)) return obj.trim();
+            continue;
+          }
+          const nombre = extraerNombre(obj);
+          if (nombre) return nombre;
+        } catch {
+          if (!esCorreo(valor)) return valor.trim();
+        }
+      }
+    }
+    return '';
+  }
+
   generar(): void {
     this.error = '';
     if (!this.fechaInicio || !this.fechaFin) {
@@ -85,8 +137,9 @@ export class ReporteExistenciasSaldosComponent {
 
     this.cargando = true;
     const ids = this.seleccionados.map((a) => a.id);
+    const usuario = this.obtenerUsuario();
 
-    this.service.descargarReporte(this.fechaInicio, this.fechaFin, ids).subscribe({
+    this.service.descargarReporte(this.fechaInicio, this.fechaFin, ids, usuario).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');

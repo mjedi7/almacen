@@ -26,11 +26,12 @@ export class ReporteExistenciasSaldosService {
   descargarReporte(
     fechaInicio: string,
     fechaFin: string,
-    idsArticulos: number[]
+    idsArticulos: number[],
+    usuario: string
   ): Observable<Blob> {
     return this.http.post(
       `${this.baseUrl}/reporte-existencias-saldos`,
-      { fechaInicio, fechaFin, idsArticulos },
+      { fechaInicio, fechaFin, idsArticulos, usuario },
       { responseType: 'blob' }
     );
   }
